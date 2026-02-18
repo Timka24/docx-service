@@ -1116,6 +1116,30 @@
             <div class="checkbox-grid" id="amioGluGrid"></div>
             </div>
 
+            <!-- Дозировка (мл) + grid по минутам -->
+            <div class="form-group">
+                <label class="form-label">Дозировка (мл)</label>
+                <div class="form-group">
+                    <label class="form-label">Дозировка (мл)</label>
+                    <input type="text" id="dosageMl" class="input-field input-field--sm"
+                        inputmode="decimal" placeholder="Напр.: 2 или 2,5"
+                        style="max-width: 120px;" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Объём (мл) по минутам (1–70)</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <input type="text" id="dosageGridValue" class="input-field" inputmode="decimal"
+                            placeholder="Напр.: 2 или 2,5" style="max-width: 220px;" />
+                        <button type="button" class="btn" id="dosageGridClearValue">Пусто</button>
+                        <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                        <button type="button" class="btn icon-btn" id="dosageGridModePaint" title="Рисование">✏️</button>
+                        <button type="button" class="btn icon-btn" id="dosageGridModeRange" title="Диапазон">↔️</button>
+                        <span id="dosageGridHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+                <div class="checkbox-grid" id="dosageGrid"></div>
+            </div>
+
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>
                 <div class="checkbox-grid" id="manualCprGrid"></div>

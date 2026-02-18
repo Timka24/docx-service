@@ -117,6 +117,8 @@ export function buildPayload(grids) {
 
   const defib_model = document.getElementById("defib_model")?.value || "";
 
+  const dosageMl = "";
+
   return {
     brig: brigade,
     ps: pstation,
@@ -203,6 +205,8 @@ export function buildPayload(grids) {
     med_t_n,
     med_t_y,
     ch_adr_nacl_ml_marks: grids.adrNaclMl.getData(),
-    ch_amio_glu_ml_marks: grids.amioGluMl.getData()
+    ch_amio_glu_ml_marks: grids.amioGluMl.getData(),
+    ch_dosage_ml_marks: grids.dosageGrid.getData(),
+    dosageMl,
   };
 }

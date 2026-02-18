@@ -191,6 +191,17 @@ const rhythmChildLt60 = createChronoRow({
   modeRangeBtnId: "rhChildLt60ModeRange"
 });
 
+const dosageGrid = createNumericRow({
+  minutes: 70,
+  gridId: "dosageGrid",
+  hintId: "dosageGridHint",
+  valueInputId: "dosageGridValue",
+  clearValueBtnId: "dosageGridClearValue",
+  modePaintBtnId: "dosageGridModePaint",
+  modeRangeBtnId: "dosageGridModeRange"
+});
+
+
 const grids = {
   cprManual,
   cprAuto,
@@ -206,7 +217,8 @@ const grids = {
   rhythmChildLt60,
   defibEnergy,
   adrNaclMl,
-  amioGluMl
+  amioGluMl,
+  dosageGrid,
 };
 
 adrNaclMl.init();
@@ -224,6 +236,7 @@ rhythmPaced.init();
 rhythmOrg.init();
 rhythmBradyPed.init();
 rhythmChildLt60.init();
+dosageGrid.init();
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
@@ -370,6 +383,13 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   if (adrInp) adrInp.value = "";
   const amioInp = document.getElementById("amioGluValue");
   if (amioInp) amioInp.value = "";
+
+  dosageGrid.clear();
+  const dosGr = document.getElementById("dosageGridValue");
+  if (dosGr) dosGr.value = "";
+  const dosMl = document.getElementById("dosageMl");
+  if (dosMl) dosMl.value = "";
+
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
