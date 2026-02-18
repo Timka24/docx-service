@@ -203,6 +203,8 @@ export function buildPayload(grids) {
     med_t_n,
     med_t_y,
     ch_adr_nacl_ml_marks: grids.adrNaclMl.getData(),
-    ch_amio_glu_ml_marks: grids.amioGluMl.getData()
+    ch_amio_glu_ml_marks: grids.amioGluMl.getData(),
+    ch_nacl_marks: grids.nacl.getData(),
+    ch_nacl: document.getElementById("ch_nacl")?.value || "",
   };
 }

@@ -191,6 +191,19 @@ const rhythmChildLt60 = createChronoRow({
   modeRangeBtnId: "rhChildLt60ModeRange"
 });
 
+const nacl = createChronoRow({
+  minutes: 70,
+  gridId: "naclGrid",
+  hintId: "naclHint",
+  symPlusBtnId: "naclSymPlus",
+  symMinusBtnId: "naclSymMinus",
+  symFillBtnId: "naclSymFill",
+  symClearBtnId: "naclSymClear",
+  symbolBtns: ["naclSymPlus", "naclSymMinus", "naclSymFill", "naclSymClear"],
+  modePaintBtnId: "naclModePaint",
+  modeRangeBtnId: "naclModeRange"
+});
+
 const grids = {
   cprManual,
   cprAuto,
@@ -206,7 +219,8 @@ const grids = {
   rhythmChildLt60,
   defibEnergy,
   adrNaclMl,
-  amioGluMl
+  amioGluMl,
+  nacl
 };
 
 adrNaclMl.init();
@@ -224,6 +238,7 @@ rhythmPaced.init();
 rhythmOrg.init();
 rhythmBradyPed.init();
 rhythmChildLt60.init();
+nacl.init();
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
@@ -370,6 +385,10 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   if (adrInp) adrInp.value = "";
   const amioInp = document.getElementById("amioGluValue");
   if (amioInp) amioInp.value = "";
+
+  nacl.clear();
+  const chNacl = document.getElementById("ch_nacl");
+  if (chNacl) chNacl.value = "";
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
