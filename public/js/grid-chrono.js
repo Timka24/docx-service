@@ -18,14 +18,27 @@ export function createChronoRow(cfg) {
     if (el) el.textContent = text || "";
   }
 
-  function applyMinute(minute) {
-    data[minute - 1] = activeSymbol;
+  function resolveActiveSymbol() {
+    if (typeof cfg.getActiveSymbol === "function") {
+      const symbol = cfg.getActiveSymbol();
+      if (symbol === null) {
+        setHint(cfg.invalidSymbolHint || "Некорректное значение");
+        return null;
+      }
+      return symbol;
+    }
+
+    return activeSymbol;
   }
 
-  function applyRange(a, b) {
+  function applyMinute(minute, symbol = activeSymbol) {
+    data[minute - 1] = symbol;
+  }
+
+  function applyRange(a, b, symbol = activeSymbol) {
     const from = Math.min(a, b);
     const to = Math.max(a, b);
-    for (let m = from; m <= to; m++) applyMinute(m);
+    for (let m = from; m <= to; m++) applyMinute(m, symbol);
   }
 
   function setActiveBtn(btnId) {
@@ -86,10 +99,18 @@ export function createChronoRow(cfg) {
     }
 
     function commit() {
+      const symbol = resolveActiveSymbol();
+      if (symbol === null) {
+        pointerDown = false;
+        anchor = null;
+        last = null;
+        return;
+      }
+
       if (anchor != null && last != null) {
         const from = Math.min(anchor, last);
         const to = Math.max(anchor, last);
-        for (let m = from; m <= to; m++) data[m - 1] = activeSymbol;
+        for (let m = from; m <= to; m++) data[m - 1] = symbol;
 
         setHint(`Готово: ${from}–${to}`);
         render();
@@ -157,7 +178,10 @@ export function createChronoRow(cfg) {
 
     function commit(endMinute) {
       if (rangeStart == null || endMinute == null) return;
-      applyRange(rangeStart, endMinute);
+      const symbol = resolveActiveSymbol();
+      if (symbol === null) return;
+
+      applyRange(rangeStart, endMinute, symbol);
       const from = Math.min(rangeStart, endMinute);
       const to = Math.max(rangeStart, endMinute);
 
@@ -245,7 +269,10 @@ export function createChronoRow(cfg) {
           return;
         }
 
-        applyRange(rangeStart, i);
+        const symbol = resolveActiveSymbol();
+        if (symbol === null) return;
+
+        applyRange(rangeStart, i, symbol);
         rangeStart = null;
         clearPreview();
         setHint("Готово. Тапни новый старт");
