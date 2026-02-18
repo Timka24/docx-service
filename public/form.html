@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Медицинская форма</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 16px;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: #1976d2;
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .form-body {
+            padding: 16px;
+        }
+
+        /* .form-group {
+            margin-bottom: 20px;
+        } */
+        .form-group {
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            margin-top: 16px;    
+        }
+        /* .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+        } */
+        .form-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.87);
+            margin-bottom: 16px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.23);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+            /* margin-top: 16px; */
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .name-fields {
+            display: flex;
+            gap: 8px;
+        }
+
+        .name-fields .input-field {
+            flex: 1;
+        }
+
+        .time-fields {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-field {
+            flex: 1;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            
+        }
+
+        .radio-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1976d2;
+        }
+
+        .clear-radio-btn {
+            align-self: flex-start;
+            background: none;
+            border: 1px solid #1976d2;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .clear-radio-btn:hover {
+            background-color: rgba(25, 118, 210, 0.1);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .cpr-cell{
+            width:100%;
+            min-height:28px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .cpr-cell.is-preview{
+            box-shadow: 0 0 0 2px rgba(25,118,210,0.35) inset;
+            background: rgba(25,118,210,0.08);
+        }
+        .checkbox-label {
+            font-size: 10px;
+            margin-bottom: 2px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .checkbox-input {
+            width: 24px;
+            height: 24px;
+            accent-color: #4caf50;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-clear {
+            background-color: #f5f5f5;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .btn-clear:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-apply {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-apply:hover {
+            background-color: #1565c0;
+        }
+
+        @media (max-width: 480px) {
+            .name-fields,
+            .time-fields {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .checkbox-grid {
+                gap: 2px;
+            }
+            
+            .checkbox-label {
+                font-size: 8px;
+            }
+            
+            .checkbox-input {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .clear-radio-btn {
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+        }
+
+        .airway-table-wrap {
+        margin-top: 12px;
+        overflow-x: auto;
+        }
+
+        .airway-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        }
+
+        .airway-table th,
+        .airway-table td {
+        border: 1px solid rgba(0,0,0,0.12);
+        padding: 8px;
+        vertical-align: middle;
+        }
+
+        .airway-table th {
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(0,0,0,0.7);
+        text-align: left;
+        background: #fafafa;
+        }
+
+        .cell-center {
+        text-align: center;
+        }
+
+        .input-field--sm {
+        padding: 8px 10px;
+        font-size: 14px;
+        }
+
+        .input-field--xs {
+        width: 30px;
+        padding: 6px 8px;
+        font-size: 14px;
+        }
+
+        .ett-inline {
+        margin-top: 6px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        }
+        /* чтобы на планшете не скроллилось при "рисовании" */
+        #cprManualGrid { touch-action: none; }
+
+        .cpr-cell{
+        height: 34px;  
+        min-height: 34px;
+        padding: 0;
+        line-height: 34px;
+        font-size: 16px;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+        }
+        .cpr-cell.is-start{
+        outline: 2px solid #1976d2;
+        }
+        /* активная кнопка */
+        .btn.active{
+        border-color: #1976d2;
+        box-shadow: 0 0 0 2px #1976d2 inset;
+        font-weight: 600;
+        }
+
+        /* маленькие "икон-кнопки" */
+        .btn.icon-btn{
+        width: 38px;
+        height: 34px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        }
+
+        /* чтобы на планшете не выделялся текст и не было прокрутки при рисовании */
+        #cprManualGrid { touch-action: none; }
+        .cpr-cell{
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="form-header">
+            <h1>Протокол СЛР</h1>
+        </div>
+        <div class="form-body">
+            <form id="docxForm">
+            <div class="form-group">
+                <label class="form-label">Бригада</label>
+                <input type="text" id="brigade" name="brig" class="input-field" placeholder="Введите название бригады">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Подстанция</label>
+                <input type="text" id="pstation" name="ps" class="input-field" placeholder="Введите название бригады">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ФИО пациента</label>
+                <div class="name-fields">
+                    <input type="text" id="lastName" name="last_name" class="input-field" placeholder="Фамилия">
+                    <input type="text" id="firstName" name="first_name" class="input-field" placeholder="Имя">
+                    <input type="text" id="middleName" name="middle_name" class="input-field" placeholder="Отчество">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">№ КВ</label>
+                <input type="number" id="kvNumber" name="kv_num" class="input-field" placeholder="Введите номер КВ" min="0">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Дата приема вызова</label>
+                <input type="date" id="nowDate" name="pr_date" class="input-field">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Время прибытия бригады на вызов</label>
+                <div class="time-fields">
+                    <div class="time-field">
+                        <input type="number" id="arrivalHours" name="pr_h" class="input-field" placeholder="Часы" min="0" max="23">
+                    </div>
+                    <div class="time-field">
+                        <input type="number" id="arrivalMinutes" name="pr_m" class="input-field" placeholder="Минуты" min="0" max="59">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Время определения клинической смерти</label>
+                <div class="time-fields">
+                    <div class="time-field">
+                        <input type="number" id="deathHours" name="d_h" class="input-field" placeholder="Часы" min="0" max="23">
+                    </div>
+                    <div class="time-field">
+                        <input type="number" id="deathMinutes" name="d_m" class="input-field" placeholder="Минуты" min="0" max="59">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Наступление клинической смерти</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="witness" class="radio-input" value="witness">
+                        В присутствии свидетеля
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="witness" class="radio-input" value="brigade">
+                        В присутствии бригады СМП
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="witness" class="radio-input" value="none">
+                        Без свидетелей и СМП
+                    </label>
+                    <button type="button" class="clear-radio-btn" id="clearWitnessBtn">Очистить</button>
+                    <!-- <button class="clear-radio-btn" id="clearRadioBtn">Очистить</button> -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Проведение СЛР свидетелями</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="slr" class="radio-input" value="none">
+                        Не проводили СЛР
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="slr" class="radio-input" value="compress">
+                        В присутствии бригады СМП
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="slr" class="radio-input" value="comp_ivl">
+                        Компрессии + ИВЛ
+                    </label>
+                    <button type="button" class="clear-radio-btn" id="clearSlrBtn">Очистить</button>
+                    <!-- <button class="clear-radio-btn" id="clearRadioBtn">Очистить</button> -->
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Реанимационные мероприятия начаты с</label>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="checkbox" id="r_start_nms" class="radio-input">
+                    Непрямой массаж сердца
+                    </label>
+
+                    <label class="radio-option">
+                    <input type="checkbox" id="r_start_vent" class="radio-input">
+                    ИВЛ (5 искусственных вдохов)
+                    </label>
+
+                    <label class="radio-option">
+                    <input type="checkbox" id="r_start_defib" class="radio-input">
+                    Дефибрилляция
+                    </label>
+
+                    <button type="button" class="clear-radio-btn" id="clearRstartBtn">Очистить</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Обеспечение проходимости ВДП</label>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="checkbox" id="a_v" name="airway_phase" class="radio-input" value="during">
+                    Во время СЛР
+                    </label>
+
+                    <label class="radio-option">
+                    <input type="checkbox" id="a_d" name="airway_phase" class="radio-input" value="before">
+                    До СЛР
+                    </label>
+
+                    <button type="button" class="clear-radio-btn" id="clearAWhenBtn">Очистить</button>
+                </div>
+
+                <div class="airway-table-wrap">
+                    <table class="airway-table">
+                    <thead>
+                        <tr>
+                        <th>Способ</th>
+                        <th>Время</th>
+                        <th>Успешно</th>
+                        <th>Безуспешно</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                        <td>Санация ВДП</td>
+                        <td><input type="time" id="a1t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="a1_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="a1_result" value="f" class="radio-input"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Фарингеальный воздуховод</td>
+                        <td><input type="time" id="a2t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="a2_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="a2_result" value="f" class="radio-input"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Герметизирующее устройство</td>
+                        <td><input type="time" id="a3t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="a3_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="a3_result" value="f" class="radio-input"></td>
+                        </tr>
+
+                        <tr>
+                        <td>
+                            Эндотрахеальная трубка
+                            <div class="ett-inline">
+                            <span>№</span>
+                            <input type="text" id="et_num" class="input-field input-field--xs">
+                            <span>попыток:</span>
+                            <input type="text" id="et_try" class="input-field input-field--xs">
+                            </div>
+                        </td>
+                        <td><input type="time" id="a4t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="a4_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="a4_result" value="f" class="radio-input"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Коникотомия</td>
+                        <td><input type="time" id="a5t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="a5_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="a5_result" value="f" class="radio-input"></td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сосудистый доступ</label>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="radio" name="vascular_phase" class="radio-input" value="during">
+                    Во время СЛР
+                    </label>
+                    <label class="radio-option">
+                    <input type="radio" name="vascular_phase" class="radio-input" value="before">
+                    До СЛР
+                    </label>
+                    <button type="button" class="clear-radio-btn" id="clearVascularPhaseBtn">Очистить</button>
+                </div>
+
+                <div class="airway-table-wrap">
+                    <table class="airway-table">
+                    <thead>
+                        <tr>
+                        <th>Вид доступа</th>
+                        <th class="cell-center">Время</th>
+                        <th class="cell-center">Успешно</th>
+                        <th class="cell-center">Безуспешно</th>
+                        <th class="cell-center">Попыток</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                        <td>Периферическая вена</td>
+                        <td class="cell-center"><input type="time" id="v1t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="v1_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="v1_result" value="f" class="radio-input"></td>
+                        <td class="cell-center"><input type="text" id="v1try" class="input-field input-field--xs" inputmode="numeric"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Внутрикостный доступ</td>
+                        <td class="cell-center"><input type="time" id="v2t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="v2_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="v2_result" value="f" class="radio-input"></td>
+                        <td class="cell-center"><input type="text" id="v2try" class="input-field input-field--xs" inputmode="numeric"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Центральная вена</td>
+                        <td class="cell-center"><input type="time" id="v3t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="v3_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="v3_result" value="f" class="radio-input"></td>
+                        <td class="cell-center"><input type="text" id="v3try" class="input-field input-field--xs" inputmode="numeric"></td>
+                        </tr>
+
+                        <tr>
+                        <td>Другой</td>
+                        <td class="cell-center"><input type="time" id="v4t" class="input-field input-field--sm"></td>
+                        <td class="cell-center"><input type="radio" name="v4_result" value="s" class="radio-input"></td>
+                        <td class="cell-center"><input type="radio" name="v4_result" value="f" class="radio-input"></td>
+                        <td class="cell-center"><input type="text" id="v4try" class="input-field input-field--xs" inputmode="numeric"></td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+
+                <div class="form-group" style="margin-top:12px;">
+                    <label class="form-label">Сосуд/точка доступа</label>
+                    <input type="text" id="v_point" class="input-field" placeholder="">
+                </div>
+            </div>
+
+            <!--ИВЛ форма-->
+            <div class="form-group">
+                <label class="form-label">ИВЛ</label>
+
+                <div class="airway-table-wrap">
+                    <table class="airway-table">
+                    <tbody>
+                        <tr>
+                        <td>Чередование с компр.</td>
+                        <td class="cell-center">
+                            <label class="radio-option" style="justify-content:center;">
+                            <input type="radio" name="ivl_alt" value="3" class="radio-input">
+                            3/1
+                            </label>
+                        </td>
+                        <td class="cell-center">
+                            <label class="radio-option" style="justify-content:center;">
+                            <input type="radio" name="ivl_alt" value="15" class="radio-input">
+                            15/2
+                            </label>
+                        </td>
+                        <td class="cell-center">
+                            <label class="radio-option" style="justify-content:center;">
+                            <input type="radio" name="ivl_alt" value="30" class="radio-input">
+                            30/2
+                            </label>
+                        </td>
+                        </tr>
+
+                        <tr>
+                        <td>Не прерывая компр.</td>
+                        <td colspan="3">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span>Частота</span>
+                            <input type="number" id="fr_m" class="input-field input-field--sm" style="max-width:120px;"
+                                    min="0" step="1" placeholder="">
+                            <span>в мин</span>
+                            </div>
+                        </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+
+                <button type="button" class="clear-radio-btn" id="clearIvlBtn">Очистить</button>
+            </div>
+
+            <!--форма использования кислорода-->
+            <div class="form-group">
+                <label class="form-label">Использование кислорода</label>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="checkbox" id="o_air" class="radio-input">
+                    Воздух
+                    </label>
+
+                    <label class="radio-option">
+                    <input type="checkbox" id="o_o2" class="radio-input">
+                    O₂
+                    </label>
+                    <button type="button" class="clear-radio-btn" id="clearOBtn">Очистить</button>
+                </div>
+            </div>
+            <!--Форма аппаратной ИВЛ-->
+            <div class="form-group">
+                <label class="form-label">Аппаратная ИВЛ</label>
+
+                <div class="airway-table-wrap">
+                    <table class="airway-table">
+                    <thead>
+                        <tr>
+                        <th>Аппарат</th>
+                        <th class="cell-center">МО</th>
+                        <th class="cell-center">Частота</th>
+                        <th class="cell-center">Время</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                        <td>
+                            <input type="text" id="i_d" class="input-field input-field--sm" placeholder="">
+                        </td>
+                        <td class="cell-center">
+                            <input type="number" id="i_m" class="input-field input-field--sm" inputmode="decimal" step="0.1" min="0" placeholder="">
+                        </td>
+                        <td class="cell-center">
+                            <input type="number" id="i_fr" class="input-field input-field--sm" inputmode="numeric" step="1" min="0" placeholder="">
+                        </td>
+                        <td class="cell-center">
+                            <input type="text" id="i_t" class="input-field input-field--sm" placeholder="">
+                        </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--Применение устройства для контроля эффективности СЛР-->
+            <div class="form-group">
+                <label class="form-label">
+                    Применение устройства для контроля эффективности СЛР
+                </label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="radio" name="slr_control" value="yes" class="radio-input">
+                    Да
+                    </label>
+                    <label class="radio-option">
+                    <input type="radio" name="slr_control" value="no" class="radio-input">
+                    Нет
+                    </label>
+                </div>
+                <button type="button" class="clear-radio-btn" id="clearSlrControlBtn">Очистить</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Время начала СЛР</label>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="slr_h" class="input-field" maxlength="2"
+                        inputmode="numeric" pattern="[0-9]*"
+                        placeholder="чч" style="width:60px;" min="0" step="1"/>
+
+                    <span>час</span>
+
+                    <input type="text" id="slr_m" class="input-field" maxlength="2"
+                        inputmode="numeric" pattern="[0-9]*"
+                        placeholder="мм" style="width:60px;" min="0" step="1"/>
+
+                    <span>мин</span>
+                </div>
+                </div>
+
+                <div class="form-group">
+                <label class="form-label">Частота компрессий (в мин)</label>
+                <input type="number" id="fr_gr" class="input-field"
+                        min="0" step="1" placeholder="частота компрессий" />
+            </div>
+
+            <!--Компрессии грудной клетки ручные 70-->
+            <div class="form-group">
+                <label class="form-label">Компрессии гр. клетки ручные (1–70 мин)</label>
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                        <button type="button" class="btn" id="cprSymPlus">+</button>
+                        <button type="button" class="btn" id="cprSymMinus">-</button>
+                        <button type="button" class="btn" id="cprSymFill">■</button>
+                        <button type="button" class="btn" id="cprSymClear">Пусто</button>
+
+                        <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                        <button type="button" class="btn icon-btn" id="cprModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                        <button type="button" class="btn icon-btn" id="cprModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                        <span id="cprHint" style=" display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+                <div class="checkbox-grid" id="cprManualGrid"></div>
+            </div>
+
+            <!--Компрессии грудной клетки автоматические 70-->
+            <div class="form-group">
+                <label class="form-label">Компрессии гр. клетки автоматические (1–70 мин)</label>
+                <div class="form-group">
+                    <label class="form-label">Компрессии гр. клетки автоматические — параметр (ch_cpr_a)</label>
+                    <input type="text" id="ch_cpr_a" class="input-field" placeholder="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="cprASymPlus">+</button>
+                    <button type="button" class="btn" id="cprASymMinus">-</button>
+                    <button type="button" class="btn" id="cprASymFill">■</button>
+                    <button type="button" class="btn" id="cprASymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="cprAModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="cprAModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="cprAHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="cprAutoGrid"></div>
+            </div>
+            <!-- ИВЛ масочная (1–70 мин) -->
+            <div class="form-group">
+            <label class="form-label">ИВЛ масочная (1–70 мин)</label>
+
+            <div class="form-group">
+                <label class="form-label">Режим заполнения</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn" id="ventMSymPlus">+</button>
+                <button type="button" class="btn" id="ventMSymMinus">-</button>
+                <button type="button" class="btn" id="ventMSymFill">■</button>
+                <button type="button" class="btn" id="ventMSymClear">Пусто</button>
+
+                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="ventMModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="ventMModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                <span id="ventMHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-grid" id="ventMaskGrid"></div>
+            </div>
+
+            <!-- ИВЛ после интубации / герметизирующего устройства (1–70 мин) -->
+            <div class="form-group">
+            <label class="form-label">ИВЛ после интубации или применен. герметиз. уст-ва (1–70 мин)</label>
+
+            <div class="form-group">
+                <label class="form-label">Режим заполнения</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn" id="ventASymPlus">+</button>
+                <button type="button" class="btn" id="ventASymMinus">-</button>
+                <button type="button" class="btn" id="ventASymFill">■</button>
+                <button type="button" class="btn" id="ventASymClear">Пусто</button>
+
+                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="ventAModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="ventAModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                <span id="ventAHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-grid" id="ventAdvancedGrid"></div>
+            </div>
+            <!--Асистолия-->
+            <div class="form-group">
+            <label class="form-label">Асистолия (1–70 мин)</label>
+
+            <div class="form-group">
+                <label class="form-label">Режим заполнения</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="btn" id="rhAsSymPlus">+</button>
+                <button type="button" class="btn" id="rhAsSymMinus">-</button>
+                <button type="button" class="btn" id="rhAsSymFill">■</button>
+                <button type="button" class="btn" id="rhAsSymClear">Пусто</button>
+
+                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="rhAsModePaint"><span style="font-size:18px">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="rhAsModeRange"><span style="font-size:18px">↔️</span></button>
+
+                <span id="rhAsHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-grid" id="rhythmAsGrid"></div>
+            </div>
+            <!--Фибрилляция желудочков-->
+            <div class="form-group">
+                <label class="form-label">Фибрилляция желудочков</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhVfSymPlus">+</button>
+                    <button type="button" class="btn" id="rhVfSymMinus">-</button>
+                    <button type="button" class="btn" id="rhVfSymFill">■</button>
+                    <button type="button" class="btn" id="rhVfSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhVfModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhVfModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhVfHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmVfGrid"></div>
+            </div>
+            <!--Желудочковая тахикардия без пульса-->
+            <div class="form-group">
+                <label class="form-label">Желудочковая тахикардия без пульса</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhVtSymPlus">+</button>
+                    <button type="button" class="btn" id="rhVtSymMinus">-</button>
+                    <button type="button" class="btn" id="rhVtSymFill">■</button>
+                    <button type="button" class="btn" id="rhVtSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhVtModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhVtModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhVtHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmVtGrid"></div>
+            </div>
+            <!--Беспульсовая электрическая активность (ЭМД)-->
+            <div class="form-group">
+                <label class="form-label">Беспульсовая электрическая активность (ЭМД)</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhPeaSymPlus">+</button>
+                    <button type="button" class="btn" id="rhPeaSymMinus">-</button>
+                    <button type="button" class="btn" id="rhPeaSymFill">■</button>
+                    <button type="button" class="btn" id="rhPeaSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhPeaModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhPeaModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhPeaHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmPeaGrid"></div>
+            </div>
+            <!--Навязанный ритм ЭКС (при использ. ЭКС бригадой)-->
+            <div class="form-group">
+                <label class="form-label">Навязанный ритм ЭКС <i>(при использ. ЭКС бригадой)</i></label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhPacedSymPlus">+</button>
+                    <button type="button" class="btn" id="rhPacedSymMinus">-</button>
+                    <button type="button" class="btn" id="rhPacedSymFill">■</button>
+                    <button type="button" class="btn" id="rhPacedSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhPacedModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhPacedModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhPacedHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmPacedGrid"></div>
+            </div>
+            <!--Организованный сердечный ритм с пульсом-->
+            <div class="form-group">
+                <label class="form-label">Организованный сердечный ритм с пульсом</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhOrgSymPlus">+</button>
+                    <button type="button" class="btn" id="rhOrgSymMinus">-</button>
+                    <button type="button" class="btn" id="rhOrgSymFill">■</button>
+                    <button type="button" class="btn" id="rhOrgSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhOrgModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhOrgModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhOrgHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmOrgGrid"></div>
+            </div>
+            <!--Для детей брадиакардия менее 60 в мин-->
+            <div class="form-group">
+                <label class="form-label"><b><i>Для детей</i></b> брадиакардия менее 60 в мин</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhBradyPedSymPlus">+</button>
+                    <button type="button" class="btn" id="rhBradyPedSymMinus">-</button>
+                    <button type="button" class="btn" id="rhBradyPedSymFill">■</button>
+                    <button type="button" class="btn" id="rhBradyPedSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhBradyPedModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhBradyPedModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhBradyPedHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmBradyPedGrid"></div>
+            </div>
+            <!--Для детей сердечный ритм с пульсом более 60 в мин-->
+            <div class="form-group">
+                <label class="form-label"><b><i>Для детей</i></b> сердечный ритм с пульсом более 60 в мин</label>
+
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="rhChildLt60SymPlus">+</button>
+                    <button type="button" class="btn" id="rhChildLt60SymMinus">-</button>
+                    <button type="button" class="btn" id="rhChildLt60SymFill">■</button>
+                    <button type="button" class="btn" id="rhChildLt60SymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhChildLt60ModePaint"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhChildLt60ModeRange"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="rhChildLt60Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="rhythmChildLt60Grid"></div>
+            </div>
+
+            <!-- Дефибрилляции (энергия в Дж по минутам 1–70) -->
+            <div class="form-group">
+            <label class="form-label">Дефибрилляции — энергия (Дж) (1–70 мин)</label>
+
+            <div class="form-group">
+                <label class="form-label">Дефибриллятор (модель аппарата)</label>
+                <input type="text" id="defib_model" class="input-field" placeholder="Напр.: LIFEPAK 15 / ZOLL X / Corpuls3">
+            </div>
+
+            <label class="form-label">Энергия (Дж)</label>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px;">
+            <input
+                type="text"
+                id="defibEnergyInput"
+                class="input-field input-field--sm"
+                inputmode="numeric"
+                placeholder="например 200"
+                style="max-width:140px;"
+            />
+
+            <button type="button" class="btn" id="defibEnergySet">Выбрать</button>
+            <button type="button" class="btn" id="defibEClear">Пусто</button>
+
+            <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+            <button type="button" class="btn icon-btn" id="defibModePaint" title="Рисование (проведи)">
+                <span style="font-size:18px">✏️</span>
+            </button>
+            <button type="button" class="btn icon-btn" id="defibModeRange" title="Диапазон (2 тапа)">
+                <span style="font-size:18px">↔️</span>
+            </button>
+
+            <span id="defibHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+            </div>
+
+
+            <div class="checkbox-grid" id="defibGrid"></div>
+            </div>
+            <!--Медикаментозная терапия-->
+            <div class="form-group">
+                <label class="form-label">
+                    Медикаментозная терапия
+                </label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                    <input type="radio" name="med_therapy" value="yes" class="radio-input">
+                    Да
+                    </label>
+                    <label class="radio-option">
+                    <input type="radio" name="med_therapy" value="no" class="radio-input">
+                    Нет
+                    </label>
+                </div>
+                <button type="button" class="clear-radio-btn" id="clearMedTherapy">Очистить</button>
+            </div>
+            <!-- Адреналин 1мг/мл + NaCl 0,9% — мл по минутам -->
+            <div class="form-group">
+            <label class="form-label">Адреналин 1мг/мл + NaCl 0,9% — объём (мл) по минутам (1–70)</label>
+
+            <div class="form-group">
+                <label class="form-label">Ввод значения (мл)</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input
+                    type="text"
+                    id="adrNaclValue"
+                    class="input-field"
+                    inputmode="decimal"
+                    placeholder="Напр.: 2 или 2,5"
+                    style="max-width: 220px;"
+                />
+                <button type="button" class="btn" id="adrNaclClearValue">Пусто</button>
+
+                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="adrNaclModePaint" title="Рисование (проведи)">
+                    <span style="font-size:18px">✏️</span>
+                </button>
+                <button type="button" class="btn icon-btn" id="adrNaclModeRange" title="Диапазон (2 тапа)">
+                    <span style="font-size:18px">↔️</span>
+                </button>
+
+                <span id="adrNaclHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-grid" id="adrNaclGrid"></div>
+            </div>
+
+            <!-- Амиодарон 50 мг/мл + Глюкоза 5% — мл по минутам -->
+            <div class="form-group">
+            <label class="form-label">Амиодарон 50 мг/мл + Глюкоза 5% — объём (мл) по минутам (1–70)</label>
+
+            <div class="form-group">
+                <label class="form-label">Ввод значения (мл)</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input
+                    type="text"
+                    id="amioGluValue"
+                    class="input-field"
+                    inputmode="decimal"
+                    placeholder="Напр.: 10 или 10,0"
+                    style="max-width: 220px;"
+                />
+                <button type="button" class="btn" id="amioGluClearValue">Пусто</button>
+
+                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="amioGluModePaint" title="Рисование (проведи)">
+                    <span style="font-size:18px">✏️</span>
+                </button>
+                <button type="button" class="btn icon-btn" id="amioGluModeRange" title="Диапазон (2 тапа)">
+                    <span style="font-size:18px">↔️</span>
+                </button>
+
+                <span id="amioGluHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-grid" id="amioGluGrid"></div>
+            </div>
+
+            <!-- <div class="form-group">
+                <label class="form-label">Компрессии гр. клетки ручные</label>
+                <div class="checkbox-grid" id="manualCprGrid"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Компрессии гр. клетки автоматические</label>
+                <div class="checkbox-grid" id="autoCprGrid"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ИВЛ масочная</label>
+                <div class="checkbox-grid" id="maskVentilationGrid"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ИВЛ после интубации или примен. герметиз. ус-ва</label>
+                <div class="checkbox-grid" id="intubationVentilationGrid"></div>
+            </div> -->
+
+            <div class="button-group">
+                <button type="button" class="btn btn-clear" id="clearBtn">Очистить все</button>
+                <button type="button" class="btn btn-apply" id="applyBtn">Применить</button>
+            </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script type="module" src="/js/form-init.js"></script>
+</body>
+</html>
