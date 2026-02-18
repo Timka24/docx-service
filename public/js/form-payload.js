@@ -117,7 +117,7 @@ export function buildPayload(grids) {
 
   const defib_model = document.getElementById("defib_model")?.value || "";
 
-  const dosageMl = "";
+  const dosageMl = document.getElementById("dosageMl")?.value || "";
 
   return {
     brig: brigade,

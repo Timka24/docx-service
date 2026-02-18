@@ -191,14 +191,28 @@ const rhythmChildLt60 = createChronoRow({
   modeRangeBtnId: "rhChildLt60ModeRange"
 });
 
-const dosageGrid = createNumericRow({
+function getDosageGridValue() {
+  const raw = (document.getElementById("dosageGridValue")?.value ?? "").toString().trim();
+  if (!raw) return "";
+
+  let normalized = raw.replace(/\s+/g, "").replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(normalized)) return null;
+
+  if (normalized.includes(".")) {
+    normalized = normalized.replace(/0+$/g, "").replace(/\.$/, "");
+  }
+
+  return normalized.replace(".", ",");
+}
+
+const dosageGrid = createChronoRow({
   minutes: 70,
   gridId: "dosageGrid",
   hintId: "dosageGridHint",
-  valueInputId: "dosageGridValue",
-  clearValueBtnId: "dosageGridClearValue",
   modePaintBtnId: "dosageGridModePaint",
-  modeRangeBtnId: "dosageGridModeRange"
+  modeRangeBtnId: "dosageGridModeRange",
+  getActiveSymbol: getDosageGridValue,
+  invalidSymbolHint: "Ошибка: введите число (пример: 2 или 2,5)"
 });
 
 
@@ -237,6 +251,11 @@ rhythmOrg.init();
 rhythmBradyPed.init();
 rhythmChildLt60.init();
 dosageGrid.init();
+
+document.getElementById("dosageGridClearValue")?.addEventListener("click", () => {
+  const input = document.getElementById("dosageGridValue");
+  if (input) input.value = "";
+});
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
