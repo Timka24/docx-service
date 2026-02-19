@@ -217,6 +217,45 @@ const drugs1 = createChronoRow({
   modeRangeBtnId: "drugs1ModeRange"
 });
 
+const drugs2 = createChronoRow({
+  minutes: 70,
+  gridId: "ch_drugs2_grid",
+  hintId: "drugs2Hint",
+  symPlusBtnId: "drugs2SymPlus",
+  symMinusBtnId: "drugs2SymMinus",
+  symFillBtnId: "drugs2SymFill",
+  symClearBtnId: "drugs2SymClear",
+  symbolBtns: ["drugs2SymPlus", "drugs2SymMinus", "drugs2SymFill", "drugs2SymClear"],
+  modePaintBtnId: "drugs2ModePaint",
+  modeRangeBtnId: "drugs2ModeRange"
+});
+
+const manipulation1 = createChronoRow({
+  minutes: 70,
+  gridId: "ch_manipulation1_grid",
+  hintId: "manip1Hint",
+  symPlusBtnId: "manip1SymPlus",
+  symMinusBtnId: "manip1SymMinus",
+  symFillBtnId: "manip1SymFill",
+  symClearBtnId: "manip1SymClear",
+  symbolBtns: ["manip1SymPlus", "manip1SymMinus", "manip1SymFill", "manip1SymClear"],
+  modePaintBtnId: "manip1ModePaint",
+  modeRangeBtnId: "manip1ModeRange"
+});
+
+const manipulation2 = createChronoRow({
+  minutes: 70,
+  gridId: "ch_manipulation2_grid",
+  hintId: "manip2Hint",
+  symPlusBtnId: "manip2SymPlus",
+  symMinusBtnId: "manip2SymMinus",
+  symFillBtnId: "manip2SymFill",
+  symClearBtnId: "manip2SymClear",
+  symbolBtns: ["manip2SymPlus", "manip2SymMinus", "manip2SymFill", "manip2SymClear"],
+  modePaintBtnId: "manip2ModePaint",
+  modeRangeBtnId: "manip2ModeRange"
+});
+
 const grids = {
   cprManual,
   cprAuto,
@@ -235,6 +274,9 @@ const grids = {
   amioGluMl,
   nacl,
   drugs1,
+  drugs2,
+  manipulation1,
+  manipulation2,
 };
 
 adrNaclMl.init();
@@ -254,6 +296,9 @@ rhythmBradyPed.init();
 rhythmChildLt60.init();
 nacl.init();
 drugs1.init();
+drugs2.init();
+manipulation1.init();
+manipulation2.init();
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
@@ -408,6 +453,18 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   drugs1.clear();
   const chDrugs1 = document.getElementById("ch_drugs1");
   if (chDrugs1) chDrugs1.value = "";
+
+  drugs2.clear();
+  const chDrugs2 = document.getElementById("ch_drugs2");
+  if (chDrugs2) chDrugs2.value = "";
+
+  manipulation1.clear();
+  const chManipulation1 = document.getElementById("ch_manipulation1");
+  if (chManipulation1) chManipulation1.value = "";
+
+  manipulation2.clear();
+  const chManipulation2 = document.getElementById("ch_manipulation2");
+  if (chManipulation2) chManipulation2.value = "";
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {

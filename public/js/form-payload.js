@@ -208,5 +208,11 @@ export function buildPayload(grids) {
     ch_nacl: document.getElementById("ch_nacl")?.value || "",
     ch_drugs1_marks: grids.drugs1.getData(),
     ch_drugs1: document.getElementById("ch_drugs1")?.value || "",
+    ch_drugs2_marks: grids.drugs2.getData(),
+    ch_drugs2: document.getElementById("ch_drugs2")?.value || "",
+    ch_manipulation1_marks: grids.manipulation1.getData(),
+    ch_manipulation1: document.getElementById("ch_manipulation1")?.value || "",
+    ch_manipulation2_marks: grids.manipulation2.getData(),
+    ch_manipulation2: document.getElementById("ch_manipulation2")?.value || "",
   };
 }
