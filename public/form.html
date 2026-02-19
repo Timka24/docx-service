@@ -1245,6 +1245,52 @@
 
                 <div class="checkbox-grid" id="ch_manipulation2_grid"></div>
             </div>
+            <!--Оценка состояния-->
+            <div class="form-group">
+                <label class="form-label">Оценка состояния</label>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Пульс на сонной артерии (плечевой для детей до года)</label>
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="pulseCarotidSymPlus">+</button>
+                    <button type="button" class="btn" id="pulseCarotidSymMinus">-</button>
+                    <button type="button" class="btn" id="pulseCarotidSymFill">■</button>
+                    <button type="button" class="btn" id="pulseCarotidSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="pulseCarotidModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="pulseCarotidModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="pulseCarotidHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="ch_pulse_carotid_grid"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Фотореакция зрачков</label>
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="pupilReactionSymPlus">+</button>
+                    <button type="button" class="btn" id="pupilReactionSymMinus">-</button>
+                    <button type="button" class="btn" id="pupilReactionSymFill">■</button>
+                    <button type="button" class="btn" id="pupilReactionSymClear">Пусто</button>
+
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="pupilReactionModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="pupilReactionModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="pupilReactionHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="ch_pupil_reaction_grid"></div>
+            </div>
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>
                 <div class="checkbox-grid" id="manualCprGrid"></div>

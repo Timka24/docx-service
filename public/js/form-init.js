@@ -256,6 +256,32 @@ const manipulation2 = createChronoRow({
   modeRangeBtnId: "manip2ModeRange"
 });
 
+const chPulseCart = createChronoRow({
+  minutes: 70,
+  gridId: "ch_pulse_carotid_grid",
+  hintId: "pulseCarotidHint",
+  symPlusBtnId: "pulseCarotidSymPlus",
+  symMinusBtnId: "pulseCarotidSymMinus",
+  symFillBtnId: "pulseCarotidSymFill",
+  symClearBtnId: "pulseCarotidSymClear",
+  symbolBtns: ["pulseCarotidSymPlus", "pulseCarotidSymMinus", "pulseCarotidSymFill", "pulseCarotidSymClear"],
+  modePaintBtnId: "pulseCarotidModePaint",
+  modeRangeBtnId: "pulseCarotidModeRange"
+});
+
+const chPupReact = createChronoRow({
+  minutes: 70,
+  gridId: "ch_pupil_reaction_grid",
+  hintId: "pupilReactionHint",
+  symPlusBtnId: "pupilReactionSymPlus",
+  symMinusBtnId: "pupilReactionSymMinus",
+  symFillBtnId: "pupilReactionSymFill",
+  symClearBtnId: "pupilReactionSymClear",
+  symbolBtns: ["pupilReactionSymPlus", "pupilReactionSymMinus", "pupilReactionSymFill", "pupilReactionSymClear"],
+  modePaintBtnId: "pupilReactionModePaint",
+  modeRangeBtnId: "pupilReactionModeRange"
+});
+
 const grids = {
   cprManual,
   cprAuto,
@@ -277,6 +303,8 @@ const grids = {
   drugs2,
   manipulation1,
   manipulation2,
+  chPulseCart,
+  chPupReact,
 };
 
 adrNaclMl.init();
@@ -299,6 +327,8 @@ drugs1.init();
 drugs2.init();
 manipulation1.init();
 manipulation2.init();
+chPulseCart.init();
+chPupReact.init();
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
@@ -465,6 +495,9 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   manipulation2.clear();
   const chManipulation2 = document.getElementById("ch_manipulation2");
   if (chManipulation2) chManipulation2.value = "";
+
+  chPulseCart.clear();
+  chPupReact.clear();
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {

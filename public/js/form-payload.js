@@ -214,5 +214,7 @@ export function buildPayload(grids) {
     ch_manipulation1: document.getElementById("ch_manipulation1")?.value || "",
     ch_manipulation2_marks: grids.manipulation2.getData(),
     ch_manipulation2: document.getElementById("ch_manipulation2")?.value || "",
+    ch_pulse_carotid_marks: grids.chPulseCart.getData(),
+    ch_pupil_reaction_marks: grids.chPupReact.getData(),
   };
 }
