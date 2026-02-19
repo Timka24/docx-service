@@ -206,5 +206,7 @@ export function buildPayload(grids) {
     ch_amio_glu_ml_marks: grids.amioGluMl.getData(),
     ch_nacl_marks: grids.nacl.getData(),
     ch_nacl: document.getElementById("ch_nacl")?.value || "",
+    ch_drugs1_marks: grids.drugs1.getData(),
+    ch_drugs1: document.getElementById("ch_drugs1")?.value || "",
   };
 }

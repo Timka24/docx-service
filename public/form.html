@@ -1119,7 +1119,7 @@
               <div class="form-group">
                 <label class="form-label">Натрия хлорид 0,9% (1–70 мин)</label>
                 <div class="form-group">
-                    <label class="form-label">Натрия хлорид 0,9% — параметр (ch_nacl)</label>
+                    <label class="form-label">Объём вещества</label>
                     <input type="text" id="ch_nacl" class="input-field" placeholder="">
                 </div>
                 <div class="form-group">
@@ -1140,7 +1140,31 @@
 
                 <div class="checkbox-grid" id="naclGrid"></div>
             </div>
+            <!--Препараты 1 (1–70 мин)-->
+              <div class="form-group">
+                <label class="form-label">Другой препарат (1–70 мин)</label>
+                <div class="form-group">
+                    <label class="form-label">Наименование препарата</label>
+                    <input type="text" id="ch_drugs1" class="input-field" placeholder="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Режим заполнения</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <button type="button" class="btn" id="drugs1SymPlus">+</button>
+                    <button type="button" class="btn" id="drugs1SymMinus">-</button>
+                    <button type="button" class="btn" id="drugs1SymFill">■</button>
+                    <button type="button" class="btn" id="drugs1SymClear">Пусто</button>
 
+                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="drugs1ModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="drugs1ModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+
+                    <span id="drugs1Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    </div>
+                </div>
+
+                <div class="checkbox-grid" id="ch_drugs1_grid"></div>
+            </div>
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>
                 <div class="checkbox-grid" id="manualCprGrid"></div>
