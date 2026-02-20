@@ -117,6 +117,10 @@ export function buildPayload(grids) {
 
   const defib_model = document.getElementById("defib_model")?.value || "";
 
+  const reversible_causes_4g4t = document.getElementById("reverseCauses")?.value || "";
+  const post_resuscitation_therapy = document.getElementById("postResuscitationTherapy")?.value || "";
+  const comments = document.getElementById("comments")?.value || "";
+
   return {
     brig: brigade,
     ps: pstation,
@@ -216,5 +220,8 @@ export function buildPayload(grids) {
     ch_manipulation2: document.getElementById("ch_manipulation2")?.value || "",
     ch_pulse_carotid_marks: grids.chPulseCart.getData(),
     ch_pupil_reaction_marks: grids.chPupReact.getData(),
+    reversible_causes_4g4t,
+    post_resuscitation_therapy,
+    comments,
   };
 }

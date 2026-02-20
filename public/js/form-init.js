@@ -498,6 +498,13 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
 
   chPulseCart.clear();
   chPupReact.clear();
+
+  const reverseCauses = document.getElementById("reverseCauses");
+  if (reverseCauses) reverseCauses.value = "";
+  const postResuscitationTherapy = document.getElementById("postResuscitationTherapy");
+  if (postResuscitationTherapy) postResuscitationTherapy.value = "";
+  const comments = document.getElementById("comments");
+  if (comments) comments.value = "";
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
