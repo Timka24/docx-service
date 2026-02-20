@@ -116,6 +116,14 @@ export function buildPayload(grids) {
   const slr_c_y = slrControl === "yes" ? CHECKED : UNCHECKED;
   const slr_c_n = slrControl === "no" ? CHECKED : UNCHECKED;
 
+  const slr_s1 = document.getElementById("slr_stop_1")?.checked ? CHECKED : UNCHECKED;
+  const slr_bel = document.getElementById("slr_stop_bel")?.checked ? CHECKED : UNCHECKED;
+  const slr_gip = document.getElementById("slr_stop_gip")?.checked ? CHECKED : UNCHECKED;
+  const slr_oth = document.getElementById("slr_stop_oth")?.checked ? CHECKED : UNCHECKED;
+  const slr_oth_txt = slr_oth === CHECKED ? (document.getElementById("slr_stop_oth_txt")?.value || "") : "";
+  const slr_s5 = document.getElementById("slr_stop_5")?.checked ? CHECKED : UNCHECKED;
+
+
   let medTherapyControl = "";
   const selectedMedTherapyControl = document.querySelector('input[name="med_therapy"]:checked');
   if (selectedMedTherapyControl) medTherapyControl = selectedMedTherapyControl.value;
@@ -268,5 +276,11 @@ export function buildPayload(grids) {
     end_transfer_team_num: document.getElementById("end_transfer_team_num")?.value || "",
     end_transfer_team_h,
     end_transfer_team_m,
+    slr_s1,
+    slr_bel,
+    slr_gip,
+    slr_oth,
+    slr_oth_txt,
+    slr_s5,
   };
 }

@@ -163,9 +163,9 @@
         }
 
         .checkbox-input {
-            width: 24px;
-            height: 24px;
-            accent-color: #4caf50;
+            width: 20px;
+            height: 20px;
+            accent-color: #1976d2;
             cursor: pointer;
         }
 
@@ -1395,6 +1395,47 @@
                         <input type="text" id="end_transfer_team_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
                     </div>
                 </div>
+            </div>
+            <!--Неуспешная СЛР-->
+            <div class="form-group">
+                <label class="form-label">СЛР прекращена по причине</label>
+
+                <label class="radio-option">
+                    <input type="checkbox" id="slr_stop_1" class="checkbox-input" />
+                    Отсутствия эффекта в течение 30 мин / у новорожденного при рождении в течение 10 минут
+                </label>
+
+                <div class="form-group" style="margin-top:8px;">
+                    <label class="form-label">Выявлены признаки биологической смерти</label>
+
+                    <label class="radio-option">
+                        <input type="checkbox" id="slr_stop_bel" class="checkbox-input" />
+                        с-м Белоглазова
+                    </label>
+
+                    <label class="radio-option">
+                        <input type="checkbox" id="slr_stop_gip" class="checkbox-input" />
+                        гипостазы
+                    </label>
+
+                    <label class="radio-option">
+                        <input type="checkbox" id="slr_stop_oth" class="checkbox-input" />
+                        другое
+                    </label>
+
+                    <input
+                        type="text"
+                        id="slr_stop_oth_txt"
+                        class="input-field"
+                        placeholder="Укажите причину"
+                        style="display:none; margin-top:8px;"
+                    />
+                </div>
+
+                <label class="radio-option">
+                    <input type="checkbox" id="slr_stop_5" class="checkbox-input" />
+                    Выяснилось, что смерть наступила на фоне: прогрессирования достоверно установленных неизлечимых заболеваний / неизлечимых последствий острой травмы, несовместимых с жизнью
+                </label>
             </div>
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>

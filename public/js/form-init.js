@@ -368,6 +368,22 @@ document.getElementById("clearOBtn")?.addEventListener("click", () => {
   if (oo) oo.checked = false;
 });
 
+function toggleSlrStopOtherText() {
+  const otherCheck = document.getElementById("slr_stop_oth");
+  const otherText = document.getElementById("slr_stop_oth_txt");
+  if (!otherCheck || !otherText) return;
+
+  if (otherCheck.checked) {
+    otherText.style.display = "block";
+  } else {
+    otherText.style.display = "none";
+    otherText.value = "";
+  }
+}
+
+document.getElementById("slr_stop_oth")?.addEventListener("change", toggleSlrStopOtherText);
+toggleSlrStopOtherText();
+
 function normalizeTimeInput(input, max) {
   if (!input) return;
   input.addEventListener("blur", () => {
@@ -556,6 +572,19 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   const endTransferTeamM = document.getElementById("end_transfer_team_m");
   if (endTransferTeamM) endTransferTeamM.value = "";
 
+  const slrStop1 = document.getElementById("slr_stop_1");
+  if (slrStop1) slrStop1.checked = false;
+  const slrStopBel = document.getElementById("slr_stop_bel");
+  if (slrStopBel) slrStopBel.checked = false;
+  const slrStopGip = document.getElementById("slr_stop_gip");
+  if (slrStopGip) slrStopGip.checked = false;
+  const slrStopOth = document.getElementById("slr_stop_oth");
+  if (slrStopOth) slrStopOth.checked = false;
+  const slrStopOthTxt = document.getElementById("slr_stop_oth_txt");
+  if (slrStopOthTxt) slrStopOthTxt.value = "";
+  const slrStop5 = document.getElementById("slr_stop_5");
+  if (slrStop5) slrStop5.checked = false;
+  toggleSlrStopOtherText();
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
