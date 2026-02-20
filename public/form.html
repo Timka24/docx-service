@@ -1306,6 +1306,96 @@
                 <label class="form-label">Комментарии</label>
                 <textarea id="comments" class="input-field" rows="4" placeholder="Дополнительная информация"></textarea>
             </div>
+            <!-- Успешная СЛР-->
+             <div class="form-group">
+                <label class="form-label">Окончание реанимационных мероприятий</label>
+
+                <div class="form-group">
+                    <label class="form-label">Дата окончания</label>
+                    <input type="date" id="end_date" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Время окончания</label>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" id="end_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                        <span>:</span>
+                        <input type="text" id="end_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><input type="checkbox" id="end_success" /> Успешная СЛР</label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ЭКГ ритм</label>
+                    <input type="text" id="end_ecg_rhythm" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ЧСС</label>
+                    <input type="number" id="end_hr" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Заключение</label>
+                    <input type="text" id="end_conclusion" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сознание (ШКГ)</label>
+                    <input type="number" id="end_gcs" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Дыхание</label>
+                    <label><input type="radio" name="end_resp" value="spont" /> Самостоятельное</label>
+                    <label><input type="radio" name="end_resp" value="ivl" /> ИВЛ</label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Частота дыхания</label>
+                    <input type="number" id="end_rr" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">АД</label>
+                    <input type="text" id="end_bp" class="input-field" placeholder="120/80" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Пульс</label>
+                    <input type="number" id="end_pulse" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">SpO2</label>
+                    <input type="number" id="end_spo2" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><input type="checkbox" id="end_transfer_doc" /> Передача врачу стационара</label>
+                    <label class="form-label">ФИО</label>
+                    <input type="text" id="end_transfer_doc_fio" class="input-field" />
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                        <input type="text" id="end_transfer_doc_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                        <span>:</span>
+                        <input type="text" id="end_transfer_doc_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label"><input type="checkbox" id="end_transfer_team" /> Передача бригаде СМП</label>
+                    <label class="form-label">№ бригады</label>
+                    <input type="text" id="end_transfer_team_num" class="input-field" />
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+                        <input type="text" id="end_transfer_team_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                        <span>:</span>
+                        <input type="text" id="end_transfer_team_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                    </div>
+                </div>
+            </div>
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>
                 <div class="checkbox-grid" id="manualCprGrid"></div>

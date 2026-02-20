@@ -1,6 +1,14 @@
 const CHECKED = "☑";
 const UNCHECKED = "☐";
 
+function normalizeTimePart(value, max) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "";
+  const num = Number(digits);
+  if (!Number.isFinite(num) || num < 0 || num > max) return "";
+  return String(num).padStart(2, "0");
+}
+
 export function formatDateForDocx(iso) {
   if (!iso) return "";
   const [yyyy, mm, dd] = iso.split("-");
@@ -121,6 +129,20 @@ export function buildPayload(grids) {
   const post_resuscitation_therapy = document.getElementById("postResuscitationTherapy")?.value || "";
   const comments = document.getElementById("comments")?.value || "";
 
+  const selectedEndResp = document.querySelector('input[name="end_resp"]:checked')?.value || "";
+  const end_resp_spont = selectedEndResp === "spont" ? CHECKED : UNCHECKED;
+  const end_resp_ivl = selectedEndResp === "ivl" ? CHECKED : UNCHECKED;
+
+  const end_h = normalizeTimePart(document.getElementById("end_h")?.value, 23);
+  const end_m = normalizeTimePart(document.getElementById("end_m")?.value, 59);
+  const end_transfer_doc_h = normalizeTimePart(document.getElementById("end_transfer_doc_h")?.value, 23);
+  const end_transfer_doc_m = normalizeTimePart(document.getElementById("end_transfer_doc_m")?.value, 59);
+  const end_transfer_team_h = normalizeTimePart(document.getElementById("end_transfer_team_h")?.value, 23);
+  const end_transfer_team_m = normalizeTimePart(document.getElementById("end_transfer_team_m")?.value, 59);
+
+  const end_date_iso = document.getElementById("end_date")?.value || "";
+  const end_date = formatDateForDocx(pr_date_iso);
+
   return {
     brig: brigade,
     ps: pstation,
@@ -223,5 +245,28 @@ export function buildPayload(grids) {
     reversible_causes_4g4t,
     post_resuscitation_therapy,
     comments,
+    end_date,
+    end_h,
+    end_m,
+    end_success_mark: document.getElementById("end_success")?.checked ? CHECKED : UNCHECKED,
+    end_ecg_rhythm: document.getElementById("end_ecg_rhythm")?.value || "",
+    end_hr: document.getElementById("end_hr")?.value || "",
+    end_conclusion: document.getElementById("end_conclusion")?.value || "",
+    end_gcs: document.getElementById("end_gcs")?.value || "",
+    end_resp: selectedEndResp,
+    end_resp_spont,
+    end_resp_ivl,
+    end_rr: document.getElementById("end_rr")?.value || "",
+    end_bp: document.getElementById("end_bp")?.value || "",
+    end_pulse: document.getElementById("end_pulse")?.value || "",
+    end_spo2: document.getElementById("end_spo2")?.value || "",
+    end_transfer_doc_mark: document.getElementById("end_transfer_doc")?.checked ? CHECKED : UNCHECKED,
+    end_transfer_doc_fio: document.getElementById("end_transfer_doc_fio")?.value || "",
+    end_transfer_doc_h,
+    end_transfer_doc_m,
+    end_transfer_team_mark: document.getElementById("end_transfer_team")?.checked ? CHECKED : UNCHECKED,
+    end_transfer_team_num: document.getElementById("end_transfer_team_num")?.value || "",
+    end_transfer_team_h,
+    end_transfer_team_m,
   };
 }

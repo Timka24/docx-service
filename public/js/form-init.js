@@ -397,6 +397,7 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
 
 (function setDefaultDate() {
   const input = document.getElementById("nowDate");
+  const input2 = document.getElementById("end_date");
   if (!input) return;
 
   const now = new Date();
@@ -404,6 +405,7 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const dd = String(now.getDate()).padStart(2, "0");
   input.value = `${yyyy}-${mm}-${dd}`;
+  input2.value = `${yyyy}-${mm}-${dd}`;
 })();
 
 document.getElementById("clearBtn")?.addEventListener("click", () => {
@@ -505,6 +507,55 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   if (postResuscitationTherapy) postResuscitationTherapy.value = "";
   const comments = document.getElementById("comments");
   if (comments) comments.value = "";
+  const endDate = document.getElementById("end_date");
+  if (endDate) endDate.value = "";
+  const endH = document.getElementById("end_h");
+  if (endH) endH.value = "";
+  const endM = document.getElementById("end_m");
+  if (endM) endM.value = "";
+  const endSuccess = document.getElementById("end_success");
+  if (endSuccess) endSuccess.checked = false;
+
+  const endEcgRhythm = document.getElementById("end_ecg_rhythm");
+  if (endEcgRhythm) endEcgRhythm.value = "";
+  const endHr = document.getElementById("end_hr");
+  if (endHr) endHr.value = "";
+  const endConclusion = document.getElementById("end_conclusion");
+  if (endConclusion) endConclusion.value = "";
+  const endGcs = document.getElementById("end_gcs");
+  if (endGcs) endGcs.value = "";
+
+  document.querySelectorAll('input[name="end_resp"]').forEach((el) => {
+    el.checked = false;
+  });
+
+  const endRr = document.getElementById("end_rr");
+  if (endRr) endRr.value = "";
+  const endBp = document.getElementById("end_bp");
+  if (endBp) endBp.value = "";
+  const endPulse = document.getElementById("end_pulse");
+  if (endPulse) endPulse.value = "";
+  const endSpo2 = document.getElementById("end_spo2");
+  if (endSpo2) endSpo2.value = "";
+
+  const endTransferDoc = document.getElementById("end_transfer_doc");
+  if (endTransferDoc) endTransferDoc.checked = false;
+  const endTransferDocFio = document.getElementById("end_transfer_doc_fio");
+  if (endTransferDocFio) endTransferDocFio.value = "";
+  const endTransferDocH = document.getElementById("end_transfer_doc_h");
+  if (endTransferDocH) endTransferDocH.value = "";
+  const endTransferDocM = document.getElementById("end_transfer_doc_m");
+  if (endTransferDocM) endTransferDocM.value = "";
+
+  const endTransferTeam = document.getElementById("end_transfer_team");
+  if (endTransferTeam) endTransferTeam.checked = false;
+  const endTransferTeamNum = document.getElementById("end_transfer_team_num");
+  if (endTransferTeamNum) endTransferTeamNum.value = "";
+  const endTransferTeamH = document.getElementById("end_transfer_team_h");
+  if (endTransferTeamH) endTransferTeamH.value = "";
+  const endTransferTeamM = document.getElementById("end_transfer_team_m");
+  if (endTransferTeamM) endTransferTeamM.value = "";
+
 });
 
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
