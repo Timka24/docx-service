@@ -141,7 +141,7 @@ export function buildPayload(grids) {
   const end_transfer_team_m = normalizeTimePart(document.getElementById("end_transfer_team_m")?.value, 59);
 
   const end_date_iso = document.getElementById("end_date")?.value || "";
-  const end_date = formatDateForDocx(pr_date_iso);
+  const end_date = formatDateForDocx(end_date_iso);
 
   return {
     brig: brigade,
