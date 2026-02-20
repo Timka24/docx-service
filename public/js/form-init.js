@@ -406,6 +406,8 @@ normalizeTimeInput(document.getElementById("deathHours"), 23);
 normalizeTimeInput(document.getElementById("deathMinutes"), 59);
 normalizeTimeInput(document.getElementById("slr_h"), 23);
 normalizeTimeInput(document.getElementById("slr_m"), 59);
+normalizeTimeInput(document.getElementById("bio_d_h"), 23);
+normalizeTimeInput(document.getElementById("bio_d_m"), 59);
 
 document.getElementById("kvNumber")?.addEventListener("input", function () {
   this.value = this.value.replace(/[^0-9]/g, "");
@@ -435,6 +437,19 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   document.getElementById("arrivalMinutes") && (document.getElementById("arrivalMinutes").value = "");
   document.getElementById("deathHours") && (document.getElementById("deathHours").value = "");
   document.getElementById("deathMinutes") && (document.getElementById("deathMinutes").value = "");
+  [
+    "bio_d_h",
+    "bio_d_m",
+    "br_ruk_last",
+    "br_ruk_first",
+    "br_ruk_middle",
+    "ver_ruk_last",
+    "ver_ruk_first",
+    "ver_ruk_middle"
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
 
   document.querySelectorAll('input[type="radio"]').forEach((r) => (r.checked = false));
   document.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));

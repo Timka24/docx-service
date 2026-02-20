@@ -1437,6 +1437,36 @@
                     Выяснилось, что смерть наступила на фоне: прогрессирования достоверно установленных неизлечимых заболеваний / неизлечимых последствий острой травмы, несовместимых с жизнью
                 </label>
             </div>
+            <!--Констатация смерти-->
+            <div class="form-group">
+                <label class="form-label">Время констатации биологической смерти</label>
+                <div class="time-fields">
+                    <div class="time-field">
+                        <input type="number" id="bio_d_h" class="input-field" placeholder="Часы" min="0" max="23" inputmode="numeric" maxlength="2">
+                    </div>
+                    <div class="time-field">
+                        <input type="number" id="bio_d_m" class="input-field" placeholder="Минуты" min="0" max="59" inputmode="numeric" maxlength="2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Руководитель бригады</label>
+                <div class="name-fields">
+                    <input type="text" id="br_ruk_last" class="input-field" placeholder="Фамилия">
+                    <input type="text" id="br_ruk_first" class="input-field" placeholder="Имя">
+                    <input type="text" id="br_ruk_middle" class="input-field" placeholder="Отчество">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Проверил</label>
+                <div class="name-fields">
+                    <input type="text" id="ver_ruk_last" class="input-field" placeholder="Фамилия">
+                    <input type="text" id="ver_ruk_first" class="input-field" placeholder="Имя">
+                    <input type="text" id="ver_ruk_middle" class="input-field" placeholder="Отчество">
+                </div>
+            </div>
             <!-- <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки ручные</label>
                 <div class="checkbox-grid" id="manualCprGrid"></div>

@@ -36,10 +36,24 @@ export function buildPayload(grids) {
 
   const pr_m_raw = document.getElementById("arrivalMinutes")?.value || "";
   const d_m_raw = document.getElementById("deathMinutes")?.value || "";
+  const bio_d_h_raw = document.getElementById("bio_d_h")?.value || "";
+  const bio_d_m_raw = document.getElementById("bio_d_m")?.value || "";
   const pr_h = document.getElementById("arrivalHours")?.value || "";
   const pr_m = pr_m_raw === "" ? "" : String(pr_m_raw).padStart(2, "0");
   const d_h = document.getElementById("deathHours")?.value || "";
   const d_m = d_m_raw === "" ? "" : String(d_m_raw).padStart(2, "0");
+  const bio_d_h = bio_d_h_raw === "" ? "" : String(bio_d_h_raw).padStart(2, "0");
+  const bio_d_m = bio_d_m_raw === "" ? "" : String(bio_d_m_raw).padStart(2, "0");
+
+  const br_ruk_last = document.getElementById("br_ruk_last")?.value || "";
+  const br_ruk_first = document.getElementById("br_ruk_first")?.value || "";
+  const br_ruk_middle = document.getElementById("br_ruk_middle")?.value || "";
+  const br_ruk = [br_ruk_last, br_ruk_first, br_ruk_middle].map((s) => s.trim()).filter(Boolean).join(" ");
+
+  const ver_ruk_last = document.getElementById("ver_ruk_last")?.value || "";
+  const ver_ruk_first = document.getElementById("ver_ruk_first")?.value || "";
+  const ver_ruk_middle = document.getElementById("ver_ruk_middle")?.value || "";
+  const ver_ruk = [ver_ruk_last, ver_ruk_first, ver_ruk_middle].map((s) => s.trim()).filter(Boolean).join(" ");
 
   const pr_date_iso = document.getElementById("nowDate")?.value || "";
   const pr_date = formatDateForDocx(pr_date_iso);
@@ -282,5 +296,9 @@ export function buildPayload(grids) {
     slr_oth,
     slr_oth_txt,
     slr_s5,
+    bio_d_h,
+    bio_d_m,
+    br_ruk,
+    ver_ruk,
   };
 }
