@@ -80,6 +80,36 @@ docker build -t docx-service .
 docker run -e DATABASE_URL=postgresql://... -p 3000:3000 docx-service
 ```
 
+### Docker Compose (app + worker + postgres)
+
+1. Подготовьте директорию на хосте для DOCX-файлов:
+
+```bash
+sudo mkdir -p /srv/slr-docx
+sudo chown -R $USER:$USER /srv/slr-docx
+```
+
+2. Запустите сервисы:
+
+```bash
+docker compose up -d --build
+```
+
+3. Проверка логов воркера:
+
+```bash
+docker compose logs -f worker
+```
+
+`docker-compose.yaml` поднимает:
+
+- `db` (PostgreSQL) с постоянным томом `db_data`
+- `app` (API) на `3000:3000`
+- `worker` (DOCX-воркер) из того же образа
+
+> Важно: SQL-скрипты из `./migrations` в `/docker-entrypoint-initdb.d` применяются только при первом старте новой БД (когда том `db_data` пустой).
+
+
 ## Технологии
 
 - **Backend:** Node.js, Express, pg, docxtemplater, pizzip

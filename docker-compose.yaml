@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: docx-postgres
+    environment:
+      POSTGRES_DB: docxdb
+      POSTGRES_USER: docx
+      POSTGRES_PASSWORD: docxpass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - docx-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docx -d docxdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: docx-service
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://docx:docxpass@docx-postgres:5432/docxdb
+      DOCX_DIR: /mnt/docx
+    volumes:
+      - /srv/slr-docx:/mnt/docx
+    networks:
+      - docx-net
+    restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: docx-worker
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npm", "run", "worker:docx"]
+    environment:
+      DATABASE_URL: postgresql://docx:docxpass@docx-postgres:5432/docxdb
+      DOCX_DIR: /mnt/docx
+      WORKER_POLL_INTERVAL_MS: 3000
+      WORKER_BATCH_SIZE: 1
+    volumes:
+      - /srv/slr-docx:/mnt/docx
+    networks:
+      - docx-net
+    restart: unless-stopped
+
+networks:
+  docx-net:
+    driver: bridge
+
+volumes:
+  db_data:
