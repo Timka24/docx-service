@@ -1,56 +1,39 @@
-const path = require("path");
 const express = require("express");
-const { buildTemplateData } = require("../lib/template-data");
-const { renderDocx } = require("../lib/docx-render");
-
-const router = express.Router();
+const { HttpError, saveArchive, createRenderVersion } = require("../lib/archive-service");
 
 function createGenerateRouter(pool) {
+  const router = express.Router();
+
   router.post("/generate", async (req, res) => {
     try {
-      const dataForTemplate = buildTemplateData(req.body);
+      const saved = await saveArchive(pool, req.body);
 
-      let archiveId = null;
       try {
-        const ins = await pool.query(
-          "insert into archives (data, stored, docx_key) values ($1, false, null) returning id",
-          [dataForTemplate]
-        );
-        archiveId = ins.rows[0].id;
+        const render = await createRenderVersion(pool, saved.archiveId);
+        return res.json({
+          archive_id: saved.archiveId,
+          render_id: render.renderId,
+          version: render.version,
+          message: "queued",
+        });
       } catch (e) {
-        console.error("DB insert error:", e);
-        return res.status(500).send("Ошибка БД: " + (e.message || e));
+        if (e instanceof HttpError && e.status === 400 && e.message === "kv_num_required_for_render") {
+          return res.json({
+            archive_id: saved.archiveId,
+            render_id: null,
+            version: null,
+            message: "saved_no_kv_num",
+          });
+        }
+        throw e;
       }
-
-      const templatePath = path.join(__dirname, "..", "template.docx");
-      const buf = renderDocx(dataForTemplate, templatePath);
-
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="filled_${archiveId}.docx"`
-      );
-
-      return res.send(buf);
     } catch (err) {
-      if (err.code === "TEMPLATE_NOT_FOUND") {
-        return res.status(500).send(err.message);
+      if (err instanceof HttpError) {
+        return res.status(err.status).json({ error: err.message });
       }
-      if (err.original) {
-        console.error("Template error:", err.original);
-      }
-      console.log("===== DOCX GENERATE ERROR =====");
-      console.log(err);
-      console.log("JSON:", JSON.stringify(err, null, 2));
-      console.log("================================");
 
-      return res
-        .status(500)
-        .type("application/json")
-        .send(JSON.stringify(err, null, 2));
+      console.error("Generate error:", err);
+      return res.status(500).json({ error: "internal_error" });
     }
   });
 
