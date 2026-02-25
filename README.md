@@ -104,3 +104,21 @@ docker run -e DATABASE_URL=postgresql://... -p 3000:3000 docx-service
 - Поле `stored` и `docx_key` — под выгрузку DOCX в общее хранилище
 - Вынос CSS в отдельный файл
 - Валидация обязательных полей на бэкенде
+
+## DOCX worker
+
+Асинхронная генерация DOCX выполняется отдельным воркером:
+
+```bash
+node worker/docx-worker.js
+```
+
+Переменные окружения:
+
+- `DATABASE_URL` — подключение к PostgreSQL
+- `DOCX_DIR` — директория хранения DOCX (по умолчанию `./storage/docx`)
+- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди (по умолчанию `3000`)
+- `WORKER_BATCH_SIZE` — размер батча за цикл (по умолчанию `1`)
+
+Воркер берёт записи `archive_renders` со статусом `docx_status='pending'`,
+генерирует DOCX из `archives.data`, сохраняет файл и выставляет `ready/failed`.

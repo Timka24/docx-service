@@ -8,5 +8,9 @@
     "express": "^4.19.0",
     "pg": "^8.18.0",
     "pizzip": "^3.1.7"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "worker:docx": "node worker/docx-worker.js"
   }
 }

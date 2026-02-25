@@ -204,6 +204,39 @@
             background-color: #1565c0;
         }
 
+        .input-field.error {
+            border-color: #d32f2f;
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+
+        .generate-status {
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .generate-status-row {
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        .btn-refresh {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border: 1px solid #1976d2;
+            color: #1976d2;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(25, 118, 210, 0.08);
+        }
+        
         @media (max-width: 480px) {
             .name-fields,
             .time-fields {
@@ -1486,10 +1519,23 @@
                 <label class="form-label">ИВЛ после интубации или примен. герметиз. ус-ва</label>
                 <div class="checkbox-grid" id="intubationVentilationGrid"></div>
             </div> -->
-
-            <div class="button-group">
+            <!-- Cтарый рендер docx -->
+            <!-- <div class="button-group">
                 <button type="button" class="btn btn-clear" id="clearBtn">Очистить все</button>
                 <button type="button" class="btn btn-apply" id="applyBtn">Применить</button>
+            </div>
+            </form> -->
+             <div class="button-group">
+                <button type="button" class="btn btn-clear" id="clearBtn">Очистить все</button>
+                <button type="button" class="btn btn-apply" id="applyBtn">Сформировать</button>
+            </div>
+
+            <div class="generate-status" id="generateStatusBlock">
+                <div id="genStatus">Статус: ожидание формирования.</div>
+                <div class="generate-status-row" id="genArchiveId">Архив: —</div>
+                <div class="generate-status-row" id="genVersion">Версия: —</div>
+                <div class="generate-status-row" id="genRenderStatus">DOCX/PDF: —</div>
+                <button type="button" id="refreshStatusBtn" class="btn-refresh">Обновить статус</button>
             </div>
             </form>
         </div>

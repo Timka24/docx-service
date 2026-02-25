@@ -602,28 +602,199 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   toggleSlrStopOtherText();
 });
 
-document.getElementById("applyBtn")?.addEventListener("click", async () => {
-  const payload = buildPayload(grids);
+// document.getElementById("applyBtn")?.addEventListener("click", async () => {
+//   const payload = buildPayload(grids);
 
-  const resp = await fetch("/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+//   const resp = await fetch("/generate", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(payload)
+//   });
 
-  if (!resp.ok) {
-    const txt = await resp.text();
-    alert(txt || "Ошибка формирования DOCX");
+//   if (!resp.ok) {
+//     const txt = await resp.text();
+//     alert(txt || "Ошибка формирования DOCX");
+//     return;
+//   }
+
+//   const blob = await resp.blob();
+//   const url = URL.createObjectURL(blob);
+//   const a = document.createElement("a");
+//   a.href = url;
+//   a.download = "filled.docx";
+//   document.body.appendChild(a);
+//   a.click();
+//   a.remove();
+//   URL.revokeObjectURL(url);
+// });
+const genStatusEl = document.getElementById("genStatus");
+const genArchiveIdEl = document.getElementById("genArchiveId");
+const genVersionEl = document.getElementById("genVersion");
+const genRenderStatusEl = document.getElementById("genRenderStatus");
+
+function setGenerateStatus({ status, archiveId, version, renderStatus }) {
+  if (genStatusEl && typeof status === "string") genStatusEl.textContent = status;
+  if (genArchiveIdEl) genArchiveIdEl.textContent = `Архив: ${archiveId ?? "—"}`;
+  if (genVersionEl) genVersionEl.textContent = `Версия: ${version ?? "—"}`;
+  if (genRenderStatusEl) genRenderStatusEl.textContent = `DOCX/PDF: ${renderStatus || "—"}`;
+}
+
+function getKvField() {
+  return document.getElementById("kvNumber") || document.querySelector('input[name="kv_num"]');
+}
+
+function clearKvError() {
+  const kvField = getKvField();
+  if (kvField) kvField.classList.remove("error");
+}
+
+function highlightKvError() {
+  const kvField = getKvField();
+  if (!kvField) return;
+  kvField.classList.add("error");
+  kvField.focus();
+}
+
+async function refreshArchiveStatus(archiveId) {
+  if (!archiveId) {
+    setGenerateStatus({
+      status: "Нет archive_id для обновления статуса.",
+      archiveId: null,
+      version: null,
+      renderStatus: "—"
+    });
     return;
   }
 
-  const blob = await resp.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "filled.docx";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  try {
+    const resp = await fetch(`/archive/${archiveId}`);
+    let data = null;
+    try {
+      data = await resp.json();
+    } catch {
+      data = null;
+    }
+
+    if (!resp.ok) {
+      const errText = data?.error || `HTTP ${resp.status}`;
+      setGenerateStatus({
+        status: `Ошибка: ${errText}`,
+        archiveId,
+        version: null,
+        renderStatus: "—"
+      });
+      return;
+    }
+
+    const latestRender = Array.isArray(data.renders) ? data.renders[0] : null;
+    if (!latestRender) {
+      setGenerateStatus({
+        status: "Сохранено. Версия ещё не создана.",
+        archiveId,
+        version: null,
+        renderStatus: "версия ещё не создана"
+      });
+      return;
+    }
+
+    setGenerateStatus({
+      status: `Архив #${archiveId}: статус версии обновлён.`,
+      archiveId,
+      version: latestRender.version,
+      renderStatus: `${latestRender.docx_status}/${latestRender.pdf_status}`
+    });
+  } catch {
+    setGenerateStatus({
+      status: "Ошибка сети/сервер недоступен",
+      archiveId,
+      version: null,
+      renderStatus: "—"
+    });
+  }
+}
+
+document.getElementById("applyBtn")?.addEventListener("click", async () => {
+  clearKvError();
+  const payload = buildPayload(grids);
+
+  try {
+    const resp = await fetch("/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    let data = null;
+    try {
+      data = await resp.json();
+    } catch {
+      data = null;
+    }
+
+    if (!resp.ok) {
+      const errText = data?.error || `HTTP ${resp.status}`;
+      setGenerateStatus({
+        status: `Ошибка: ${errText}`,
+        archiveId: null,
+        version: null,
+        renderStatus: "—"
+      });
+      return;
+    }
+
+    const archiveId = data?.archive_id ?? null;
+    window.lastArchiveId = archiveId;
+
+    if (data?.message === "queued") {
+      setGenerateStatus({
+        status: `Сохранено. Поставлено в очередь на формирование. Архив #${archiveId}, версия ${data.version}. Статус: pending.`,
+        archiveId,
+        version: data.version ?? null,
+        renderStatus: "pending/pending"
+      });
+      await refreshArchiveStatus(archiveId);
+      return;
+    }
+
+    if (data?.message === "saved_no_kv_num") {
+      setGenerateStatus({
+        status: `Сохранено как черновик (архив #${archiveId}). Заполните номер квитанции (kv_num), затем снова нажмите «Сформировать».`,
+        archiveId,
+        version: null,
+        renderStatus: "версия не создана"
+      });
+      highlightKvError();
+      return;
+    }
+
+    if (data?.error) {
+      setGenerateStatus({
+        status: `Ошибка: ${data.error}`,
+        archiveId,
+        version: null,
+        renderStatus: "—"
+      });
+      return;
+    }
+
+    setGenerateStatus({
+      status: "Получен неожиданный ответ сервера.",
+      archiveId,
+      version: data?.version ?? null,
+      renderStatus: "—"
+    });
+  } catch {
+    setGenerateStatus({
+      status: "Ошибка сети/сервер недоступен",
+      archiveId: null,
+      version: null,
+      renderStatus: "—"
+    });
+  }
 });
+
+document.getElementById("refreshStatusBtn")?.addEventListener("click", async () => {
+  await refreshArchiveStatus(window.lastArchiveId);
+});
+
+getKvField()?.addEventListener("input", clearKvError);
