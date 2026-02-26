@@ -1,11 +1,13 @@
 const express = require("express");
 const { HttpError, saveArchive, createRenderVersion } = require("../lib/archive-service");
+const { ValidationError, validatePayload } = require("../lib/validation");
 
 function createGenerateRouter(pool) {
   const router = express.Router();
 
   router.post("/generate", async (req, res) => {
     try {
+      validatePayload(req.body);
       const saved = await saveArchive(pool, req.body);
 
       try {
@@ -28,6 +30,9 @@ function createGenerateRouter(pool) {
         throw e;
       }
     } catch (err) {
+      if (err instanceof ValidationError) {
+        return res.status(err.status).json({ error: err.code, details: err.details });
+      }
       if (err instanceof HttpError) {
         return res.status(err.status).json({ error: err.message });
       }

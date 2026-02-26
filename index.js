@@ -13,6 +13,8 @@ pool.query("select 1").catch((err) => {
 });
 
 const app = express();
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
@@ -20,6 +22,14 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", formRouter);
 app.use("/", createGenerateRouter(pool));
 app.use("/", createArchiveRouter(pool));
+
+app.use((err, req, res, next) => {
+  if (err && err.type === "entity.too.large") {
+    return res.status(413).json({ error: "payload_too_large" });
+  }
+  return next(err);
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

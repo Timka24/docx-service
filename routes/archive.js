@@ -1,5 +1,6 @@
 const express = require("express");
 const { HttpError, saveArchive, createRenderVersion } = require("../lib/archive-service");
+const { ValidationError, validatePayload } = require("../lib/validation");
 
 function createArchiveRouter(pool) {
   const router = express.Router();
@@ -78,9 +79,13 @@ function createArchiveRouter(pool) {
 
   router.post("/archive/save", async (req, res) => {
     try {
+      validatePayload(req.body);
       const saved = await saveArchive(pool, req.body);
       res.json({ archive_id: saved.archiveId });
     } catch (e) {
+      if (e instanceof ValidationError) {
+        return res.status(e.status).json({ error: e.code, details: e.details });
+      }
       if (e instanceof HttpError) {
         return res.status(e.status).json({ error: e.message });
       }
@@ -103,6 +108,9 @@ function createArchiveRouter(pool) {
         version: render.version,
       });
     } catch (e) {
+      if (e instanceof ValidationError) {
+        return res.status(e.status).json({ error: e.code, details: e.details });
+      }
       if (e instanceof HttpError) {
         return res.status(e.status).json({ error: e.message });
       }
