@@ -115,6 +115,7 @@ docker run -e DATABASE_URL=postgresql://... -p 3000:3000 docx-service
 sudo mkdir -p /srv/slr-docx
 sudo chown -R $USER:$USER /srv/slr-docx
 ```
+```bash
 docker compose up -d --build
 docker compose logs -f worker
 ```
