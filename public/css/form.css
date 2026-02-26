@@ -1,0 +1,370 @@
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 16px;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: #1976d2;
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .form-body {
+            padding: 16px;
+        }
+
+        /* .form-group {
+            margin-bottom: 20px;
+        } */
+        .form-group {
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            margin-top: 16px;    
+        }
+        /* .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+        } */
+        .form-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(0,0,0,0.87);
+            margin-bottom: 16px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.23);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+            /* margin-top: 16px; */
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .name-fields {
+            display: flex;
+            gap: 8px;
+        }
+
+        .name-fields .input-field {
+            flex: 1;
+        }
+
+        .time-fields {
+            display: flex;
+            gap: 8px;
+        }
+
+        .time-field {
+            flex: 1;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            
+        }
+
+        .radio-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1976d2;
+        }
+
+        .clear-radio-btn {
+            align-self: flex-start;
+            background: none;
+            border: 1px solid #1976d2;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .clear-radio-btn:hover {
+            background-color: rgba(25, 118, 210, 0.1);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .cpr-cell{
+            width:100%;
+            min-height:28px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .cpr-cell.is-preview{
+            box-shadow: 0 0 0 2px rgba(25,118,210,0.35) inset;
+            background: rgba(25,118,210,0.08);
+        }
+        .checkbox-label {
+            font-size: 10px;
+            margin-bottom: 2px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            accent-color: #1976d2;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-clear {
+            background-color: #f5f5f5;
+            color: rgba(0, 0, 0, 0.87);
+        }
+
+        .btn-clear:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-apply {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-apply:hover {
+            background-color: #1565c0;
+        }
+
+        .input-field.error {
+            border-color: #d32f2f;
+            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+        }
+
+        .generate-status {
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .generate-status-row {
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        .btn-refresh {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border: 1px solid #1976d2;
+            color: #1976d2;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(25, 118, 210, 0.08);
+        }
+        
+        @media (max-width: 480px) {
+            .name-fields,
+            .time-fields {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .checkbox-grid {
+                gap: 2px;
+            }
+            
+            .checkbox-label {
+                font-size: 8px;
+            }
+            
+            .checkbox-input {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .clear-radio-btn {
+                font-size: 11px;
+                padding: 3px 6px;
+            }
+        }
+
+        .airway-table-wrap {
+        margin-top: 12px;
+        overflow-x: auto;
+        }
+
+        .airway-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        }
+
+        .airway-table th,
+        .airway-table td {
+        border: 1px solid rgba(0,0,0,0.12);
+        padding: 8px;
+        vertical-align: middle;
+        }
+
+        .airway-table th {
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(0,0,0,0.7);
+        text-align: left;
+        background: #fafafa;
+        }
+
+        .cell-center {
+        text-align: center;
+        }
+
+        .input-field--sm {
+        padding: 8px 10px;
+        font-size: 14px;
+        }
+
+        .input-field--xs {
+        width: 30px;
+        padding: 6px 8px;
+        font-size: 14px;
+        }
+
+        .ett-inline {
+        margin-top: 6px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        }
+        /* чтобы на планшете не скроллилось при "рисовании" */
+        #cprManualGrid { touch-action: none; }
+
+        .cpr-cell{
+        height: 34px;  
+        min-height: 34px;
+        padding: 0;
+        line-height: 34px;
+        font-size: 16px;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+        }
+        .cpr-cell.is-start{
+        outline: 2px solid #1976d2;
+        }
+        /* активная кнопка */
+        .btn.active{
+        border-color: #1976d2;
+        box-shadow: 0 0 0 2px #1976d2 inset;
+        font-weight: 600;
+        }
+
+        /* маленькие "икон-кнопки" */
+        .btn.icon-btn{
+        width: 38px;
+        height: 34px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        }
+
+        /* чтобы на планшете не выделялся текст и не было прокрутки при рисовании */
+        #cprManualGrid { touch-action: none; }
+        .cpr-cell{
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+        }
+
+    
+
+.mt-12 { margin-top: 12px; }
+.mt-8 { margin-top: 8px; }
+.flex-center-gap-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.max-w-120 { max-width:120px; }
+.flex-gap-10-center-wrap { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.w-60 { width:60px; }
+.flex-gap-8-wrap-center { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.op-70-ml-8 { opacity:.7; margin-left:8px; }
+.icon-emoji { font-size:18px; }
+.hint-inline { display:inline-block; min-width:220px; min-height:30px; opacity:.7; }
+.flex-gap-8-wrap-center-mt12 { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+.max-w-220 { max-width: 220px; }
+.max-w-140 { max-width:140px; }
+.flex-gap-8-center-wrap { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.w-90 { width:90px; }
+.hidden-mt-8 { display:none; margin-top:8px; }
+.radio-option-center { justify-content:center; }
+.input-field-sm { max-width:220px; }
+.input-field-xs { width:60px; }

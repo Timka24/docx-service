@@ -4,357 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Медицинская форма</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Roboto', 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            padding: 16px;
-            color: rgba(0, 0, 0, 0.87);
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .form-header {
-            background: #1976d2;
-            color: white;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .form-body {
-            padding: 16px;
-        }
-
-        /* .form-group {
-            margin-bottom: 20px;
-        } */
-        .form-group {
-            padding: 16px;
-            background: #fafafa;
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 6px;
-            margin-bottom: 20px;
-            margin-top: 16px;    
-        }
-        /* .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: rgba(0, 0, 0, 0.6);
-            font-size: 14px;
-        } */
-        .form-label {
-            font-size: 15px;
-            font-weight: 600;
-            color: rgba(0,0,0,0.87);
-            margin-bottom: 16px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid rgba(0, 0, 0, 0.23);
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.2s;
-            /* margin-top: 16px; */
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #1976d2;
-            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-        }
-
-        .name-fields {
-            display: flex;
-            gap: 8px;
-        }
-
-        .name-fields .input-field {
-            flex: 1;
-        }
-
-        .time-fields {
-            display: flex;
-            gap: 8px;
-        }
-
-        .time-field {
-            flex: 1;
-        }
-
-        .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            
-        }
-
-        .radio-input {
-            width: 20px;
-            height: 20px;
-            accent-color: #1976d2;
-        }
-
-        .clear-radio-btn {
-            align-self: flex-start;
-            background: none;
-            border: 1px solid #1976d2;
-            color: #1976d2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: background-color 0.2s;
-        }
-
-        .clear-radio-btn:hover {
-            background-color: rgba(25, 118, 210, 0.1);
-        }
-
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 4px;
-            margin-top: 8px;
-        }
-        .cpr-cell{
-            width:100%;
-            min-height:28px;
-        }
-
-        .checkbox-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-        .cpr-cell.is-preview{
-            box-shadow: 0 0 0 2px rgba(25,118,210,0.35) inset;
-            background: rgba(25,118,210,0.08);
-        }
-        .checkbox-label {
-            font-size: 10px;
-            margin-bottom: 2px;
-            color: rgba(0, 0, 0, 0.6);
-        }
-
-        .checkbox-input {
-            width: 20px;
-            height: 20px;
-            accent-color: #1976d2;
-            cursor: pointer;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-clear {
-            background-color: #f5f5f5;
-            color: rgba(0, 0, 0, 0.87);
-        }
-
-        .btn-clear:hover {
-            background-color: #e0e0e0;
-        }
-
-        .btn-apply {
-            background-color: #1976d2;
-            color: white;
-        }
-
-        .btn-apply:hover {
-            background-color: #1565c0;
-        }
-
-        .input-field.error {
-            border-color: #d32f2f;
-            box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
-        }
-
-        .generate-status {
-            margin-top: 12px;
-            padding: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            border-radius: 6px;
-            background: #fafafa;
-        }
-
-        .generate-status-row {
-            margin-top: 6px;
-            font-size: 14px;
-        }
-
-        .btn-refresh {
-            margin-top: 10px;
-            padding: 8px 12px;
-            border: 1px solid #1976d2;
-            color: #1976d2;
-            background: transparent;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-refresh:hover {
-            background: rgba(25, 118, 210, 0.08);
-        }
-        
-        @media (max-width: 480px) {
-            .name-fields,
-            .time-fields {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .checkbox-grid {
-                gap: 2px;
-            }
-            
-            .checkbox-label {
-                font-size: 8px;
-            }
-            
-            .checkbox-input {
-                width: 20px;
-                height: 20px;
-            }
-            
-            .clear-radio-btn {
-                font-size: 11px;
-                padding: 3px 6px;
-            }
-        }
-
-        .airway-table-wrap {
-        margin-top: 12px;
-        overflow-x: auto;
-        }
-
-        .airway-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-        }
-
-        .airway-table th,
-        .airway-table td {
-        border: 1px solid rgba(0,0,0,0.12);
-        padding: 8px;
-        vertical-align: middle;
-        }
-
-        .airway-table th {
-        font-size: 13px;
-        font-weight: 600;
-        color: rgba(0,0,0,0.7);
-        text-align: left;
-        background: #fafafa;
-        }
-
-        .cell-center {
-        text-align: center;
-        }
-
-        .input-field--sm {
-        padding: 8px 10px;
-        font-size: 14px;
-        }
-
-        .input-field--xs {
-        width: 30px;
-        padding: 6px 8px;
-        font-size: 14px;
-        }
-
-        .ett-inline {
-        margin-top: 6px;
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        flex-wrap: wrap;
-        }
-        /* чтобы на планшете не скроллилось при "рисовании" */
-        #cprManualGrid { touch-action: none; }
-
-        .cpr-cell{
-        height: 34px;  
-        min-height: 34px;
-        padding: 0;
-        line-height: 34px;
-        font-size: 16px;
-        box-sizing: border-box;
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: none;
-        }
-        .cpr-cell.is-start{
-        outline: 2px solid #1976d2;
-        }
-        /* активная кнопка */
-        .btn.active{
-        border-color: #1976d2;
-        box-shadow: 0 0 0 2px #1976d2 inset;
-        font-weight: 600;
-        }
-
-        /* маленькие "икон-кнопки" */
-        .btn.icon-btn{
-        width: 38px;
-        height: 34px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        line-height: 1;
-        }
-
-        /* чтобы на планшете не выделялся текст и не было прокрутки при рисовании */
-        #cprManualGrid { touch-action: none; }
-        .cpr-cell{
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: none;
-        }
-
-    </style>
+    <link rel="stylesheet" href="/css/form.css">
 </head>
 <body>
     
@@ -619,7 +269,7 @@
                     </table>
                 </div>
 
-                <div class="form-group" style="margin-top:12px;">
+                <div class="form-group mt-12">
                     <label class="form-label">Сосуд/точка доступа</label>
                     <input type="text" id="v_point" class="input-field" placeholder="">
                 </div>
@@ -635,19 +285,19 @@
                         <tr>
                         <td>Чередование с компр.</td>
                         <td class="cell-center">
-                            <label class="radio-option" style="justify-content:center;">
+                            <label class="radio-option radio-option-center">
                             <input type="radio" name="ivl_alt" value="3" class="radio-input">
                             3/1
                             </label>
                         </td>
                         <td class="cell-center">
-                            <label class="radio-option" style="justify-content:center;">
+                            <label class="radio-option radio-option-center">
                             <input type="radio" name="ivl_alt" value="15" class="radio-input">
                             15/2
                             </label>
                         </td>
                         <td class="cell-center">
-                            <label class="radio-option" style="justify-content:center;">
+                            <label class="radio-option radio-option-center">
                             <input type="radio" name="ivl_alt" value="30" class="radio-input">
                             30/2
                             </label>
@@ -657,9 +307,9 @@
                         <tr>
                         <td>Не прерывая компр.</td>
                         <td colspan="3">
-                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <div class="flex-center-gap-wrap">
                             <span>Частота</span>
-                            <input type="number" id="fr_m" class="input-field input-field--sm" style="max-width:120px;"
+                            <input type="number" id="fr_m" class="input-field input-field--sm max-w-120"
                                     min="0" step="1" placeholder="">
                             <span>в мин</span>
                             </div>
@@ -742,16 +392,16 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Время начала СЛР</label>
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="flex-gap-10-center-wrap">
                     <input type="text" id="slr_h" class="input-field" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
-                        placeholder="чч" style="width:60px;" min="0" step="1"/>
+                        placeholder="чч" class="input-field input-field-xs" min="0" step="1"/>
 
                     <span>час</span>
 
                     <input type="text" id="slr_m" class="input-field" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
-                        placeholder="мм" style="width:60px;" min="0" step="1"/>
+                        placeholder="мм" class="input-field input-field-xs" min="0" step="1"/>
 
                     <span>мин</span>
                 </div>
@@ -768,16 +418,16 @@
                 <label class="form-label">Компрессии гр. клетки ручные (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                         <button type="button" class="btn" id="cprSymPlus">+</button>
                         <button type="button" class="btn" id="cprSymMinus">-</button>
                         <button type="button" class="btn" id="cprSymFill">■</button>
                         <button type="button" class="btn" id="cprSymClear">Пусто</button>
 
-                        <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                        <button type="button" class="btn icon-btn" id="cprModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                        <button type="button" class="btn icon-btn" id="cprModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
-                        <span id="cprHint" style=" display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                        <span class="op-70-ml-8">Диапазон:</span>
+                        <button type="button" class="btn icon-btn" id="cprModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                        <button type="button" class="btn icon-btn" id="cprModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
+                        <span id="cprHint" class="hint-inline"></span>
                     </div>
                 </div>
                 <div class="checkbox-grid" id="cprManualGrid"></div>
@@ -792,17 +442,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="cprASymPlus">+</button>
                     <button type="button" class="btn" id="cprASymMinus">-</button>
                     <button type="button" class="btn" id="cprASymFill">■</button>
                     <button type="button" class="btn" id="cprASymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="cprAModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="cprAModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="cprAModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="cprAModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="cprAHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="cprAHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -814,17 +464,17 @@
 
             <div class="form-group">
                 <label class="form-label">Режим заполнения</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="flex-gap-8-wrap-center">
                 <button type="button" class="btn" id="ventMSymPlus">+</button>
                 <button type="button" class="btn" id="ventMSymMinus">-</button>
                 <button type="button" class="btn" id="ventMSymFill">■</button>
                 <button type="button" class="btn" id="ventMSymClear">Пусто</button>
 
-                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                <button type="button" class="btn icon-btn" id="ventMModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                <button type="button" class="btn icon-btn" id="ventMModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                <span class="op-70-ml-8">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="ventMModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="ventMModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                <span id="ventMHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                <span id="ventMHint" class="hint-inline"></span>
                 </div>
             </div>
 
@@ -837,17 +487,17 @@
 
             <div class="form-group">
                 <label class="form-label">Режим заполнения</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="flex-gap-8-wrap-center">
                 <button type="button" class="btn" id="ventASymPlus">+</button>
                 <button type="button" class="btn" id="ventASymMinus">-</button>
                 <button type="button" class="btn" id="ventASymFill">■</button>
                 <button type="button" class="btn" id="ventASymClear">Пусто</button>
 
-                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                <button type="button" class="btn icon-btn" id="ventAModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                <button type="button" class="btn icon-btn" id="ventAModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                <span class="op-70-ml-8">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="ventAModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="ventAModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                <span id="ventAHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                <span id="ventAHint" class="hint-inline"></span>
                 </div>
             </div>
 
@@ -859,17 +509,17 @@
 
             <div class="form-group">
                 <label class="form-label">Режим заполнения</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="flex-gap-8-wrap-center">
                 <button type="button" class="btn" id="rhAsSymPlus">+</button>
                 <button type="button" class="btn" id="rhAsSymMinus">-</button>
                 <button type="button" class="btn" id="rhAsSymFill">■</button>
                 <button type="button" class="btn" id="rhAsSymClear">Пусто</button>
 
-                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                <button type="button" class="btn icon-btn" id="rhAsModePaint"><span style="font-size:18px">✏️</span></button>
-                <button type="button" class="btn icon-btn" id="rhAsModeRange"><span style="font-size:18px">↔️</span></button>
+                <span class="op-70-ml-8">Диапазон:</span>
+                <button type="button" class="btn icon-btn" id="rhAsModePaint"><span class="icon-emoji">✏️</span></button>
+                <button type="button" class="btn icon-btn" id="rhAsModeRange"><span class="icon-emoji">↔️</span></button>
 
-                <span id="rhAsHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                <span id="rhAsHint" class="hint-inline"></span>
                 </div>
             </div>
 
@@ -881,17 +531,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhVfSymPlus">+</button>
                     <button type="button" class="btn" id="rhVfSymMinus">-</button>
                     <button type="button" class="btn" id="rhVfSymFill">■</button>
                     <button type="button" class="btn" id="rhVfSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhVfModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhVfModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhVfModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhVfModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhVfHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhVfHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -903,17 +553,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhVtSymPlus">+</button>
                     <button type="button" class="btn" id="rhVtSymMinus">-</button>
                     <button type="button" class="btn" id="rhVtSymFill">■</button>
                     <button type="button" class="btn" id="rhVtSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhVtModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhVtModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhVtModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhVtModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhVtHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhVtHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -925,17 +575,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhPeaSymPlus">+</button>
                     <button type="button" class="btn" id="rhPeaSymMinus">-</button>
                     <button type="button" class="btn" id="rhPeaSymFill">■</button>
                     <button type="button" class="btn" id="rhPeaSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhPeaModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhPeaModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhPeaModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhPeaModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhPeaHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhPeaHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -947,17 +597,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhPacedSymPlus">+</button>
                     <button type="button" class="btn" id="rhPacedSymMinus">-</button>
                     <button type="button" class="btn" id="rhPacedSymFill">■</button>
                     <button type="button" class="btn" id="rhPacedSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhPacedModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhPacedModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhPacedModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhPacedModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhPacedHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhPacedHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -969,17 +619,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhOrgSymPlus">+</button>
                     <button type="button" class="btn" id="rhOrgSymMinus">-</button>
                     <button type="button" class="btn" id="rhOrgSymFill">■</button>
                     <button type="button" class="btn" id="rhOrgSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhOrgModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhOrgModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhOrgModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhOrgModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhOrgHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhOrgHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -991,17 +641,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhBradyPedSymPlus">+</button>
                     <button type="button" class="btn" id="rhBradyPedSymMinus">-</button>
                     <button type="button" class="btn" id="rhBradyPedSymFill">■</button>
                     <button type="button" class="btn" id="rhBradyPedSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhBradyPedModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhBradyPedModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhBradyPedModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhBradyPedModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhBradyPedHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhBradyPedHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1013,17 +663,17 @@
 
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="rhChildLt60SymPlus">+</button>
                     <button type="button" class="btn" id="rhChildLt60SymMinus">-</button>
                     <button type="button" class="btn" id="rhChildLt60SymFill">■</button>
                     <button type="button" class="btn" id="rhChildLt60SymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="rhChildLt60ModePaint"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="rhChildLt60ModeRange"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="rhChildLt60ModePaint"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="rhChildLt60ModeRange"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="rhChildLt60Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="rhChildLt60Hint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1041,28 +691,28 @@
 
             <label class="form-label">Энергия (Дж)</label>
 
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px;">
+            <div class="flex-gap-8-wrap-center-mt12">
             <input
                 type="text"
                 id="defibEnergyInput"
                 class="input-field input-field--sm"
                 inputmode="numeric"
                 placeholder="например 200"
-                style="max-width:140px;"
+                class="max-w-140"
             />
 
             <button type="button" class="btn" id="defibEnergySet">Выбрать</button>
             <button type="button" class="btn" id="defibEClear">Пусто</button>
 
-            <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+            <span class="op-70-ml-8">Диапазон:</span>
             <button type="button" class="btn icon-btn" id="defibModePaint" title="Рисование (проведи)">
-                <span style="font-size:18px">✏️</span>
+                <span class="icon-emoji">✏️</span>
             </button>
             <button type="button" class="btn icon-btn" id="defibModeRange" title="Диапазон (2 тапа)">
-                <span style="font-size:18px">↔️</span>
+                <span class="icon-emoji">↔️</span>
             </button>
 
-            <span id="defibHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+            <span id="defibHint" class="hint-inline"></span>
             </div>
 
 
@@ -1091,26 +741,26 @@
 
             <div class="form-group">
                 <label class="form-label">Ввод значения (мл)</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="flex-gap-8-wrap-center">
                 <input
                     type="text"
                     id="adrNaclValue"
                     class="input-field"
                     inputmode="decimal"
                     placeholder="Напр.: 2 или 2,5"
-                    style="max-width: 220px;"
+                    class="max-w-220"
                 />
                 <button type="button" class="btn" id="adrNaclClearValue">Пусто</button>
 
-                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <span class="op-70-ml-8">Диапазон:</span>
                 <button type="button" class="btn icon-btn" id="adrNaclModePaint" title="Рисование (проведи)">
-                    <span style="font-size:18px">✏️</span>
+                    <span class="icon-emoji">✏️</span>
                 </button>
                 <button type="button" class="btn icon-btn" id="adrNaclModeRange" title="Диапазон (2 тапа)">
-                    <span style="font-size:18px">↔️</span>
+                    <span class="icon-emoji">↔️</span>
                 </button>
 
-                <span id="adrNaclHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                <span id="adrNaclHint" class="hint-inline"></span>
                 </div>
             </div>
 
@@ -1123,26 +773,26 @@
 
             <div class="form-group">
                 <label class="form-label">Ввод значения (мл)</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <div class="flex-gap-8-wrap-center">
                 <input
                     type="text"
                     id="amioGluValue"
                     class="input-field"
                     inputmode="decimal"
                     placeholder="Напр.: 10 или 10,0"
-                    style="max-width: 220px;"
+                    class="max-w-220"
                 />
                 <button type="button" class="btn" id="amioGluClearValue">Пусто</button>
 
-                <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
+                <span class="op-70-ml-8">Диапазон:</span>
                 <button type="button" class="btn icon-btn" id="amioGluModePaint" title="Рисование (проведи)">
-                    <span style="font-size:18px">✏️</span>
+                    <span class="icon-emoji">✏️</span>
                 </button>
                 <button type="button" class="btn icon-btn" id="amioGluModeRange" title="Диапазон (2 тапа)">
-                    <span style="font-size:18px">↔️</span>
+                    <span class="icon-emoji">↔️</span>
                 </button>
 
-                <span id="amioGluHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                <span id="amioGluHint" class="hint-inline"></span>
                 </div>
             </div>
 
@@ -1157,17 +807,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="naclSymPlus">+</button>
                     <button type="button" class="btn" id="naclSymMinus">-</button>
                     <button type="button" class="btn" id="naclSymFill">■</button>
                     <button type="button" class="btn" id="naclSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="naclModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="naclModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="naclModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="naclModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="naclHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="naclHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1182,17 +832,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="drugs1SymPlus">+</button>
                     <button type="button" class="btn" id="drugs1SymMinus">-</button>
                     <button type="button" class="btn" id="drugs1SymFill">■</button>
                     <button type="button" class="btn" id="drugs1SymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="drugs1ModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="drugs1ModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="drugs1ModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="drugs1ModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="drugs1Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="drugs1Hint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1208,17 +858,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="drugs2SymPlus">+</button>
                     <button type="button" class="btn" id="drugs2SymMinus">-</button>
                     <button type="button" class="btn" id="drugs2SymFill">■</button>
                     <button type="button" class="btn" id="drugs2SymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="drugs2ModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="drugs2ModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="drugs2ModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="drugs2ModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="drugs2Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="drugs2Hint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1237,17 +887,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="manip1SymPlus">+</button>
                     <button type="button" class="btn" id="manip1SymMinus">-</button>
                     <button type="button" class="btn" id="manip1SymFill">■</button>
                     <button type="button" class="btn" id="manip1SymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="manip1ModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="manip1ModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="manip1ModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="manip1ModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="manip1Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="manip1Hint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1262,17 +912,17 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="manip2SymPlus">+</button>
                     <button type="button" class="btn" id="manip2SymMinus">-</button>
                     <button type="button" class="btn" id="manip2SymFill">■</button>
                     <button type="button" class="btn" id="manip2SymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="manip2ModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="manip2ModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="manip2ModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="manip2ModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="manip2Hint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="manip2Hint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1287,17 +937,17 @@
                 <label class="form-label">Пульс на сонной артерии (плечевой для детей до года)</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="pulseCarotidSymPlus">+</button>
                     <button type="button" class="btn" id="pulseCarotidSymMinus">-</button>
                     <button type="button" class="btn" id="pulseCarotidSymFill">■</button>
                     <button type="button" class="btn" id="pulseCarotidSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="pulseCarotidModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="pulseCarotidModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="pulseCarotidModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="pulseCarotidModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="pulseCarotidHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="pulseCarotidHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1308,17 +958,17 @@
                 <label class="form-label">Фотореакция зрачков</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <div class="flex-gap-8-wrap-center">
                     <button type="button" class="btn" id="pupilReactionSymPlus">+</button>
                     <button type="button" class="btn" id="pupilReactionSymMinus">-</button>
                     <button type="button" class="btn" id="pupilReactionSymFill">■</button>
                     <button type="button" class="btn" id="pupilReactionSymClear">Пусто</button>
 
-                    <span style="opacity:.7; margin-left:8px;">Диапазон:</span>
-                    <button type="button" class="btn icon-btn" id="pupilReactionModePaint" title="Рисование (проведи)"><span style="font-size:18px">✏️</span></button>
-                    <button type="button" class="btn icon-btn" id="pupilReactionModeRange" title="Диапазон (2 тапа)"><span style="font-size:18px">↔️</span></button>
+                    <span class="op-70-ml-8">Диапазон:</span>
+                    <button type="button" class="btn icon-btn" id="pupilReactionModePaint" title="Рисование (проведи)"><span class="icon-emoji">✏️</span></button>
+                    <button type="button" class="btn icon-btn" id="pupilReactionModeRange" title="Диапазон (2 тапа)"><span class="icon-emoji">↔️</span></button>
 
-                    <span id="pupilReactionHint" style="display:inline-block; min-width:220px; min-height:30px; opacity:.7;"></span>
+                    <span id="pupilReactionHint" class="hint-inline"></span>
                     </div>
                 </div>
 
@@ -1350,10 +1000,10 @@
 
                 <div class="form-group">
                     <label class="form-label">Время окончания</label>
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <input type="text" id="end_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                    <div class="flex-gap-8-center-wrap">
+                        <input type="text" id="end_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
                         <span>:</span>
-                        <input type="text" id="end_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                        <input type="text" id="end_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
                     </div>
                 </div>
 
@@ -1411,10 +1061,10 @@
                     <label class="form-label"><input type="checkbox" id="end_transfer_doc" /> Передача врачу стационара</label>
                     <label class="form-label">ФИО</label>
                     <input type="text" id="end_transfer_doc_fio" class="input-field" />
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
-                        <input type="text" id="end_transfer_doc_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                    <div class="flex-gap-8-center-wrap mt-8">
+                        <input type="text" id="end_transfer_doc_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
                         <span>:</span>
-                        <input type="text" id="end_transfer_doc_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                        <input type="text" id="end_transfer_doc_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
                     </div>
                 </div>
 
@@ -1422,10 +1072,10 @@
                     <label class="form-label"><input type="checkbox" id="end_transfer_team" /> Передача бригаде СМП</label>
                     <label class="form-label">№ бригады</label>
                     <input type="text" id="end_transfer_team_num" class="input-field" />
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
-                        <input type="text" id="end_transfer_team_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" style="width:90px;" />
+                    <div class="flex-gap-8-center-wrap mt-8">
+                        <input type="text" id="end_transfer_team_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
                         <span>:</span>
-                        <input type="text" id="end_transfer_team_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" style="width:90px;" />
+                        <input type="text" id="end_transfer_team_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
                     </div>
                 </div>
             </div>
@@ -1438,7 +1088,7 @@
                     Отсутствия эффекта в течение 30 мин / у новорожденного при рождении в течение 10 минут
                 </label>
 
-                <div class="form-group" style="margin-top:8px;">
+                <div class="form-group mt-8">
                     <label class="form-label">Выявлены признаки биологической смерти</label>
 
                     <label class="radio-option">
@@ -1461,7 +1111,7 @@
                         id="slr_stop_oth_txt"
                         class="input-field"
                         placeholder="Укажите причину"
-                        style="display:none; margin-top:8px;"
+                        class="hidden-mt-8"
                     />
                 </div>
 

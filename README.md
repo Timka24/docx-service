@@ -30,7 +30,9 @@ docx-service/
 │   ├── generate.js       # POST /generate (save + queue render)
 │   └── archive.js        # /archive API (list, details, save, queue render)
 ├── public/
-│   ├── form.html         # Страница формы (HTML + CSS)
+│   ├── form.html         # Страница формы (HTML)
+│   ├── css/
+│   │   └── form.css      # Стили формы
 │   └── js/
 │       ├── form-init.js      # Инициализация, обработчики, submit
 │       ├── form-payload.js   # Сборка payload, formatDateForDocx, marksFromResult
