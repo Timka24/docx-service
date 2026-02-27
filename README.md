@@ -5,8 +5,8 @@
 ## Статус проекта (актуально)
 
 - **Статус:** рабочий MVP / pre-production
-- **Что стабильно работает:** форма СЛР, сохранение архива, версионирование рендеров, асинхронная генерация DOCX воркером
-- **Что в процессе развития:** PDF-конвейер (поля и статусы уже в БД), UI для просмотра архива, backend-валидация обязательных полей
+- **Что стабильно работает:** форма СЛР, сохранение архива, версионирование рендеров, асинхронная генерация DOCX и PDF воркерами
+- **Что в процессе развития:** UI для просмотра архива, backend-валидация обязательных полей
 
 ## Функциональность
 
@@ -41,11 +41,13 @@ docx-service/
 │       └── grid-numeric.js   # createNumericRow — объёмы в мл (дробные)
 ├── migrations/
 │   ├── 001_init.sql      # Базовая таблица archives
-│   └── 002_archive_versions.sql # Версионирование рендеров + новые поля archives
+│   ├── 002_archive_versions.sql # Версионирование рендеров + новые поля archives
+│   └── 003_add_pdf_retry_fields.sql # Поля retry для PDF-конвейера
 ├── worker/
-│   └── docx-worker.js    # Фоновая обработка pending DOCX-рендеров
+│   ├── docx-worker.js    # Фоновая обработка pending DOCX-рендеров
+│   └── pdf-worker.js     # Фоновая конвертация DOCX -> PDF через Gotenberg
 ├── template.docx         # Шаблон DOCX
-├── docker-compose.yaml   # app + worker + postgres
+├── docker-compose.yaml   # app + docx-worker + pdf-worker + gotenberg + postgres
 ├── Dockerfile
 └── package.json
 ```
@@ -80,9 +82,10 @@ PostgreSQL.
 
 - `archive_id`, `version` — версия рендера для конкретного архива
 - `docx_status` / `docx_key` / `docx_error` — статус DOCX-конвейера
-- `pdf_status` / `pdf_key` / `pdf_error` — задел под PDF-конвейер
+- `pdf_status` / `pdf_key` / `pdf_error` — статус PDF-конвейера
+- `pdf_attempts` / `pdf_next_attempt_at` — счётчик попыток и время следующего ретрая PDF
 
-Миграции: `migrations/001_init.sql`, затем `migrations/002_archive_versions.sql`
+Миграции: `migrations/001_init.sql`, затем `migrations/002_archive_versions.sql`, затем `migrations/003_add_pdf_retry_fields.sql`
 
 ## Запуск
 
@@ -91,6 +94,11 @@ PostgreSQL.
 - `DATABASE_URL` — строка подключения PostgreSQL (обязательно)
 - `PORT` — порт (по умолчанию 3000)
 - `DOCX_DIR` — директория хранения DOCX у воркера (по умолчанию `./storage/docx`)
+- `PDF_DIR` — директория хранения PDF у `pdf-worker` (по умолчанию `./storage/pdf`)
+- `GOTENBERG_URL` — URL сервиса Gotenberg (по умолчанию `http://gotenberg:3000`)
+- `GOTENBERG_LIBREOFFICE_ENDPOINT` — endpoint конвертации (по умолчанию `/forms/libreoffice/convert`)
+- `PDF_CONVERT_TIMEOUT_MS` — таймаут конвертации PDF (по умолчанию `60000`)
+- `MAX_PDF_BYTES` — ограничение размера PDF в байтах (по умолчанию `31457280`)
 - `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди (по умолчанию `3000`)
 - `WORKER_BATCH_SIZE` — размер батча за цикл (по умолчанию `1`)
 
@@ -98,7 +106,7 @@ PostgreSQL.
 
 ```bash
 npm install
-# Выполнить migrations/001_init.sql
+# Выполнить migrations/001_init.sql, 002_archive_versions.sql, 003_add_pdf_retry_fields.sql
 DATABASE_URL=postgresql://user:pass@localhost/db node index.js
 ```
 
@@ -109,17 +117,18 @@ docker build -t docx-service .
 docker run -e DATABASE_URL=postgresql://... -p 3000:3000 docx-service
 ```
 
-### Docker Compose (app + worker + postgres)
+### Docker Compose (app + docx-worker + pdf-worker + gotenberg + postgres)
 
-1. Подготовьте директорию на хосте для DOCX-файлов:
+1. Подготовьте директории на хосте для DOCX/PDF-файлов:
 
 ```bash
-sudo mkdir -p /srv/slr-docx
-sudo chown -R $USER:$USER /srv/slr-docx
+sudo mkdir -p /srv/slr-docx /srv/slr-pdf
+sudo chown -R $USER:$USER /srv/slr-docx /srv/slr-pdf
 ```
 ```bash
 docker compose up -d --build
 docker compose logs -f worker
+docker compose logs -f pdf-worker
 ```
 
 `docker-compose.yaml` поднимает:
@@ -127,6 +136,8 @@ docker compose logs -f worker
 - `db` (PostgreSQL) с постоянным томом `db_data`
 - `app` (API) на `3000:3000`
 - `worker` (DOCX-воркер) из того же образа
+- `pdf-worker` (PDF-воркер) из того же образа
+- `gotenberg` (конвертация DOCX -> PDF)
 
 > Важно: SQL-скрипты из `./migrations` в `/docker-entrypoint-initdb.d` применяются только при первом старте новой БД (когда том `db_data` пустой).
 
@@ -149,14 +160,41 @@ docker compose logs -f worker
 - [x] Версионирование рендеров для одного архива
 - [x] API архива (список, карточка, сохранение, постановка рендера)
 - [x] Docker-образ
-- [x] Docker Compose стек: `app + worker + postgres`
+- [x] Docker Compose стек: `app + docx-worker + pdf-worker + gotenberg + postgres`
 
 ## Не реализовано / на будущее
 
 - Интерфейс просмотра архива/версий (есть только API)
-- PDF-воркер и фактическая генерация PDF (схема в БД уже подготовлена)
 - Вынос CSS в отдельный файл
 - Расширенная валидация обязательных полей на бэкенде
+
+## PDF worker
+
+Асинхронная генерация PDF выполняется отдельным воркером:
+
+```bash
+node worker/pdf-worker.js
+```
+
+Переменные окружения:
+
+- `DATABASE_URL` — подключение к PostgreSQL
+- `DOCX_DIR` — директория исходных DOCX
+- `PDF_DIR` — директория хранения PDF
+- `GOTENBERG_URL` — URL Gotenberg
+- `GOTENBERG_LIBREOFFICE_ENDPOINT` — endpoint конвертации (по умолчанию `/forms/libreoffice/convert`)
+- `PDF_CONVERT_TIMEOUT_MS` — таймаут запроса к Gotenberg
+- `MAX_PDF_BYTES` — ограничение размера принимаемого PDF
+- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди
+- `WORKER_BATCH_SIZE` — размер батча за цикл
+
+Логика:
+
+- берёт записи `archive_renders` со статусами `docx_status='ready'` и `pdf_status='pending'`;
+- строит путь PDF по `pr_date` (предпочтительно `archives.data.pr_date_iso`) и `kv_num` в формате `YYYY/<месяц_рус_нижний>/DD/<kv_num>.pdf`;
+- конвертирует готовый DOCX через Gotenberg;
+- при временных ошибках выполняет до 3 попыток с backoff и сохраняет `pdf_attempts`/`pdf_next_attempt_at`;
+- выставляет `pdf_status` в `ready` или `failed`.
 
 ## DOCX worker
 

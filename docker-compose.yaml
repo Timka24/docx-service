@@ -20,6 +20,22 @@ services:
       retries: 10
       start_period: 10s
     restart: unless-stopped
+  
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: gotenberg
+    command:
+      - gotenberg
+      - --api-port=3000
+    networks:
+      - docx-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
 
   app:
     build: .
@@ -55,6 +71,32 @@ services:
     networks:
       - docx-net
     restart: unless-stopped
+  
+  
+  
+  pdf-worker:
+    build: .
+    container_name: pdf-worker
+    depends_on:
+      db:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+    command: ["npm", "run", "worker:pdf"]
+    environment:
+      DATABASE_URL: postgresql://docx:docxpass@docx-postgres:5432/docxdb
+      DOCX_DIR: /mnt/docx
+      PDF_DIR: /mnt/pdf
+      GOTENBERG_URL: http://gotenberg:3000
+      WORKER_POLL_INTERVAL_MS: 3000
+      WORKER_BATCH_SIZE: 1
+    volumes:
+      - /srv/slr-docx:/mnt/docx
+      - /srv/slr-pdf:/mnt/pdf
+    networks:
+      - docx-net
+    restart: unless-stopped
+
 
 networks:
   docx-net:
