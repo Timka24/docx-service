@@ -50,6 +50,7 @@
             font-size: 14px;
         } */
         .form-label {
+            display: block;
             font-size: 15px;
             font-weight: 600;
             color: rgba(0,0,0,0.87);
@@ -353,7 +354,7 @@
 .mt-8 { margin-top: 8px; }
 .flex-center-gap-wrap { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .max-w-120 { max-width:120px; }
-.flex-gap-10-center-wrap { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.flex-gap-8-center-wrap { display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
 .w-60 { width:60px; }
 .flex-gap-8-wrap-center { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .op-70-ml-8 { opacity:.7; margin-left:8px; }

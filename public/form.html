@@ -112,17 +112,17 @@
 
                 <div class="radio-group">
                     <label class="radio-option">
-                    <input type="checkbox" id="r_start_nms" class="radio-input">
+                    <input type="checkbox" id="r_start_nms" class="checkbox-input">
                     Непрямой массаж сердца
                     </label>
 
                     <label class="radio-option">
-                    <input type="checkbox" id="r_start_vent" class="radio-input">
+                    <input type="checkbox" id="r_start_vent" class="checkbox-input">
                     ИВЛ (5 искусственных вдохов)
                     </label>
 
                     <label class="radio-option">
-                    <input type="checkbox" id="r_start_defib" class="radio-input">
+                    <input type="checkbox" id="r_start_defib" class="checkbox-input">
                     Дефибрилляция
                     </label>
 
@@ -135,12 +135,12 @@
 
                 <div class="radio-group">
                     <label class="radio-option">
-                    <input type="checkbox" id="a_v" name="airway_phase" class="radio-input" value="during">
+                    <input type="checkbox" id="a_v" name="airway_phase" class="checkbox-input" value="during">
                     Во время СЛР
                     </label>
 
                     <label class="radio-option">
-                    <input type="checkbox" id="a_d" name="airway_phase" class="radio-input" value="before">
+                    <input type="checkbox" id="a_d" name="airway_phase" class="checkbox-input" value="before">
                     До СЛР
                     </label>
 
@@ -328,12 +328,12 @@
 
                 <div class="radio-group">
                     <label class="radio-option">
-                    <input type="checkbox" id="o_air" class="radio-input">
+                    <input type="checkbox" id="o_air" class="checkbox-input">
                     Воздух
                     </label>
 
                     <label class="radio-option">
-                    <input type="checkbox" id="o_o2" class="radio-input">
+                    <input type="checkbox" id="o_o2" class="checkbox-input">
                     O₂
                     </label>
                     <button type="button" class="clear-radio-btn" id="clearOBtn">Очистить</button>
@@ -391,15 +391,16 @@
                 <button type="button" class="clear-radio-btn" id="clearSlrControlBtn">Очистить</button>
             </div>
             <div class="form-group">
+
                 <label class="form-label">Время начала СЛР</label>
                 <div class="flex-gap-10-center-wrap">
-                    <input type="text" id="slr_h" class="input-field" maxlength="2"
+                    <input type="text" id="slr_h" class="input-field w-90" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
                         placeholder="чч" class="input-field input-field-xs" min="0" step="1"/>
 
                     <span>час</span>
 
-                    <input type="text" id="slr_m" class="input-field" maxlength="2"
+                    <input type="text" id="slr_m" class="input-field w-90" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
                         placeholder="мм" class="input-field input-field-xs" min="0" step="1"/>
 
@@ -1001,14 +1002,14 @@
                 <div class="form-group">
                     <label class="form-label">Время окончания</label>
                     <div class="flex-gap-8-center-wrap">
-                        <input type="text" id="end_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
+                        <input type="text" id="end_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
                         <span>:</span>
-                        <input type="text" id="end_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
+                        <input type="text" id="end_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><input type="checkbox" id="end_success" /> Успешная СЛР</label>
+                    <label class="form-label"><input type="checkbox" id="end_success" calss="checkbox-input"/> Успешная СЛР</label>
                 </div>
 
                 <div class="form-group">
@@ -1058,24 +1059,24 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><input type="checkbox" id="end_transfer_doc" /> Передача врачу стационара</label>
+                     <label class="form-label"><input type="checkbox" id="end_transfer_doc" class="checkbox-input" /> Передача врачу стационара</label>
                     <label class="form-label">ФИО</label>
                     <input type="text" id="end_transfer_doc_fio" class="input-field" />
                     <div class="flex-gap-8-center-wrap mt-8">
-                        <input type="text" id="end_transfer_doc_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
+                        <input type="text" id="end_transfer_doc_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
                         <span>:</span>
-                        <input type="text" id="end_transfer_doc_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
+                        <input type="text" id="end_transfer_doc_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><input type="checkbox" id="end_transfer_team" /> Передача бригаде СМП</label>
+                     <label class="form-label"><input type="checkbox" id="end_transfer_team" class="checkbox-input" /> Передача бригаде СМП</label>
                     <label class="form-label">№ бригады</label>
                     <input type="text" id="end_transfer_team_num" class="input-field" />
                     <div class="flex-gap-8-center-wrap mt-8">
-                        <input type="text" id="end_transfer_team_h" class="input-field" maxlength="2" inputmode="numeric" placeholder="ЧЧ" class="input-field w-90" />
+                        <input type="text" id="end_transfer_team_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
                         <span>:</span>
-                        <input type="text" id="end_transfer_team_m" class="input-field" maxlength="2" inputmode="numeric" placeholder="ММ" class="input-field w-90" />
+                        <input type="text" id="end_transfer_team_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
                     </div>
                 </div>
             </div>
