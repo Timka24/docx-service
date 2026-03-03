@@ -12,6 +12,7 @@
   "scripts": {
     "start": "node index.js",
     "worker:docx": "node worker/docx-worker.js",
-    "worker:pdf": "node worker/pdf-worker.js"
+    "worker:pdf": "node worker/pdf-worker.js",
+    "test": "node --test"
   }
 }

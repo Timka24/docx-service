@@ -165,12 +165,30 @@ export function buildPayload(grids) {
   const end_date_iso = document.getElementById("end_date")?.value || "";
   const end_date = formatDateForDocx(end_date_iso);
 
+  const last_name_raw = lastName;
+  const first_name_raw = firstName;
+  const middle_name_raw = middleName;
+  const kv_num_tail_raw = kvNumber;
+  const pr_date_iso_raw = pr_date_iso;
+  const end_date_iso_raw = end_date_iso;
+  const br_ruk_last_raw = br_ruk_last;
+  const br_ruk_first_raw = br_ruk_first;
+  const br_ruk_middle_raw = br_ruk_middle;
+  const ver_ruk_last_raw = ver_ruk_last;
+  const ver_ruk_first_raw = ver_ruk_first;
+  const ver_ruk_middle_raw = ver_ruk_middle;
+
   return {
     brig: brigade,
     ps: pstation,
     fio_pac,
+    last_name_raw,
+    first_name_raw,
+    middle_name_raw,
+    kv_num_tail_raw,
     kv_num: kvNumber ? `100-26-${kvNumber}` : "",
     pr_date,
+    pr_date_iso_raw,
     pr_h,
     pr_m,
     d_h,
@@ -268,6 +286,7 @@ export function buildPayload(grids) {
     post_resuscitation_therapy,
     comments,
     end_date,
+    end_date_iso_raw,
     end_h,
     end_m,
     end_success_mark: document.getElementById("end_success")?.checked ? CHECKED : UNCHECKED,
@@ -300,5 +319,11 @@ export function buildPayload(grids) {
     bio_d_m,
     br_ruk,
     ver_ruk,
+    br_ruk_last_raw,
+    br_ruk_first_raw,
+    br_ruk_middle_raw,
+    ver_ruk_last_raw,
+    ver_ruk_first_raw,
+    ver_ruk_middle_raw,
   };
 }

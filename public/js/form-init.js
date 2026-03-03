@@ -426,7 +426,7 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
   input2.value = `${yyyy}-${mm}-${dd}`;
 })();
 
-document.getElementById("clearBtn")?.addEventListener("click", () => {
+function clearForm()  {
   document.getElementById("brigade") && (document.getElementById("brigade").value = "");
   document.getElementById("pstation") && (document.getElementById("pstation").value = "");
   document.getElementById("lastName") && (document.getElementById("lastName").value = "");
@@ -600,33 +600,228 @@ document.getElementById("clearBtn")?.addEventListener("click", () => {
   const slrStop5 = document.getElementById("slr_stop_5");
   if (slrStop5) slrStop5.checked = false;
   toggleSlrStopOtherText();
-});
+  window.lastArchiveId = null;
+  setGenerateStatus({ status: "Форма очищена.", archiveId: null, version: null, renderStatus: "—" });
+}
 
-// document.getElementById("applyBtn")?.addEventListener("click", async () => {
-//   const payload = buildPayload(grids);
+document.getElementById("clearBtn")?.addEventListener("click", clearForm);
 
-//   const resp = await fetch("/generate", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(payload)
-//   });
+// 
+function setInputValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = typeof value === "string" ? value : "";
+}
 
-//   if (!resp.ok) {
-//     const txt = await resp.text();
-//     alert(txt || "Ошибка формирования DOCX");
-//     return;
-//   }
+function setCheckboxValue(id, checked) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.checked = Boolean(checked);
+}
 
-//   const blob = await resp.blob();
-//   const url = URL.createObjectURL(blob);
-//   const a = document.createElement("a");
-//   a.href = url;
-//   a.download = "filled.docx";
-//   document.body.appendChild(a);
-//   a.click();
-//   a.remove();
-//   URL.revokeObjectURL(url);
-// });
+function setRadioByName(name, value) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach((radio) => {
+    radio.checked = radio.value === value;
+  });
+}
+
+function splitFio(fio) {
+  const parts = String(fio || "").trim().split(/\s+/).filter(Boolean);
+  return {
+    last: parts[0] || "",
+    first: parts[1] || "",
+    middle: parts.slice(2).join(" "),
+  };
+}
+
+function parseIsoDate(raw) {
+  const text = String(raw || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+  const ru = text.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (!ru) return "";
+  const [, dd, mm, yyyy] = ru;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function arrayOrEmpty(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function applyResultPair(name, successMark, failMark) {
+  if (successMark === "☑") {
+    setRadioByName(name, "s");
+    return;
+  }
+  if (failMark === "☑") {
+    setRadioByName(name, "f");
+    return;
+  }
+  setRadioByName(name, "");
+}
+
+function applyTailFromKv(kvNum) {
+  const kvTail = String(kvNum || "").trim();
+  if (!kvTail) return "";
+  if (kvTail.startsWith("100-26-")) {
+    return kvTail.slice("100-26-".length);
+  }
+  return kvTail;
+}
+
+function loadArchiveToForm(archive) {
+  const raw = archive?.raw_data && typeof archive.raw_data === "object" ? archive.raw_data : {};
+  clearForm();
+
+  setInputValue("brigade", raw.brig);
+  setInputValue("pstation", raw.ps);
+
+  const fio = splitFio(raw.fio_pac);
+  setInputValue("lastName", raw.last_name_raw || fio.last);
+  setInputValue("firstName", raw.first_name_raw || fio.first);
+  setInputValue("middleName", raw.middle_name_raw || fio.middle);
+
+  setInputValue("kvNumber", raw.kv_num_tail_raw || applyTailFromKv(raw.kv_num));
+
+  setInputValue("nowDate", raw.pr_date_iso_raw || parseIsoDate(raw.pr_date));
+  setInputValue("end_date", raw.end_date_iso_raw || parseIsoDate(raw.end_date));
+
+  setInputValue("arrivalHours", raw.pr_h);
+  setInputValue("arrivalMinutes", raw.pr_m);
+  setInputValue("deathHours", raw.d_h);
+  setInputValue("deathMinutes", raw.d_m);
+  setInputValue("bio_d_h", raw.bio_d_h);
+  setInputValue("bio_d_m", raw.bio_d_m);
+
+  setRadioByName("witness", raw.witness || "");
+  setRadioByName("slr", raw.slr || "");
+  setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
+  setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));
+  setRadioByName("ivl_alt", raw.t_3 === "☑" ? "3" : (raw.t_15 === "☑" ? "15" : (raw.t_30 === "☑" ? "30" : "")));
+  setRadioByName("slr_control", raw.slr_c_y === "☑" ? "y" : (raw.slr_c_n === "☑" ? "n" : ""));
+  setRadioByName("med_therapy", raw.med_t_y === "☑" ? "y" : (raw.med_t_n === "☑" ? "n" : ""));
+  setRadioByName("end_resp", raw.end_resp || (raw.end_resp_spont === "☑" ? "spont" : (raw.end_resp_ivl === "☑" ? "ivl" : "")));
+
+  setCheckboxValue("r_start_nms", raw.r_start_nms === "☑");
+  setCheckboxValue("r_start_vent", raw.r_start_vent === "☑");
+  setCheckboxValue("r_start_defib", raw.r_start_defib === "☑");
+  setCheckboxValue("o_air", raw.o_air === "☑");
+  setCheckboxValue("o_o2", raw.o_o2 === "☑");
+
+  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "v1t", "v2t", "v3t", "v4t", "v1try", "v2try", "v3try", "v4try", "v_point", "fr_m", "i_d", "i_m", "i_fr", "i_t", "slr_h", "slr_m", "fr_gr", "ch_cpr_a", "defib_model", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2", "reverseCauses", "postResuscitationTherapy", "comments", "end_h", "end_m", "end_ecg_rhythm", "end_hr", "end_conclusion", "end_gcs", "end_rr", "end_bp", "end_pulse", "end_spo2", "end_transfer_doc_fio", "end_transfer_doc_h", "end_transfer_doc_m", "end_transfer_team_num", "end_transfer_team_h", "end_transfer_team_m", "slr_stop_oth_txt", "br_ruk_last", "br_ruk_first", "br_ruk_middle", "ver_ruk_last", "ver_ruk_first", "ver_ruk_middle"].forEach((id) => {
+    const map = {
+      reverseCauses: "reversible_causes_4g4t",
+      postResuscitationTherapy: "post_resuscitation_therapy",
+      comments: "comments",
+      slr_stop_oth_txt: "slr_oth_txt",
+      br_ruk_last: "br_ruk_last_raw",
+      br_ruk_first: "br_ruk_first_raw",
+      br_ruk_middle: "br_ruk_middle_raw",
+      ver_ruk_last: "ver_ruk_last_raw",
+      ver_ruk_first: "ver_ruk_first_raw",
+      ver_ruk_middle: "ver_ruk_middle_raw",
+    };
+    const rawKey = map[id] || id;
+    setInputValue(id, raw[rawKey]);
+  });
+
+  applyResultPair("a1_result", raw.a1s, raw.a1f);
+  applyResultPair("a2_result", raw.a2s, raw.a2f);
+  applyResultPair("a3_result", raw.a3s, raw.a3f);
+  applyResultPair("a4_result", raw.a4s, raw.a4f);
+  applyResultPair("a5_result", raw.a5s, raw.a5f);
+  applyResultPair("v1_result", raw.v1s, raw.v1f);
+  applyResultPair("v2_result", raw.v2s, raw.v2f);
+  applyResultPair("v3_result", raw.v3s, raw.v3f);
+  applyResultPair("v4_result", raw.v4s, raw.v4f);
+
+  setCheckboxValue("end_success", raw.end_success_mark === "☑");
+  setCheckboxValue("end_transfer_doc", raw.end_transfer_doc_mark === "☑");
+  setCheckboxValue("end_transfer_team", raw.end_transfer_team_mark === "☑");
+  setCheckboxValue("slr_stop_1", raw.slr_s1 === "☑");
+  setCheckboxValue("slr_stop_bel", raw.slr_bel === "☑");
+  setCheckboxValue("slr_stop_gip", raw.slr_gip === "☑");
+  setCheckboxValue("slr_stop_oth", raw.slr_oth === "☑");
+  setCheckboxValue("slr_stop_5", raw.slr_s5 === "☑");
+  toggleSlrStopOtherText();
+
+  grids.cprManual.setData(arrayOrEmpty(raw.ch_cpr_m));
+  grids.cprAuto.setData(arrayOrEmpty(raw.ch_cpr_a_marks));
+  grids.ventMask.setData(arrayOrEmpty(raw.ch_vent_m_marks));
+  grids.ventAdvanced.setData(arrayOrEmpty(raw.ch_vent_a_marks));
+  grids.rhythmAs.setData(arrayOrEmpty(raw.ch_rhythm_as_marks));
+  grids.rhythmVf.setData(arrayOrEmpty(raw.ch_rhythm_vf_marks));
+  grids.rhythmVt.setData(arrayOrEmpty(raw.ch_rhythm_vt_marks));
+  grids.rhythmPea.setData(arrayOrEmpty(raw.ch_rhythm_pea_marks));
+  grids.rhythmPaced.setData(arrayOrEmpty(raw.ch_rhythm_paced_marks));
+  grids.rhythmOrg.setData(arrayOrEmpty(raw.ch_rhythm_organized_marks));
+  grids.rhythmBradyPed.setData(arrayOrEmpty(raw.ch_rhythm_brady_ped_marks));
+  grids.rhythmChildLt60.setData(arrayOrEmpty(raw.ch_rhythm_child_lt60_marks));
+  grids.defibEnergy.setData(arrayOrEmpty(raw.ch_defib_j_marks));
+  grids.adrNaclMl.setData(arrayOrEmpty(raw.ch_adr_nacl_ml_marks));
+  grids.amioGluMl.setData(arrayOrEmpty(raw.ch_amio_glu_ml_marks));
+  grids.nacl.setData(arrayOrEmpty(raw.ch_nacl_marks));
+  grids.drugs1.setData(arrayOrEmpty(raw.ch_drugs1_marks));
+  grids.drugs2.setData(arrayOrEmpty(raw.ch_drugs2_marks));
+  grids.manipulation1.setData(arrayOrEmpty(raw.ch_manipulation1_marks));
+  grids.manipulation2.setData(arrayOrEmpty(raw.ch_manipulation2_marks));
+  grids.chPulseCart.setData(arrayOrEmpty(raw.ch_pulse_carotid_marks));
+  grids.chPupReact.setData(arrayOrEmpty(raw.ch_pupil_reaction_marks));
+
+  window.lastArchiveId = archive.id;
+  clearKvError();
+  setGenerateStatus({
+    status: `Загружена карта #${archive.id} по kv_num ${archive.kv_num}.`,
+    archiveId: archive.id,
+    version: null,
+    renderStatus: "загружено из архива"
+  });
+}
+
+async function trySuggestLoadByKv() {
+  const kvInput = document.getElementById("kvNumber");
+  const tail = typeof kvInput?.value === "string" ? kvInput.value.trim() : "";
+  if (!tail) return;
+
+  const fullKvNum = `100-26-${tail}`;
+
+  try {
+    const resp = await fetch(`/archive/by-kv?kv_num=${encodeURIComponent(fullKvNum)}`);
+    if (resp.status === 404) return;
+
+    let data = null;
+    try {
+      data = await resp.json();
+    } catch {
+      data = null;
+    }
+
+    if (!resp.ok) {
+      setGenerateStatus({
+        status: `Ошибка поиска карты: ${data?.error || `HTTP ${resp.status}`}`,
+        archiveId: window.lastArchiveId || null,
+        version: null,
+        renderStatus: "—"
+      });
+      return;
+    }
+
+    if (window.lastArchiveId && Number(window.lastArchiveId) === Number(data.id)) return;
+
+    const shouldLoad = window.confirm("Найдена ранее заполненная карта с этим kv_num. Загрузить?");
+    if (shouldLoad) {
+      loadArchiveToForm(data);
+    }
+  } catch {
+    setGenerateStatus({
+      status: "Ошибка сети при поиске карты по kv_num",
+      archiveId: window.lastArchiveId || null,
+      version: null,
+      renderStatus: "—"
+    });
+  }
+}
+
+
 const genStatusEl = document.getElementById("genStatus");
 const genArchiveIdEl = document.getElementById("genArchiveId");
 const genVersionEl = document.getElementById("genVersion");
@@ -716,6 +911,7 @@ async function refreshArchiveStatus(archiveId) {
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
   clearKvError();
   const payload = buildPayload(grids);
+  payload.archive_id = window.lastArchiveId || null;
 
   try {
     const resp = await fetch("/generate", {
@@ -732,10 +928,20 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
     }
 
     if (!resp.ok) {
-      const errText = data?.error || `HTTP ${resp.status}`;
+      if (resp.status === 409 && errText === "kv_num_exists") {
+        highlightKvError();
+        setGenerateStatus({
+          status: "kv_num уже существует, загрузите карту",
+          archiveId: window.lastArchiveId || null,
+          version: null,
+          renderStatus: "—"
+        });
+        await trySuggestLoadByKv();
+        return;
+      }
       setGenerateStatus({
         status: `Ошибка: ${errText}`,
-        archiveId: null,
+        archiveId: window.lastArchiveId || null,
         version: null,
         renderStatus: "—"
       });
@@ -798,3 +1004,4 @@ document.getElementById("refreshStatusBtn")?.addEventListener("click", async () 
 });
 
 getKvField()?.addEventListener("input", clearKvError);
+document.getElementById("kvNumber")?.addEventListener("blur", trySuggestLoadByKv);

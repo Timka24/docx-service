@@ -33,6 +33,32 @@ function createArchiveRouter(pool) {
     }
   });
 
+  router.get("/archive/by-kv", async (req, res) => {
+    const kvNum = typeof req.query.kv_num === "string" ? req.query.kv_num.trim() : "";
+    if (!kvNum) {
+      return res.status(400).json({ error: "invalid_kv_num" });
+    }
+
+    try {
+      const archive = await pool.query(
+        `select id, created_at, kv_num, updated_at, raw_data
+           from archives
+          where kv_num = $1
+          limit 1`,
+        [kvNum]
+      );
+
+      if (!archive.rows[0]) {
+        return res.status(404).json({ error: "not_found" });
+      }
+
+      return res.json(archive.rows[0]);
+    } catch (e) {
+      console.error("Archive lookup by kv_num error:", e);
+      return res.status(500).json({ error: "internal_error" });
+    }
+  });
+
   router.get("/archive/:id", async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id <= 0) {
