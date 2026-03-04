@@ -13,6 +13,8 @@
 - **Веб-форма** — форма ввода данных протокола СЛР (бригада, пациент, время, ВДП, сосудистый доступ, ИВЛ, ритмы, дефибрилляция, медикаменты)
 - **Генерация DOCX** — постановка задачи в очередь рендеров и асинхронная обработка отдельным воркером
 - **Архив** — сохранение данных формы в БД (JSONB), получение списка, карточки записи и её рендер-версий
+- **Уникальность `kv_num`** — на уровне БД и API предотвращаются дубли; при конфликте возвращается `409 kv_num_exists`
+- **Поиск карты по `kv_num`** — отдельный endpoint для быстрого поиска ранее сохранённой записи
 - **Хронометраж по минутам (1–70)** — интерактивные сетки для ручных/автоматических компрессий, ИВЛ, ритмов, энергии дефибрилляции, объёмов лекарств (адреналин, амиодарон)
 
 ## Структура проекта
@@ -42,7 +44,10 @@ docx-service/
 ├── migrations/
 │   ├── 001_init.sql      # Базовая таблица archives
 │   ├── 002_archive_versions.sql # Версионирование рендеров + новые поля archives
-│   └── 003_add_pdf_retry_fields.sql # Поля retry для PDF-конвейера
+│   ├── 003_add_pdf_retry_fields.sql # Поля retry для PDF-конвейера
+│   └── 004_kv_num_unique.sql # Уникальный индекс по kv_num + индекс поиска
+├── test/
+│   └── archive-service.test.js # Unit-тесты сценариев saveArchive
 ├── worker/
 │   ├── docx-worker.js    # Фоновая обработка pending DOCX-рендеров
 │   └── pdf-worker.js     # Фоновая конвертация DOCX -> PDF через Gotenberg
@@ -59,6 +64,7 @@ docx-service/
 | GET   | `/form` | Страница формы |
 | POST  | `/generate` | Сохранение архива + постановка DOCX-рендера в очередь (`queued`) |
 | GET   | `/archive` | Список последних 100 архивов + статусы последнего рендера |
+| GET   | `/archive/by-kv?kv_num=...` | Поиск архива по номеру карты (`kv_num`) |
 | GET   | `/archive/:id` | Карточка архива + все версии рендеров |
 | POST  | `/archive/save` | Сохранить/обновить архив без постановки рендера |
 | POST  | `/archive/:id/render` | Поставить новую версию рендера в очередь |
@@ -78,6 +84,11 @@ PostgreSQL.
 - `kv_num` — номер карты/случая (обязателен для постановки рендера)
 - `updated_at` — дата обновления записи
 
+Ограничения и индексы:
+
+- уникальный partial index `archives_kv_num_uniq` на `kv_num` (для `kv_num is not null`)
+- индекс `archives_kv_num_idx` для быстрого lookup по `kv_num`
+
 ### Таблица `archive_renders`
 
 - `archive_id`, `version` — версия рендера для конкретного архива
@@ -85,7 +96,21 @@ PostgreSQL.
 - `pdf_status` / `pdf_key` / `pdf_error` — статус PDF-конвейера
 - `pdf_attempts` / `pdf_next_attempt_at` — счётчик попыток и время следующего ретрая PDF
 
-Миграции: `migrations/001_init.sql`, затем `migrations/002_archive_versions.sql`, затем `migrations/003_add_pdf_retry_fields.sql`
+Миграции: `migrations/001_init.sql`, затем `migrations/002_archive_versions.sql`, затем `migrations/003_add_pdf_retry_fields.sql`, затем `migrations/004_kv_num_unique.sql`
+
+## Логика сохранения архива (`saveArchive`)
+
+- **Create-режим** (без `archive_id`) — создаётся новая запись.
+- **Edit-режим** (с `archive_id`):
+  - если `kv_num` не изменился, обновляется текущая запись;
+  - если `kv_num` изменился, создаётся **новая** запись (старый архив сохраняется как историческая версия).
+- При нарушении уникальности `kv_num` API возвращает `409` с ошибкой `kv_num_exists`.
+
+На клиенте форма использует это поведение так:
+
+- при blur поля номера карты выполняется запрос `GET /archive/by-kv`;
+- если карта найдена — предлагается загрузить её в форму;
+- при ответе `409 kv_num_exists` поле `kv_num` подсвечивается, после чего предлагается загрузка существующей карты.
 
 ## Запуск
 
@@ -106,8 +131,14 @@ PostgreSQL.
 
 ```bash
 npm install
-# Выполнить migrations/001_init.sql, 002_archive_versions.sql, 003_add_pdf_retry_fields.sql
+# Выполнить migrations/001_init.sql, 002_archive_versions.sql, 003_add_pdf_retry_fields.sql, 004_kv_num_unique.sql
 DATABASE_URL=postgresql://user:pass@localhost/db node index.js
+```
+
+### Тесты
+
+```bash
+npm test
 ```
 
 ### Docker
