@@ -4,7 +4,7 @@ export function createChronoRow(cfg) {
   const states = cfg.states ?? ["", "+", "-", "■"];
 
   let data = new Array(minutes).fill("");
-  let activeSymbol = cfg.defaultSymbol ?? "■";
+  let activeSymbol = cfg.defaultSymbol ?? "+";
   let rangeBind = null;
   let mode = "paint";
   let rangeStart = null;
@@ -272,10 +272,11 @@ export function createChronoRow(cfg) {
       });
     }
     if (cfg.symFillBtnId) {
-      document.getElementById(cfg.symFillBtnId)?.addEventListener("click", () => {
-        activeSymbol = "■";
-        setActiveBtn(cfg.symFillBtnId);
-      });
+       const fillBtn = document.getElementById(cfg.symFillBtnId);
+      if (fillBtn) {
+        fillBtn.disabled = true;
+        fillBtn.hidden = true;
+      }
     }
     if (cfg.symClearBtnId) {
       document.getElementById(cfg.symClearBtnId)?.addEventListener("click", () => {
@@ -303,7 +304,7 @@ export function createChronoRow(cfg) {
     });
 
     setModeBtn("paint");
-    if (cfg.symFillBtnId) setActiveBtn(cfg.symFillBtnId);
+    if (cfg.symPlusBtnId) setActiveBtn(cfg.symPlusBtnId);
 
     bindPaintToContainer();
     rangeBind = bindRangePreviewToContainer();

@@ -41,10 +41,21 @@
             <div class="form-group">
                 <label class="form-label">Дата приема вызова</label>
                 <input type="date" id="nowDate" name="pr_date" class="input-field">
+                <div class="mt-12">
+                    <label class="form-label">Время приема вызова</label>
+                    <div class="time-fields">
+                        <div class="time-field">
+                            <input type="number" id="callAcceptHours" name="pr_time_h" class="input-field" placeholder="Часы" min="0" max="23">
+                        </div>
+                        <div class="time-field">
+                            <input type="number" id="callAcceptMinutes" name="pr_time_m" class="input-field" placeholder="Минуты" min="0" max="59">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Время прибытия бригады на вызов</label>
+                <label class="form-label">Время первого медицинского контакта по данному состоянию, повлекшему клин. смерть</label>
                 <div class="time-fields">
                     <div class="time-field">
                         <input type="number" id="arrivalHours" name="pr_h" class="input-field" placeholder="Часы" min="0" max="23">
@@ -174,7 +185,10 @@
                         </tr>
 
                         <tr>
-                        <td>Герметизирующее устройство</td>
+                        <td>
+                            <div>Герметизирующее устройство</div>
+                            <select id="vd_dev" class="input-field input-field--sm mt-12"></select>
+                        </td>
                         <td><input type="time" id="a3t" class="input-field input-field--sm"></td>
                         <td class="cell-center"><input type="radio" name="a3_result" value="s" class="radio-input"></td>
                         <td class="cell-center"><input type="radio" name="a3_result" value="f" class="radio-input"></td>
@@ -283,7 +297,7 @@
                     <table class="airway-table">
                     <tbody>
                         <tr>
-                        <td>Чередование с компр.</td>
+                        <td>Масочная</td>
                         <td class="cell-center">
                             <label class="radio-option radio-option-center">
                             <input type="radio" name="ivl_alt" value="3" class="radio-input">
@@ -305,10 +319,10 @@
                         </tr>
 
                         <tr>
-                        <td>Не прерывая компр.</td>
+                        <td>После интубации/герметизации ВДП</td>
                         <td colspan="3">
                             <div class="flex-center-gap-wrap">
-                            <span>Частота</span>
+                            <span>ЧД</span>
                             <input type="number" id="fr_m" class="input-field input-field--sm max-w-120"
                                     min="0" step="1" placeholder="">
                             <span>в мин</span>
@@ -334,7 +348,7 @@
 
                     <label class="radio-option">
                     <input type="checkbox" id="o_o2" class="checkbox-input">
-                    O₂
+                    100% O₂
                     </label>
                     <button type="button" class="clear-radio-btn" id="clearOBtn">Очистить</button>
                 </div>
@@ -357,7 +371,7 @@
                     <tbody>
                         <tr>
                         <td>
-                            <input type="text" id="i_d" class="input-field input-field--sm" placeholder="">
+                            <select id="i_d" class="input-field input-field--sm"></select>
                         </td>
                         <td class="cell-center">
                             <input type="number" id="i_m" class="input-field input-field--sm" inputmode="decimal" step="0.1" min="0" placeholder="">
@@ -373,22 +387,9 @@
                     </table>
                 </div>
             </div>
-            <!--Применение устройства для контроля эффективности СЛР-->
             <div class="form-group">
-                <label class="form-label">
-                    Применение устройства для контроля эффективности СЛР
-                </label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                    <input type="radio" name="slr_control" value="yes" class="radio-input">
-                    Да
-                    </label>
-                    <label class="radio-option">
-                    <input type="radio" name="slr_control" value="no" class="radio-input">
-                    Нет
-                    </label>
-                </div>
-                <button type="button" class="clear-radio-btn" id="clearSlrControlBtn">Очистить</button>
+                <label class="form-label">Особенности</label>
+                <textarea id="vd_note" class="input-field textarea-field" rows="3" placeholder=""></textarea>
             </div>
             <div class="form-group">
 
@@ -437,10 +438,6 @@
             <!--Компрессии грудной клетки автоматические 70-->
             <div class="form-group">
                 <label class="form-label">Компрессии гр. клетки автоматические (1–70 мин)</label>
-                <div class="form-group">
-                    <label class="form-label">Компрессии гр. клетки автоматические — параметр (ch_cpr_a)</label>
-                    <input type="text" id="ch_cpr_a" class="input-field" placeholder="">
-                </div>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
                     <div class="flex-gap-8-wrap-center">

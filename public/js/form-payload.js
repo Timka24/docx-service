@@ -38,6 +38,8 @@ export function buildPayload(grids) {
   const d_m_raw = document.getElementById("deathMinutes")?.value || "";
   const bio_d_h_raw = document.getElementById("bio_d_h")?.value || "";
   const bio_d_m_raw = document.getElementById("bio_d_m")?.value || "";
+  const pr_time_h = normalizeTimePart(document.getElementById("callAcceptHours")?.value, 23);
+  const pr_time_m = normalizeTimePart(document.getElementById("callAcceptMinutes")?.value, 59);
   const pr_h = document.getElementById("arrivalHours")?.value || "";
   const pr_m = pr_m_raw === "" ? "" : String(pr_m_raw).padStart(2, "0");
   const d_h = document.getElementById("deathHours")?.value || "";
@@ -122,13 +124,8 @@ export function buildPayload(grids) {
   const i_m = document.getElementById("i_m")?.value || "";
   const i_fr = document.getElementById("i_fr")?.value || "";
   const i_t = document.getElementById("i_t")?.value || "";
-
-  let slrControl = "";
-  const selectedSlrControl = document.querySelector('input[name="slr_control"]:checked');
-  if (selectedSlrControl) slrControl = selectedSlrControl.value;
-
-  const slr_c_y = slrControl === "yes" ? CHECKED : UNCHECKED;
-  const slr_c_n = slrControl === "no" ? CHECKED : UNCHECKED;
+  const vd_dev = document.getElementById("vd_dev")?.value || "";
+  const vd_note = document.getElementById("vd_note")?.value || "";
 
   const slr_s1 = document.getElementById("slr_stop_1")?.checked ? CHECKED : UNCHECKED;
   const slr_bel = document.getElementById("slr_stop_bel")?.checked ? CHECKED : UNCHECKED;
@@ -189,6 +186,8 @@ export function buildPayload(grids) {
     kv_num: kvNumber ? `100-26-${kvNumber}` : "",
     pr_date,
     pr_date_iso_raw,
+    pr_time_h,
+    pr_time_m,
     pr_h,
     pr_m,
     d_h,
@@ -246,14 +245,14 @@ export function buildPayload(grids) {
     i_m,
     i_fr,
     i_t,
-    slr_c_y,
-    slr_c_n,
+    vd_dev,
+    vd_note,
     ch_cpr_m: grids.cprManual.getData(),
     slr_h: document.getElementById("slr_h")?.value || "",
     slr_m: document.getElementById("slr_m")?.value || "",
     fr_gr: document.getElementById("fr_gr")?.value || "",
     ch_cpr_a_marks: grids.cprAuto.getData(),
-    ch_cpr_a: document.getElementById("ch_cpr_a")?.value || "",
+    ch_cpr_a: "Арка",
     ch_vent_m_marks: grids.ventMask.getData(),
     ch_vent_a_marks: grids.ventAdvanced.getData(),
     ch_rhythm_as_marks: grids.rhythmAs.getData(),

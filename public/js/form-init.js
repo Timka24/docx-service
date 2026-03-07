@@ -3,6 +3,28 @@ import { createEnergyRow } from "./grid-energy.js";
 import { createNumericRow } from "./grid-numeric.js";
 import { buildPayload } from "./form-payload.js";
 
+const VD_DEV_OPTIONS = [
+  "ларингеальная трубка",
+  "ларингеальная маска",
+  "трахеопищеводная трубка Combitube",
+];
+
+const IVL_DEVICE_OPTIONS = [
+  '3/30 -"Медпром"',
+  '3/30А -"Медпром"',
+  '"РИТМ" 100 "ТМТ"',
+];
+
+function initSelectOptions(selectId, options) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  select.innerHTML = "";
+  select.append(new Option("", ""));
+  options.forEach((value) => {
+    select.append(new Option(value, value));
+  });
+}
+
 const adrNaclMl = createNumericRow({
   minutes: 70,
   gridId: "adrNaclGrid",
@@ -329,12 +351,11 @@ manipulation1.init();
 manipulation2.init();
 chPulseCart.init();
 chPupReact.init();
+initSelectOptions("vd_dev", VD_DEV_OPTIONS);
+initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
-});
-document.getElementById("clearSlrControlBtn")?.addEventListener("click", () => {
-  document.querySelectorAll('input[name="slr_control"]').forEach((r) => (r.checked = false));
 });
 document.getElementById("clearSlrBtn")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="slr"]').forEach((r) => (r.checked = false));
@@ -402,6 +423,8 @@ function normalizeTimeInput(input, max) {
 
 normalizeTimeInput(document.getElementById("arrivalMinutes"), 59);
 normalizeTimeInput(document.getElementById("arrivalHours"), 23);
+normalizeTimeInput(document.getElementById("callAcceptHours"), 23);
+normalizeTimeInput(document.getElementById("callAcceptMinutes"), 59);
 normalizeTimeInput(document.getElementById("deathHours"), 23);
 normalizeTimeInput(document.getElementById("deathMinutes"), 59);
 normalizeTimeInput(document.getElementById("slr_h"), 23);
@@ -427,6 +450,9 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
 })();
 
 function clearForm()  {
+  initSelectOptions("vd_dev", VD_DEV_OPTIONS);
+  initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
+
   document.getElementById("brigade") && (document.getElementById("brigade").value = "");
   document.getElementById("pstation") && (document.getElementById("pstation").value = "");
   document.getElementById("lastName") && (document.getElementById("lastName").value = "");
@@ -435,6 +461,8 @@ function clearForm()  {
   document.getElementById("kvNumber") && (document.getElementById("kvNumber").value = "");
   document.getElementById("arrivalHours") && (document.getElementById("arrivalHours").value = "");
   document.getElementById("arrivalMinutes") && (document.getElementById("arrivalMinutes").value = "");
+  document.getElementById("callAcceptHours") && (document.getElementById("callAcceptHours").value = "");
+  document.getElementById("callAcceptMinutes") && (document.getElementById("callAcceptMinutes").value = "");
   document.getElementById("deathHours") && (document.getElementById("deathHours").value = "");
   document.getElementById("deathMinutes") && (document.getElementById("deathMinutes").value = "");
   [
@@ -455,7 +483,7 @@ function clearForm()  {
   document.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
   document.querySelectorAll('input[name="airway_phase"]').forEach((r) => (r.checked = false));
 
-  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try"].forEach((id) => {
+  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "vd_dev"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -475,15 +503,13 @@ function clearForm()  {
   const fr = document.getElementById("fr_m");
   if (fr) fr.value = "";
 
-  ["i_d", "i_m", "i_fr", "i_t"].forEach((id) => {
+  ["i_d", "i_m", "i_fr", "i_t", "vd_note"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
 
   cprManual.clear();
   cprAuto.clear();
-  const chCprA = document.getElementById("ch_cpr_a");
-  if (chCprA) chCprA.value = "";
 
   ventMask.clear();
   ventAdvanced.clear();
@@ -613,6 +639,21 @@ function setInputValue(id, value) {
   el.value = typeof value === "string" ? value : "";
 }
 
+function setSelectValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = typeof value === "string" ? value : "";
+  if (!text) {
+    el.value = "";
+    return;
+  }
+  const exists = Array.from(el.options || []).some((opt) => opt.value === text);
+  if (!exists) {
+    el.append(new Option(text, text));
+  }
+  el.value = text;
+}
+
 function setCheckboxValue(id, checked) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -687,6 +728,8 @@ function loadArchiveToForm(archive) {
 
   setInputValue("arrivalHours", raw.pr_h);
   setInputValue("arrivalMinutes", raw.pr_m);
+  setInputValue("callAcceptHours", raw.pr_time_h);
+  setInputValue("callAcceptMinutes", raw.pr_time_m);
   setInputValue("deathHours", raw.d_h);
   setInputValue("deathMinutes", raw.d_m);
   setInputValue("bio_d_h", raw.bio_d_h);
@@ -697,7 +740,6 @@ function loadArchiveToForm(archive) {
   setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
   setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));
   setRadioByName("ivl_alt", raw.t_3 === "☑" ? "3" : (raw.t_15 === "☑" ? "15" : (raw.t_30 === "☑" ? "30" : "")));
-  setRadioByName("slr_control", raw.slr_c_y === "☑" ? "y" : (raw.slr_c_n === "☑" ? "n" : ""));
   setRadioByName("med_therapy", raw.med_t_y === "☑" ? "y" : (raw.med_t_n === "☑" ? "n" : ""));
   setRadioByName("end_resp", raw.end_resp || (raw.end_resp_spont === "☑" ? "spont" : (raw.end_resp_ivl === "☑" ? "ivl" : "")));
 
@@ -707,7 +749,7 @@ function loadArchiveToForm(archive) {
   setCheckboxValue("o_air", raw.o_air === "☑");
   setCheckboxValue("o_o2", raw.o_o2 === "☑");
 
-  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "v1t", "v2t", "v3t", "v4t", "v1try", "v2try", "v3try", "v4try", "v_point", "fr_m", "i_d", "i_m", "i_fr", "i_t", "slr_h", "slr_m", "fr_gr", "ch_cpr_a", "defib_model", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2", "reverseCauses", "postResuscitationTherapy", "comments", "end_h", "end_m", "end_ecg_rhythm", "end_hr", "end_conclusion", "end_gcs", "end_rr", "end_bp", "end_pulse", "end_spo2", "end_transfer_doc_fio", "end_transfer_doc_h", "end_transfer_doc_m", "end_transfer_team_num", "end_transfer_team_h", "end_transfer_team_m", "slr_stop_oth_txt", "br_ruk_last", "br_ruk_first", "br_ruk_middle", "ver_ruk_last", "ver_ruk_first", "ver_ruk_middle"].forEach((id) => {
+  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "v1t", "v2t", "v3t", "v4t", "v1try", "v2try", "v3try", "v4try", "v_point", "fr_m", "i_m", "i_fr", "i_t", "vd_note", "slr_h", "slr_m", "fr_gr", "defib_model", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2", "reverseCauses", "postResuscitationTherapy", "comments", "end_h", "end_m", "end_ecg_rhythm", "end_hr", "end_conclusion", "end_gcs", "end_rr", "end_bp", "end_pulse", "end_spo2", "end_transfer_doc_fio", "end_transfer_doc_h", "end_transfer_doc_m", "end_transfer_team_num", "end_transfer_team_h", "end_transfer_team_m", "slr_stop_oth_txt", "br_ruk_last", "br_ruk_first", "br_ruk_middle", "ver_ruk_last", "ver_ruk_first", "ver_ruk_middle"].forEach((id) => {
     const map = {
       reverseCauses: "reversible_causes_4g4t",
       postResuscitationTherapy: "post_resuscitation_therapy",
@@ -723,6 +765,8 @@ function loadArchiveToForm(archive) {
     const rawKey = map[id] || id;
     setInputValue(id, raw[rawKey]);
   });
+  setSelectValue("vd_dev", raw.vd_dev);
+  setSelectValue("i_d", raw.i_d);
 
   applyResultPair("a1_result", raw.a1s, raw.a1f);
   applyResultPair("a2_result", raw.a2s, raw.a2f);
