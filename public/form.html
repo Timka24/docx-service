@@ -684,7 +684,7 @@
 
             <div class="form-group">
                 <label class="form-label">Дефибриллятор (модель аппарата)</label>
-                <input type="text" id="defib_model" class="input-field" placeholder="Напр.: LIFEPAK 15 / ZOLL X / Corpuls3">
+                <select id="defib_model" class="input-field"></select>
             </div>
 
             <label class="form-label">Энергия (Дж)</label>
@@ -733,19 +733,20 @@
                 </div>
                 <button type="button" class="clear-radio-btn" id="clearMedTherapy">Очистить</button>
             </div>
-            <!-- Адреналин 1мг/мл + NaCl 0,9% — мл по минутам -->
+            <div id="medTherapyFieldsBlock">
+            <!-- Адреналин 1мг/мл + NaCl 0,9% — доза по минутам -->
             <div class="form-group">
-            <label class="form-label">Адреналин 1мг/мл + NaCl 0,9% — объём (мл) по минутам (1–70)</label>
+            <label class="form-label">Адреналин 1мг/мл (доза в мг) / + NaCl 0,9% (1–70 мин)</label>
 
             <div class="form-group">
-                <label class="form-label">Ввод значения (мл)</label>
+                <label class="form-label">Доза в мг</label>
                 <div class="flex-gap-8-wrap-center">
                 <input
                     type="text"
                     id="adrNaclValue"
                     class="input-field"
                     inputmode="decimal"
-                    placeholder="Напр.: 2 или 2,5"
+                    placeholder="Напр.: 1 или 1,5"
                     class="max-w-220"
                 />
                 <button type="button" class="btn" id="adrNaclClearValue">Пусто</button>
@@ -762,22 +763,29 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label class="form-label">Ввод значения (мл)</label>
+                <div class="flex-gap-8-wrap-center">
+                    <input type="text" id="ch_adr_nacl_sum" class="input-field" inputmode="decimal" placeholder="0,0">
+                </div>
+            </div>
+
             <div class="checkbox-grid" id="adrNaclGrid"></div>
             </div>
 
-            <!-- Амиодарон 50 мг/мл + Глюкоза 5% — мл по минутам -->
+            <!-- Амиодарон 50 мг/мл + Глюкоза 5% — доза по минутам -->
             <div class="form-group">
-            <label class="form-label">Амиодарон 50 мг/мл + Глюкоза 5% — объём (мл) по минутам (1–70)</label>
+            <label class="form-label">Амиодарон 50 мг/мл (доза в мг) / + Глюкоза 5% (1–70 мин)</label>
 
             <div class="form-group">
-                <label class="form-label">Ввод значения (мл)</label>
+                <label class="form-label">Доза в мг</label>
                 <div class="flex-gap-8-wrap-center">
                 <input
                     type="text"
                     id="amioGluValue"
                     class="input-field"
                     inputmode="decimal"
-                    placeholder="Напр.: 10 или 10,0"
+                    placeholder="Напр.: 50 или 75,5"
                     class="max-w-220"
                 />
                 <button type="button" class="btn" id="amioGluClearValue">Пусто</button>
@@ -794,10 +802,17 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                <label class="form-label">Ввод значения (мл)</label>
+                <div class="flex-gap-8-wrap-center">
+                    <input type="text" id="ch_amio_glu_sum" class="input-field" inputmode="decimal" placeholder="0,0">
+                </div>
+            </div>
+
             <div class="checkbox-grid" id="amioGluGrid"></div>
             </div>
             <!--Натрия хлорид 0,9% (1–70 мин)-->
-              <div class="form-group">
+              <div class="form-group" id="medNaclBlock">
                 <label class="form-label">Натрия хлорид 0,9% (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Объём вещества</label>
@@ -821,8 +836,22 @@
 
                 <div class="checkbox-grid" id="naclGrid"></div>
             </div>
+            <div class="form-group" id="medOtherControlBlock">
+                <label class="form-label">Использование других препаратов?</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="other_drugs" value="yes" class="radio-input">
+                        Да
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="other_drugs" value="no" class="radio-input">
+                        Нет
+                    </label>
+                </div>
+                <button type="button" class="clear-radio-btn" id="clearOtherDrugsBtn">Очистить</button>
+            </div>
             <!--Препараты 1 (1–70 мин)-->
-              <div class="form-group">
+              <div class="form-group" id="medDrugs1Block">
                 <label class="form-label">Другой препарат (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Наименование препарата</label>
@@ -848,7 +877,7 @@
             </div>
 
                      <!--Препараты 2 (1–70 мин)-->
-              <div class="form-group">
+              <div class="form-group" id="medDrugs2Block">
                 <label class="form-label">Другой препарат 2 (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Наименование препарата</label>
@@ -871,6 +900,7 @@
                 </div>
 
                 <div class="checkbox-grid" id="ch_drugs2_grid"></div>
+            </div>
             </div>
 
             <div class="form-group">
@@ -1009,72 +1039,76 @@
                     <label class="form-label"><input type="checkbox" id="end_success" calss="checkbox-input"/> Успешная СЛР</label>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="endSuccessFieldsBlock">
                     <label class="form-label">ЭКГ ритм</label>
                     <input type="text" id="end_ecg_rhythm" class="input-field" />
-                </div>
-
-                <div class="form-group">
+                
+                <div class="form-group end-success-field">
                     <label class="form-label">ЧСС</label>
                     <input type="number" id="end_hr" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">Заключение</label>
                     <input type="text" id="end_conclusion" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">Сознание (ШКГ)</label>
                     <input type="number" id="end_gcs" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">Дыхание</label>
                     <label><input type="radio" name="end_resp" value="spont" /> Самостоятельное</label>
                     <label><input type="radio" name="end_resp" value="ivl" /> ИВЛ</label>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">Частота дыхания</label>
                     <input type="number" id="end_rr" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">АД</label>
                     <input type="text" id="end_bp" class="input-field" placeholder="120/80" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">Пульс</label>
                     <input type="number" id="end_pulse" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                     <label class="form-label">SpO2</label>
                     <input type="number" id="end_spo2" class="input-field" />
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                      <label class="form-label"><input type="checkbox" id="end_transfer_doc" class="checkbox-input" /> Передача врачу стационара</label>
-                    <label class="form-label">ФИО</label>
-                    <input type="text" id="end_transfer_doc_fio" class="input-field" />
-                    <div class="flex-gap-8-center-wrap mt-8">
-                        <input type="text" id="end_transfer_doc_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
-                        <span>:</span>
-                        <input type="text" id="end_transfer_doc_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                    <div id="endTransferDocDetails">
+                        <label class="form-label">ФИО</label>
+                        <input type="text" id="end_transfer_doc_fio" class="input-field" />
+                        <div class="flex-gap-8-center-wrap mt-8">
+                            <input type="text" id="end_transfer_doc_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
+                            <span>:</span>
+                            <input type="text" id="end_transfer_doc_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group end-success-field">
                      <label class="form-label"><input type="checkbox" id="end_transfer_team" class="checkbox-input" /> Передача бригаде СМП</label>
-                    <label class="form-label">№ бригады</label>
-                    <input type="text" id="end_transfer_team_num" class="input-field" />
-                    <div class="flex-gap-8-center-wrap mt-8">
-                        <input type="text" id="end_transfer_team_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
-                        <span>:</span>
-                        <input type="text" id="end_transfer_team_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                    <div id="endTransferTeamDetails">
+                        <label class="form-label">№ бригады</label>
+                        <input type="text" id="end_transfer_team_num" class="input-field" />
+                        <div class="flex-gap-8-center-wrap mt-8">
+                            <input type="text" id="end_transfer_team_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
+                            <span>:</span>
+                            <input type="text" id="end_transfer_team_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                        </div>
                     </div>
+                </div>
                 </div>
             </div>
             <!--Неуспешная СЛР-->
@@ -1083,7 +1117,12 @@
 
                 <label class="radio-option">
                     <input type="checkbox" id="slr_stop_1" class="checkbox-input" />
-                    Отсутствия эффекта в течение 30 мин / у новорожденного при рождении в течение 10 минут
+                    Отсутствия эффекта в течение 30 мин
+                </label>
+
+                <label class="radio-option">
+                    <input type="checkbox" id="slr_stop_2" class="checkbox-input" />
+                    у новорожденного при рождении в течение 10 минут
                 </label>
 
                 <div class="form-group mt-8">
@@ -1115,7 +1154,12 @@
 
                 <label class="radio-option">
                     <input type="checkbox" id="slr_stop_5" class="checkbox-input" />
-                    Выяснилось, что смерть наступила на фоне: прогрессирования достоверно установленных неизлечимых заболеваний / неизлечимых последствий острой травмы, несовместимых с жизнью
+                    Выяснилось, что смерть наступила на фоне: прогрессирования достоверно установленных неизлечимых заболеваний
+                </label>
+
+                <label class="radio-option">
+                    <input type="checkbox" id="slr_stop_6" class="checkbox-input" />
+                    неизлечимых последствий острой травмы, несовместимых с жизнью
                 </label>
             </div>
             <!--Констатация смерти-->

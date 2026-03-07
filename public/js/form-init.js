@@ -13,6 +13,29 @@ const IVL_DEVICE_OPTIONS = [
   '3/30 -"Медпром"',
   '3/30А -"Медпром"',
   '"РИТМ" 100 "ТМТ"',
+  'WEINMANN MEDUMAT',
+  'Care Fusion Pulmonetic LTV-1200',
+];
+
+const DEFIB_MODEL_OPTIONS = [
+  {
+    label: "Ручные",
+    values: [
+      "AXION ДКИ-Н-11",
+      "BeneHeart D3",
+    ],
+  },
+  {
+    label: "Автоматические",
+    values: [
+      "ZOL AED Plus",
+      "LifePak",
+      "Comen",
+      "Corpuls3",
+      "Mindray BeneHeart",
+      'ДКИ-Н-11 "Аксион"',
+    ],
+  },
 ];
 
 function initSelectOptions(selectId, options) {
@@ -23,6 +46,57 @@ function initSelectOptions(selectId, options) {
   options.forEach((value) => {
     select.append(new Option(value, value));
   });
+}
+
+function initSelectOptionsGrouped(selectId, groups) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+  select.innerHTML = "";
+  select.append(new Option("", ""));
+  groups.forEach((group) => {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = group.label;
+    group.values.forEach((value) => {
+      optgroup.append(new Option(value, value));
+    });
+    select.append(optgroup);
+  });
+}
+
+function setDisplay(id, isVisible) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = isVisible ? "" : "none";
+}
+
+function selectedRadioValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+
+function updateMedicationVisibility() {
+  const medTherapy = selectedRadioValue("med_therapy");
+  const showTherapyFields = medTherapy === "yes";
+  setDisplay("medTherapyFieldsBlock", showTherapyFields);
+
+  const showOtherControl = showTherapyFields;
+  setDisplay("medOtherControlBlock", showOtherControl);
+
+  const showOtherDrugs = showTherapyFields && selectedRadioValue("other_drugs") === "yes";
+  setDisplay("medDrugs1Block", showOtherDrugs);
+  setDisplay("medDrugs2Block", showOtherDrugs);
+}
+
+function updateEndSectionVisibility() {
+  const endSuccess = document.getElementById("end_success")?.checked === true;
+  setDisplay("endSuccessFieldsBlock", endSuccess);
+  document.querySelectorAll(".end-success-field").forEach((el) => {
+    el.style.display = endSuccess ? "" : "none";
+  });
+
+  const showTransferDoc = endSuccess && (document.getElementById("end_transfer_doc")?.checked === true);
+  const showTransferTeam = endSuccess && (document.getElementById("end_transfer_team")?.checked === true);
+  setDisplay("endTransferDocDetails", showTransferDoc);
+  setDisplay("endTransferTeamDetails", showTransferTeam);
 }
 
 const adrNaclMl = createNumericRow({
@@ -353,9 +427,15 @@ chPulseCart.init();
 chPupReact.init();
 initSelectOptions("vd_dev", VD_DEV_OPTIONS);
 initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
+initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
+  updateMedicationVisibility();
+});
+document.getElementById("clearOtherDrugsBtn")?.addEventListener("click", () => {
+  document.querySelectorAll('input[name="other_drugs"]').forEach((r) => (r.checked = false));
+  updateMedicationVisibility();
 });
 document.getElementById("clearSlrBtn")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="slr"]').forEach((r) => (r.checked = false));
@@ -398,12 +478,22 @@ function toggleSlrStopOtherText() {
     otherText.style.display = "block";
   } else {
     otherText.style.display = "none";
-    otherText.value = "";
   }
 }
 
 document.getElementById("slr_stop_oth")?.addEventListener("change", toggleSlrStopOtherText);
+document.querySelectorAll('input[name="med_therapy"]').forEach((el) => {
+  el.addEventListener("change", updateMedicationVisibility);
+});
+document.querySelectorAll('input[name="other_drugs"]').forEach((el) => {
+  el.addEventListener("change", updateMedicationVisibility);
+});
+document.getElementById("end_success")?.addEventListener("change", updateEndSectionVisibility);
+document.getElementById("end_transfer_doc")?.addEventListener("change", updateEndSectionVisibility);
+document.getElementById("end_transfer_team")?.addEventListener("change", updateEndSectionVisibility);
 toggleSlrStopOtherText();
+updateMedicationVisibility();
+updateEndSectionVisibility();
 
 function normalizeTimeInput(input, max) {
   if (!input) return;
@@ -452,6 +542,7 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
 function clearForm()  {
   initSelectOptions("vd_dev", VD_DEV_OPTIONS);
   initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
+  initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
 
   document.getElementById("brigade") && (document.getElementById("brigade").value = "");
   document.getElementById("pstation") && (document.getElementById("pstation").value = "");
@@ -534,6 +625,10 @@ function clearForm()  {
   if (adrInp) adrInp.value = "";
   const amioInp = document.getElementById("amioGluValue");
   if (amioInp) amioInp.value = "";
+  const adrSum = document.getElementById("ch_adr_nacl_sum");
+  if (adrSum) adrSum.value = "";
+  const amioSum = document.getElementById("ch_amio_glu_sum");
+  if (amioSum) amioSum.value = "";
 
   nacl.clear();
   const chNacl = document.getElementById("ch_nacl");
@@ -615,6 +710,8 @@ function clearForm()  {
 
   const slrStop1 = document.getElementById("slr_stop_1");
   if (slrStop1) slrStop1.checked = false;
+  const slrStop2 = document.getElementById("slr_stop_2");
+  if (slrStop2) slrStop2.checked = false;
   const slrStopBel = document.getElementById("slr_stop_bel");
   if (slrStopBel) slrStopBel.checked = false;
   const slrStopGip = document.getElementById("slr_stop_gip");
@@ -625,7 +722,12 @@ function clearForm()  {
   if (slrStopOthTxt) slrStopOthTxt.value = "";
   const slrStop5 = document.getElementById("slr_stop_5");
   if (slrStop5) slrStop5.checked = false;
+  const slrStop6 = document.getElementById("slr_stop_6");
+  if (slrStop6) slrStop6.checked = false;
+  document.querySelectorAll('input[name="other_drugs"]').forEach((r) => (r.checked = false));
   toggleSlrStopOtherText();
+  updateMedicationVisibility();
+  updateEndSectionVisibility();
   window.lastArchiveId = null;
   setGenerateStatus({ status: "Форма очищена.", archiveId: null, version: null, renderStatus: "—" });
 }
@@ -740,7 +842,13 @@ function loadArchiveToForm(archive) {
   setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
   setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));
   setRadioByName("ivl_alt", raw.t_3 === "☑" ? "3" : (raw.t_15 === "☑" ? "15" : (raw.t_30 === "☑" ? "30" : "")));
-  setRadioByName("med_therapy", raw.med_t_y === "☑" ? "y" : (raw.med_t_n === "☑" ? "n" : ""));
+  setRadioByName("med_therapy", raw.med_t_y === "☑" ? "yes" : (raw.med_t_n === "☑" ? "no" : ""));
+  const hasOtherDrugData =
+    String(raw.ch_drugs1 || "").trim() !== "" ||
+    String(raw.ch_drugs2 || "").trim() !== "" ||
+    arrayOrEmpty(raw.ch_drugs1_marks).some((v) => String(v || "").trim() !== "") ||
+    arrayOrEmpty(raw.ch_drugs2_marks).some((v) => String(v || "").trim() !== "");
+  setRadioByName("other_drugs", raw.other_drugs || (hasOtherDrugData ? "yes" : "no"));
   setRadioByName("end_resp", raw.end_resp || (raw.end_resp_spont === "☑" ? "spont" : (raw.end_resp_ivl === "☑" ? "ivl" : "")));
 
   setCheckboxValue("r_start_nms", raw.r_start_nms === "☑");
@@ -749,7 +857,7 @@ function loadArchiveToForm(archive) {
   setCheckboxValue("o_air", raw.o_air === "☑");
   setCheckboxValue("o_o2", raw.o_o2 === "☑");
 
-  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "v1t", "v2t", "v3t", "v4t", "v1try", "v2try", "v3try", "v4try", "v_point", "fr_m", "i_m", "i_fr", "i_t", "vd_note", "slr_h", "slr_m", "fr_gr", "defib_model", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2", "reverseCauses", "postResuscitationTherapy", "comments", "end_h", "end_m", "end_ecg_rhythm", "end_hr", "end_conclusion", "end_gcs", "end_rr", "end_bp", "end_pulse", "end_spo2", "end_transfer_doc_fio", "end_transfer_doc_h", "end_transfer_doc_m", "end_transfer_team_num", "end_transfer_team_h", "end_transfer_team_m", "slr_stop_oth_txt", "br_ruk_last", "br_ruk_first", "br_ruk_middle", "ver_ruk_last", "ver_ruk_first", "ver_ruk_middle"].forEach((id) => {
+  ["a1t", "a2t", "a3t", "a4t", "a5t", "et_num", "et_try", "v1t", "v2t", "v3t", "v4t", "v1try", "v2try", "v3try", "v4try", "v_point", "fr_m", "i_m", "i_fr", "i_t", "vd_note", "slr_h", "slr_m", "fr_gr", "ch_adr_nacl_sum", "ch_amio_glu_sum", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2", "reverseCauses", "postResuscitationTherapy", "comments", "end_h", "end_m", "end_ecg_rhythm", "end_hr", "end_conclusion", "end_gcs", "end_rr", "end_bp", "end_pulse", "end_spo2", "end_transfer_doc_fio", "end_transfer_doc_h", "end_transfer_doc_m", "end_transfer_team_num", "end_transfer_team_h", "end_transfer_team_m", "slr_stop_oth_txt", "br_ruk_last", "br_ruk_first", "br_ruk_middle", "ver_ruk_last", "ver_ruk_first", "ver_ruk_middle"].forEach((id) => {
     const map = {
       reverseCauses: "reversible_causes_4g4t",
       postResuscitationTherapy: "post_resuscitation_therapy",
@@ -765,8 +873,11 @@ function loadArchiveToForm(archive) {
     const rawKey = map[id] || id;
     setInputValue(id, raw[rawKey]);
   });
+  setInputValue("ch_adr_nacl_sum", raw.ch_adr_nacl_sum || raw.ch_adr_nacl_sum_1_35 || raw.ch_adr_nacl_sum_36_70 || "");
+  setInputValue("ch_amio_glu_sum", raw.ch_amio_glu_sum || raw.ch_amio_glu_sum_1_35 || raw.ch_amio_glu_sum_36_70 || "");
   setSelectValue("vd_dev", raw.vd_dev);
   setSelectValue("i_d", raw.i_d);
+  setSelectValue("defib_model", raw.defib_model);
 
   applyResultPair("a1_result", raw.a1s, raw.a1f);
   applyResultPair("a2_result", raw.a2s, raw.a2f);
@@ -782,11 +893,15 @@ function loadArchiveToForm(archive) {
   setCheckboxValue("end_transfer_doc", raw.end_transfer_doc_mark === "☑");
   setCheckboxValue("end_transfer_team", raw.end_transfer_team_mark === "☑");
   setCheckboxValue("slr_stop_1", raw.slr_s1 === "☑");
+  setCheckboxValue("slr_stop_2", raw.slr_s2 === "☑");
   setCheckboxValue("slr_stop_bel", raw.slr_bel === "☑");
   setCheckboxValue("slr_stop_gip", raw.slr_gip === "☑");
   setCheckboxValue("slr_stop_oth", raw.slr_oth === "☑");
   setCheckboxValue("slr_stop_5", raw.slr_s5 === "☑");
+  setCheckboxValue("slr_stop_6", raw.slr_s6 === "☑");
   toggleSlrStopOtherText();
+  updateMedicationVisibility();
+  updateEndSectionVisibility();
 
   grids.cprManual.setData(arrayOrEmpty(raw.ch_cpr_m));
   grids.cprAuto.setData(arrayOrEmpty(raw.ch_cpr_a_marks));

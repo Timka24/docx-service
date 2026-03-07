@@ -9,6 +9,14 @@ function normalizeTimePart(value, max) {
   return String(num).padStart(2, "0");
 }
 
+function normalizeMlInput(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const normalized = text.replace(/\s+/g, "").replace(",", ".");
+  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return "";
+  return normalized.replace(".", ",");
+}
+
 export function formatDateForDocx(iso) {
   if (!iso) return "";
   const [yyyy, mm, dd] = iso.split("-");
@@ -128,16 +136,19 @@ export function buildPayload(grids) {
   const vd_note = document.getElementById("vd_note")?.value || "";
 
   const slr_s1 = document.getElementById("slr_stop_1")?.checked ? CHECKED : UNCHECKED;
+  const slr_s2 = document.getElementById("slr_stop_2")?.checked ? CHECKED : UNCHECKED;
   const slr_bel = document.getElementById("slr_stop_bel")?.checked ? CHECKED : UNCHECKED;
   const slr_gip = document.getElementById("slr_stop_gip")?.checked ? CHECKED : UNCHECKED;
   const slr_oth = document.getElementById("slr_stop_oth")?.checked ? CHECKED : UNCHECKED;
   const slr_oth_txt = slr_oth === CHECKED ? (document.getElementById("slr_stop_oth_txt")?.value || "") : "";
   const slr_s5 = document.getElementById("slr_stop_5")?.checked ? CHECKED : UNCHECKED;
+  const slr_s6 = document.getElementById("slr_stop_6")?.checked ? CHECKED : UNCHECKED;
 
 
   let medTherapyControl = "";
   const selectedMedTherapyControl = document.querySelector('input[name="med_therapy"]:checked');
   if (selectedMedTherapyControl) medTherapyControl = selectedMedTherapyControl.value;
+  const otherDrugs = document.querySelector('input[name="other_drugs"]:checked')?.value || "";
 
   const med_t_y = medTherapyControl === "yes" ? CHECKED : UNCHECKED;
   const med_t_n = medTherapyControl === "no" ? CHECKED : UNCHECKED;
@@ -267,8 +278,11 @@ export function buildPayload(grids) {
     defib_model,
     med_t_n,
     med_t_y,
+    other_drugs: otherDrugs,
     ch_adr_nacl_ml_marks: grids.adrNaclMl.getData(),
+    ch_adr_nacl_sum: normalizeMlInput(document.getElementById("ch_adr_nacl_sum")?.value),
     ch_amio_glu_ml_marks: grids.amioGluMl.getData(),
+    ch_amio_glu_sum: normalizeMlInput(document.getElementById("ch_amio_glu_sum")?.value),
     ch_nacl_marks: grids.nacl.getData(),
     ch_nacl: document.getElementById("ch_nacl")?.value || "",
     ch_drugs1_marks: grids.drugs1.getData(),
@@ -309,11 +323,13 @@ export function buildPayload(grids) {
     end_transfer_team_h,
     end_transfer_team_m,
     slr_s1,
+    slr_s2,
     slr_bel,
     slr_gip,
     slr_oth,
     slr_oth_txt,
     slr_s5,
+    slr_s6,
     bio_d_h,
     bio_d_m,
     br_ruk,
