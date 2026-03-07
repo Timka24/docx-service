@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Карточка архива</title>
+  <link rel="stylesheet" href="/css/archive.css">
+</head>
+<body>
+  <div class="archive-shell">
+    <header class="archive-header">
+      <div>
+        <h1 id="cardTitle">Архивная запись</h1>
+        <p id="cardSubtitle" class="muted">Загрузка...</p>
+      </div>
+      <a class="btn btn-secondary" href="/archive">Назад к архиву</a>
+    </header>
+
+    <section class="panel" id="summaryPanel">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Состояние записи</div>
+          <div id="summarySavedState" class="summary-value">сохранена</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">archive_id</div>
+          <div id="summaryArchiveId" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">kv_num</div>
+          <div id="summaryKvNum" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Дата сохранения</div>
+          <div id="summaryUpdatedAt" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Последняя версия DOCX</div>
+          <div id="summaryLastVersion" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Статус DOCX</div>
+          <div id="summaryDocxStatus" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Статус PDF</div>
+          <div id="summaryPdfStatus" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Последний DOCX-рендер</div>
+          <div id="summaryLastDocxAt" class="summary-value">—</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Последний PDF-рендер</div>
+          <div id="summaryLastPdfAt" class="summary-value">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Скачивание файлов</h2>
+      </div>
+
+      <div class="download-grid">
+        <div class="download-card">
+          <h3>DOCX</h3>
+          <label class="field">
+            <span>Версия для скачивания</span>
+            <select id="docxVersionSelect"></select>
+          </label>
+          <button id="downloadDocxBtn" class="btn btn-primary" type="button">Скачать DOCX</button>
+        </div>
+
+        <div class="download-card">
+          <h3>PDF</h3>
+          <p class="muted">Скачивается актуальный PDF-файл записи.</p>
+          <button id="downloadPdfBtn" class="btn btn-primary" type="button">Скачать PDF</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>История рендеров</h2>
+        <div id="pdfVersioningInfo" class="muted"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="archive-table">
+          <thead>
+            <tr>
+              <th>Тип</th>
+              <th>Версия</th>
+              <th>Статус</th>
+              <th>Дата/время</th>
+              <th>Ошибка</th>
+              <th>Файл</th>
+            </tr>
+          </thead>
+          <tbody id="renderHistoryRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <details>
+        <summary>Показать debug (raw_data/data)</summary>
+        <div class="debug-grid">
+          <div>
+            <h3>raw_data</h3>
+            <pre id="rawDataPre" class="debug-pre">{}</pre>
+          </div>
+          <div>
+            <h3>data</h3>
+            <pre id="dataPre" class="debug-pre">{}</pre>
+          </div>
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <script type="module" src="/js/archive-card.js"></script>
+</body>
+</html>

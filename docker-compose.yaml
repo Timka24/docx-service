@@ -48,8 +48,10 @@ services:
     environment:
       DATABASE_URL: postgresql://docx:docxpass@docx-postgres:5432/docxdb
       DOCX_DIR: /mnt/docx
+      PDF_DIR: /mnt/pdf
     volumes:
       - /srv/slr-docx:/mnt/docx
+      - /srv/slr-pdf:/mnt/pdf
     networks:
       - docx-net
     restart: unless-stopped

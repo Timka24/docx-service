@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Архив протоколов</title>
+  <link rel="stylesheet" href="/css/archive.css">
+</head>
+<body>
+  <div class="archive-shell">
+    <header class="archive-header">
+      <div>
+        <h1>Архив протоколов СЛР</h1>
+        <p class="muted">Список архивных записей, фильтры и переход в карточку записи.</p>
+      </div>
+      <a class="btn btn-secondary" href="/form">К форме</a>
+    </header>
+
+    <section class="panel">
+      <form id="filtersForm" class="filters-grid">
+        <label class="field">
+          <span>Поиск по kv_num</span>
+          <input id="kvNum" name="kv_num" type="text" placeholder="Напр.: 100-26-12345">
+        </label>
+
+        <label class="field">
+          <span>Дата сохранения: с</span>
+          <input id="dateFrom" name="date_from" type="date">
+        </label>
+
+        <label class="field">
+          <span>Дата сохранения: по</span>
+          <input id="dateTo" name="date_to" type="date">
+        </label>
+
+        <label class="field">
+          <span>DOCX</span>
+          <select id="hasDocx" name="has_docx">
+            <option value="all">Все</option>
+            <option value="yes">Есть</option>
+            <option value="no">Нет</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>PDF</span>
+          <select id="hasPdf" name="has_pdf">
+            <option value="all">Все</option>
+            <option value="yes">Есть</option>
+            <option value="no">Нет</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>На странице</span>
+          <select id="pageSize" name="page_size">
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+
+        <div class="filters-actions">
+          <button type="submit" class="btn btn-primary">Применить</button>
+          <button type="button" id="resetFiltersBtn" class="btn btn-secondary">Сбросить фильтры</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Список архивов</h2>
+        <div id="listInfo" class="muted">Загрузка...</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="archive-table">
+          <thead>
+            <tr>
+              <th>archive_id</th>
+              <th>kv_num</th>
+              <th>Дата сохранения</th>
+              <th>DOCX</th>
+              <th>PDF</th>
+              <th>Версия</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="archiveRows"></tbody>
+        </table>
+      </div>
+
+      <div class="pager">
+        <button type="button" id="prevPageBtn" class="btn btn-secondary">Назад</button>
+        <span id="pageInfo" class="muted">Страница 1</span>
+        <button type="button" id="nextPageBtn" class="btn btn-secondary">Вперёд</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="/js/archive-list.js"></script>
+</body>
+</html>

@@ -944,7 +944,7 @@ async function trySuggestLoadByKv() {
   const fullKvNum = `100-26-${tail}`;
 
   try {
-    const resp = await fetch(`/archive/by-kv?kv_num=${encodeURIComponent(fullKvNum)}`);
+    const resp = await fetch(`/api/archive/by-kv?kv_num=${encodeURIComponent(fullKvNum)}`);
     if (resp.status === 404) return;
 
     let data = null;
@@ -1021,7 +1021,7 @@ async function refreshArchiveStatus(archiveId) {
   }
 
   try {
-    const resp = await fetch(`/archive/${archiveId}`);
+    const resp = await fetch(`/api/archive/${archiveId}`);
     let data = null;
     try {
       data = await resp.json();
