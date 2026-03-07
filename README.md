@@ -1,265 +1,302 @@
 # docx-service
 
-Сервис для заполнения медицинских протоколов сердечно-лёгочной реанимации (СЛР). Пользователь заполняет веб-форму, данные сохраняются в PostgreSQL, генерируется DOCX-документ по шаблону.
+Сервис для заполнения медицинских протоколов сердечно-лёгочной реанимации (СЛР):
+- пользователь заполняет веб-форму;
+- данные проходят нормализацию и backend-валидацию;
+- запись сохраняется в PostgreSQL (архив);
+- генерация DOCX и PDF выполняется асинхронно через очередь рендеров.
 
 ## Статус проекта (актуально)
 
-- **Статус:** рабочий MVP / pre-production
-- **Что стабильно работает:** форма СЛР, архивный UI (список + карточка), версионирование рендеров, асинхронная генерация DOCX и PDF воркерами
-- **Что в процессе развития:** backend-валидация обязательных полей
-
-### Обновления от 7 марта 2026
-
-- Добавлены отдельные поля времени приёма вызова (`pr_time_h`, `pr_time_m`) с нормализацией в `pr_time` для шаблона.
-- Обновлены элементы формы на справочники (`select`) для ряда полей: устройство ВДП, тип ИВЛ-устройства, модель дефибриллятора.
-- Раздел медикаментозной терапии сделан условным: поля скрываются/показываются по выбору `med_therapy` и `other_drugs`.
-- Для адреналина и амиодарона добавлены итоговые поля объёма в мл (`ch_adr_nacl_sum`, `ch_amio_glu_sum`) с нормализацией ввода.
-- Обновлена логика исхода СЛР: расширены причины прекращения (`slr_s2`, `slr_s6`), секция «Успешная СЛР» отображается условно.
-- Исправлен `Dockerfile` (коммит `fde2f92`) после временного повреждения в `25a8b19`; итоговая конфигурация сборки без изменений.
+- **Статус:** рабочий MVP / pre-production.
+- **Стабильно работает:**
+  - форма СЛР (`/form`);
+  - архивный UI (список `/archive` + карточка `/archive/:id`);
+  - API сохранения/поиска/выдачи архива;
+  - версионирование рендеров (`archive_renders`);
+  - асинхронная генерация DOCX отдельным воркером;
+  - асинхронная генерация PDF отдельным воркером через Gotenberg с retry/backoff.
+- **В развитии:** расширение бизнес-валидации обязательных полей и UX сценариев повторной загрузки данных.
 
 ## Функциональность
 
-- **Веб-форма** — форма ввода данных протокола СЛР (бригада, пациент, время, ВДП, сосудистый доступ, ИВЛ, ритмы, дефибрилляция, медикаменты)
-- **Генерация DOCX** — постановка задачи в очередь рендеров и асинхронная обработка отдельным воркером
-- **Архив** — сохранение данных формы в БД (JSONB), получение списка, карточки записи и её рендер-версий
-- **Уникальность `kv_num`** — на уровне БД и API предотвращаются дубли; при конфликте возвращается `409 kv_num_exists`
-- **Поиск карты по `kv_num`** — отдельный endpoint для быстрого поиска ранее сохранённой записи
-- **Хронометраж по минутам (1–70)** — интерактивные сетки для ручных/автоматических компрессий, ИВЛ, ритмов, энергии дефибрилляции и введения препаратов (дозы/объёмы)
+- **Веб-форма СЛР**
+  - ввод данных бригады, пациента, времени, этапов СЛР, ритмов, дефибрилляции, медикаментов;
+  - поддержка хронометража по минутам (1–70) для ряда блоков;
+  - сборка payload клиентскими модулями в `public/js`.
+
+- **Сохранение и архив**
+  - сохранение сырого payload и нормализованных данных в PostgreSQL;
+  - получение списка архива с фильтрами/пагинацией;
+  - карточка записи с историей версий рендера;
+  - поиск по номеру карты `kv_num`.
+
+- **Уникальность `kv_num`**
+  - на уровне БД используется уникальный индекс;
+  - на уровне API конфликт возвращается как `409 kv_num_exists`.
+
+- **Асинхронный конвейер документов**
+  - `POST /generate` создаёт/обновляет архив и ставит задачу в очередь рендера;
+  - DOCX-воркер формирует `docx_key` и сохраняет документ в файловое хранилище;
+  - PDF-воркер берёт готовый DOCX, отправляет в Gotenberg, сохраняет PDF и пишет `pdf_key`;
+  - при временных сбоях PDF-воркер делает повторные попытки с backoff.
 
 ## Структура проекта
 
-```
+```text
 docx-service/
-├── index.js              # Точка входа Express
-├── lib/
-│   ├── normalize.js      # Нормализация данных (pad2, normalizeRow70, normalizeMl70, …)
-│   ├── template-data.js  # Сборка объекта для шаблона из req.body
-│   ├── docx-render.js    # Рендеринг DOCX (Docxtemplater + PizZip)
-│   └── archive-service.js# Сохранение архива и создание версий рендера
+├── index.js                  # Точка входа Express
+├── template.docx             # DOCX-шаблон с плейсхолдерами
 ├── routes/
-│   ├── form.js           # GET /form
-│   ├── generate.js       # POST /generate (save + queue render)
-│   └── archive.js        # /api/archive API + download endpoints
-├── public/
-│   ├── form.html         # Страница формы (HTML)
-│   ├── archive.html      # Страница списка архива
-│   ├── archive-card.html # Страница карточки архивной записи
-│   ├── css/
-│   │   ├── form.css      # Стили формы
-│   │   └── archive.css   # Стили страниц архива
-│   └── js/
-│       ├── form-init.js      # Инициализация, обработчики, submit
-│       ├── form-payload.js   # Сборка payload, formatDateForDocx, marksFromResult
-│       ├── archive-list.js   # UI списка архива: фильтры, пагинация, переход в карточку
-│       ├── archive-card.js   # UI карточки: статусы, загрузка файлов, история рендеров
-│       ├── grid-chrono.js    # createChronoRow — символьные сетки (+, -)
-│       ├── grid-energy.js    # createEnergyRow — энергия дефибрилляции (Дж)
-│       └── grid-numeric.js   # createNumericRow — числовые сетки (дозы/объёмы)
-├── migrations/
-│   ├── 001_init.sql      # Базовая таблица archives
-│   ├── 002_archive_versions.sql # Версионирование рендеров + новые поля archives
-│   ├── 003_add_pdf_retry_fields.sql # Поля retry для PDF-конвейера
-│   └── 004_kv_num_unique.sql # Уникальный индекс по kv_num + индекс поиска
-├── test/
-│   └── archive-service.test.js # Unit-тесты сценариев saveArchive
+│   ├── form.js               # GET /form, /archive, /archive/:archiveId
+│   ├── generate.js           # POST /generate (validate + save + queue render)
+│   └── archive.js            # /api/archive и download endpoints
+├── lib/
+│   ├── validation.js         # Backend-валидация payload
+│   ├── normalize.js          # Нормализация полей формы
+│   ├── template-data.js      # Сборка данных для шаблона
+│   ├── docx-render.js        # Генерация DOCX (docxtemplater + pizzip)
+│   └── archive-service.js    # Save/update архива + create render version
 ├── worker/
-│   ├── docx-worker.js    # Фоновая обработка pending DOCX-рендеров
-│   └── pdf-worker.js     # Фоновая конвертация DOCX -> PDF через Gotenberg
-├── template.docx         # Шаблон DOCX
-├── docker-compose.yaml   # app + docx-worker + pdf-worker + gotenberg + postgres
+│   ├── docx-worker.js        # Обработка docx_status=pending
+│   └── pdf-worker.js         # Обработка pdf_status=pending + retry/backoff
+├── migrations/
+│   ├── 001_init.sql
+│   ├── 002_archive_versions.sql
+│   ├── 003_add_pdf_retry_fields.sql
+│   └── 004_kv_num_unique.sql
+├── public/
+│   ├── form.html
+│   ├── archive.html
+│   ├── archive-card.html
+│   ├── css/
+│   │   ├── form.css
+│   │   └── archive.css
+│   └── js/
+│       ├── form-init.js
+│       ├── form-payload.js
+│       ├── archive-list.js
+│       ├── archive-card.js
+│       ├── grid-chrono.js
+│       ├── grid-energy.js
+│       └── grid-numeric.js
+├── test/
+│   └── archive-service.test.js
 ├── Dockerfile
+├── docker-compose.yaml
 └── package.json
 ```
 
-## API
+## Архитектура и поток данных
 
-| Метод | Маршрут | Описание |
-|-------|---------|----------|
-| GET   | `/form` | Страница формы |
-| GET   | `/archive` | Страница списка архива (UI) |
-| GET   | `/archive/:archiveId` | Страница карточки архивной записи (UI) |
-| POST  | `/generate` | Сохранение архива + постановка DOCX-рендера в очередь (`queued`) |
-| GET   | `/api/archive` | Список архивов (поиск, фильтры, пагинация) |
-| GET   | `/api/archive/by-kv?kv_num=...` | Поиск архива по номеру карты (`kv_num`) |
-| GET   | `/api/archive/:id` | Детали записи + история рендеров |
-| GET   | `/api/archive/:id/download/docx?version=...` | Скачать DOCX конкретной версии (или последней, если версия не задана) |
-| GET   | `/api/archive/:id/download/pdf` | Скачать актуальный PDF |
-| POST  | `/api/archive/save` | Сохранить/обновить архив без постановки рендера |
-| POST  | `/api/archive/:id/render` | Поставить новую версию рендера в очередь |
+1. Клиент отправляет форму на `POST /generate`.
+2. API валидирует payload (`lib/validation.js`) и сохраняет архив (`lib/archive-service.js`).
+3. Для архива создаётся новая версия рендера в `archive_renders` со статусами `pending`.
+4. `worker/docx-worker.js` забирает pending-задачу, генерирует DOCX, сохраняет файл и отмечает `docx_status = ready`.
+5. `worker/pdf-worker.js` обрабатывает задачи с готовым DOCX, конвертирует через Gotenberg и отмечает `pdf_status = ready`.
+6. UI архива позволяет отслеживать статусы и скачивать итоговые файлы.
 
-## БД
+## API и маршруты
 
-PostgreSQL.
+### UI маршруты
 
-### Таблица `archives`
+- `GET /form` — страница формы.
+- `GET /archive` — список архива.
+- `GET /archive/:archiveId` — карточка архивной записи.
 
-- `id` — bigserial
-- `created_at` — timestamptz
-- `stored` — legacy-флаг (оставлен для обратной совместимости)
-- `docx_key` — legacy-ключ хранения (оставлен для обратной совместимости)
-- `data` — JSONB с нормализованными данными для шаблона
-- `raw_data` — JSONB с исходным payload из формы
-- `kv_num` — номер карты/случая (обязателен для постановки рендера)
-- `updated_at` — дата обновления записи
+### Основные API
 
-Ограничения и индексы:
+- `POST /generate` — валидация + сохранение + постановка версии рендера.
+- `GET /api/archive` — список архива (фильтры/пагинация).
+- `GET /api/archive/by-kv?kv_num=...` — поиск записи по `kv_num`.
+- `GET /api/archive/:id` — карточка архива + версии рендеров.
+- `POST /api/archive/save` — сохранение архива без постановки рендера.
+- `POST /api/archive/:id/render` — ручная постановка новой версии рендера.
+- `GET /api/archive/:id/download/docx?version=...` — скачать DOCX.
+- `GET /api/archive/:id/download/pdf` — скачать PDF.
 
-- уникальный partial index `archives_kv_num_uniq` на `kv_num` (для `kv_num is not null`)
-- индекс `archives_kv_num_idx` для быстрого lookup по `kv_num`
+### Legacy-алиасы (обратная совместимость)
 
-### Таблица `archive_renders`
-
-- `archive_id`, `version` — версия рендера для конкретного архива
-- `docx_status` / `docx_key` / `docx_error` — статус DOCX-конвейера
-- `pdf_status` / `pdf_key` / `pdf_error` — статус PDF-конвейера
-- `pdf_attempts` / `pdf_next_attempt_at` — счётчик попыток и время следующего ретрая PDF
-
-Миграции: `migrations/001_init.sql`, затем `migrations/002_archive_versions.sql`, затем `migrations/003_add_pdf_retry_fields.sql`, затем `migrations/004_kv_num_unique.sql`
+- `GET /archive/by-kv`
+- `POST /archive/save`
+- `POST /archive/:id/render`
 
 ## Логика сохранения архива (`saveArchive`)
 
 - **Create-режим** (без `archive_id`) — создаётся новая запись.
 - **Edit-режим** (с `archive_id`):
   - если `kv_num` не изменился, обновляется текущая запись;
-  - если `kv_num` изменился, создаётся **новая** запись (старый архив сохраняется как историческая версия).
-- При нарушении уникальности `kv_num` API возвращает `409` с ошибкой `kv_num_exists`.
+  - если `kv_num` изменился, создаётся новая запись (историчность сохраняется).
+- При конфликте уникальности по `kv_num` API возвращает `409` с ошибкой `kv_num_exists`.
 
-На клиенте форма использует это поведение так:
+## Валидация payload (backend)
 
-- при blur поля номера карты выполняется запрос `GET /api/archive/by-kv` (legacy-алиас: `GET /archive/by-kv`);
-- если карта найдена — предлагается загрузить её в форму;
-- при ответе `409 kv_num_exists` поле `kv_num` подсвечивается, после чего предлагается загрузка существующей карты.
+На текущий момент валидация проверяет:
+- тип верхнего объекта (должен быть JSON object);
+- длины текстовых полей;
+- формат и диапазоны час/мин полей;
+- размер и типы minute-grid полей (ровно 70 элементов);
+- форматы значений для числовых/энергетических сеток.
 
-## Запуск
+> Важно: это базовая структурная/форматная валидация. Полная проверка обязательности бизнес-полей продолжает развиваться.
 
-### Переменные окружения
+## Переменные окружения
 
-- `DATABASE_URL` — строка подключения PostgreSQL (обязательно)
-- `PORT` — порт (по умолчанию 3000)
-- `DOCX_DIR` — директория хранения DOCX у воркера (по умолчанию `./storage/docx`)
-- `PDF_DIR` — директория хранения PDF у `pdf-worker` (по умолчанию `./storage/pdf`)
-- `GOTENBERG_URL` — URL сервиса Gotenberg (по умолчанию `http://gotenberg:3000`)
-- `GOTENBERG_LIBREOFFICE_ENDPOINT` — endpoint конвертации (по умолчанию `/forms/libreoffice/convert`)
-- `PDF_CONVERT_TIMEOUT_MS` — таймаут конвертации PDF (по умолчанию `60000`)
-- `MAX_PDF_BYTES` — ограничение размера PDF в байтах (по умолчанию `31457280`)
-- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди (по умолчанию `3000`)
-- `WORKER_BATCH_SIZE` — размер батча за цикл (по умолчанию `1`)
+### Обязательная
 
-### Локально
+- `DATABASE_URL` — строка подключения PostgreSQL.
+
+### Основные
+
+- `PORT` — порт приложения (по умолчанию `3000`).
+- `DOCX_DIR` — директория хранения DOCX (по умолчанию `./storage/docx`).
+- `PDF_DIR` — директория хранения PDF (по умолчанию `./storage/pdf`).
+
+### Gotenberg / PDF
+
+- `GOTENBERG_URL` — адрес Gotenberg (по умолчанию `http://gotenberg:3000`).
+- `GOTENBERG_LIBREOFFICE_ENDPOINT` — endpoint конвертации (по умолчанию `/forms/libreoffice/convert`).
+- `PDF_CONVERT_TIMEOUT_MS` — таймаут запроса конвертации (по умолчанию `60000`).
+- `MAX_PDF_BYTES` — лимит размера получаемого PDF (по умолчанию `31457280`).
+
+### Воркеры
+
+- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди (по умолчанию `3000`).
+- `WORKER_BATCH_SIZE` — количество задач за цикл (по умолчанию `1`).
+
+## Локальный запуск (без Docker)
+
+1) Установите зависимости:
 
 ```bash
 npm install
-# Выполнить migrations/001_init.sql, 002_archive_versions.sql, 003_add_pdf_retry_fields.sql, 004_kv_num_unique.sql
-DATABASE_URL=postgresql://user:pass@localhost/db node index.js
 ```
 
-### Тесты
+2) Примените SQL-миграции в порядке:
+
+```bash
+migrations/001_init.sql
+migrations/002_archive_versions.sql
+migrations/003_add_pdf_retry_fields.sql
+migrations/004_kv_num_unique.sql
+```
+
+3) Запустите API:
+
+```bash
+DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm start
+```
+
+4) (Опционально) Запустите воркеры отдельными процессами:
+
+```bash
+DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm run worker:docx
+DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm run worker:pdf
+```
+
+## Тесты
 
 ```bash
 npm test
 ```
 
-### Docker
+## Docker
 
 ```bash
 docker build -t docx-service .
-docker run -e DATABASE_URL=postgresql://... -p 3000:3000 docx-service
+
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL=postgresql://user:pass@host:5432/docxdb \
+  -e DOCX_DIR=/app/storage/docx \
+  -e PDF_DIR=/app/storage/pdf \
+  docx-service
 ```
 
-### Docker Compose (app + docx-worker + pdf-worker + gotenberg + postgres)
+## Docker Compose (app + docx-worker + pdf-worker + gotenberg + postgres)
 
-1. Подготовьте директории на хосте для DOCX/PDF-файлов:
+### Что поднимается
+
+`docker-compose.yaml` поднимает:
+- `db` — PostgreSQL 16 + volume `db_data`;
+- `app` — Express API на `3000:3000`;
+- `worker` — DOCX-воркер из того же образа;
+- `pdf-worker` — PDF-воркер из того же образа;
+- `gotenberg` — конвертация DOCX → PDF.
+
+### Подготовка директорий на хосте
 
 ```bash
 sudo mkdir -p /srv/slr-docx /srv/slr-pdf
-sudo chown -R $USER:$USER /srv/slr-docx /srv/slr-pdf
+sudo chown -R "$USER":"$USER" /srv/slr-docx /srv/slr-pdf
 ```
+
+### Перечень команд Docker Compose
+
+#### Запуск и сборка
+
 ```bash
+# запуск всего стека в фоне с пересборкой
 docker compose up -d --build
+
+# запуск отдельных сервисов
+docker compose up -d --build app
+docker compose up -d --build worker
+docker compose up -d --build pdf-worker
+docker compose up -d --build gotenberg
+docker compose up -d --build db
+```
+
+#### Статус и диагностика
+
+```bash
+# состояние сервисов
+docker compose ps
+
+# потоковые логи всего стека
+docker compose logs -f
+
+# логи конкретных сервисов
+docker compose logs -f app
 docker compose logs -f worker
 docker compose logs -f pdf-worker
+docker compose logs -f db
+docker compose logs -f gotenberg
 ```
 
-`docker-compose.yaml` поднимает:
+#### Выполнение команд внутри контейнеров
 
-- `db` (PostgreSQL) с постоянным томом `db_data`
-- `app` (API) на `3000:3000`
-- `worker` (DOCX-воркер) из того же образа
-- `pdf-worker` (PDF-воркер) из того же образа
-- `gotenberg` (конвертация DOCX -> PDF)
+```bash
+# shell внутри API-контейнера
+docker compose exec app sh
 
-> Важно: SQL-скрипты из `./migrations` в `/docker-entrypoint-initdb.d` применяются только при первом старте новой БД (когда том `db_data` пустой).
+# подключение к postgres
+docker compose exec db psql -U docx -d docxdb
+```
 
+#### Остановка и удаление
+
+```bash
+# мягкая остановка контейнеров
+docker compose stop
+
+# остановка + удаление контейнеров и сети
+docker compose down
+
+# полная очистка с удалением volume (ОПАСНО: удалит данные БД)
+docker compose down -v
+```
+
+> Важно: SQL-скрипты из `./migrations`, проброшенные в `/docker-entrypoint-initdb.d`, выполняются только при первом старте нового volume `db_data`.
 
 ## Технологии
 
-- **Backend:** Node.js, Express, pg, docxtemplater, pizzip
-- **Frontend:** ES modules (без сборки), vanilla JS
-- **Шаблон:** один DOCX с плейсхолдерами `[[...]]`
+- **Backend:** Node.js, Express, pg
+- **Генерация документов:** docxtemplater, pizzip, Gotenberg
+- **Frontend:** vanilla JS (ES modules), HTML/CSS без сборки
+- **База данных:** PostgreSQL
 
-## Реализовано
+## Дорожная карта (кратко)
 
-- [x] Модульная структура (lib, routes, public/js)
-- [x] Ведение протокола СЛР (форма, валидация, нормализация)
-- [x] Хронометраж 1–70 мин: символы (+, -), энергия (Дж), дозы/объёмы препаратов
-- [x] Режимы заполнения сеток: рисование (drag) и диапазон (2 тапа)
-- [x] Генерация DOCX с подстановкой данных
-- [x] Сохранение в PostgreSQL (`data` + `raw_data`)
-- [x] Асинхронная очередь рендеров DOCX (`archive_renders`)
-- [x] Версионирование рендеров для одного архива
-- [x] API архива (список, карточка, сохранение, постановка рендера)
-- [x] UI архива: список с фильтрами/пагинацией и карточка записи с историей рендеров
-- [x] Docker-образ
-- [x] Docker Compose стек: `app + docx-worker + pdf-worker + gotenberg + postgres`
-
-## Не реализовано / на будущее
-
-- Загрузка архивной записи обратно в форму из UI архива
-- Расширенная валидация обязательных полей на бэкенде
-
-## PDF worker
-
-Асинхронная генерация PDF выполняется отдельным воркером:
-
-```bash
-node worker/pdf-worker.js
-```
-
-Переменные окружения:
-
-- `DATABASE_URL` — подключение к PostgreSQL
-- `DOCX_DIR` — директория исходных DOCX
-- `PDF_DIR` — директория хранения PDF
-- `GOTENBERG_URL` — URL Gotenberg
-- `GOTENBERG_LIBREOFFICE_ENDPOINT` — endpoint конвертации (по умолчанию `/forms/libreoffice/convert`)
-- `PDF_CONVERT_TIMEOUT_MS` — таймаут запроса к Gotenberg
-- `MAX_PDF_BYTES` — ограничение размера принимаемого PDF
-- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди
-- `WORKER_BATCH_SIZE` — размер батча за цикл
-
-Логика:
-
-- берёт записи `archive_renders` со статусами `docx_status='ready'` и `pdf_status='pending'`;
-- строит путь PDF по `pr_date` (предпочтительно `archives.data.pr_date_iso`) и `kv_num` в формате `YYYY/<месяц_рус_нижний>/DD/<kv_num>.pdf`;
-- конвертирует готовый DOCX через Gotenberg;
-- при временных ошибках выполняет до 3 попыток с backoff и сохраняет `pdf_attempts`/`pdf_next_attempt_at`;
-- выставляет `pdf_status` в `ready` или `failed`.
-
-## DOCX worker
-
-Асинхронная генерация DOCX выполняется отдельным воркером:
-
-```bash
-node worker/docx-worker.js
-```
-
-Переменные окружения:
-
-- `DATABASE_URL` — подключение к PostgreSQL
-- `DOCX_DIR` — директория хранения DOCX (по умолчанию `./storage/docx`)
-- `WORKER_POLL_INTERVAL_MS` — интервал опроса очереди (по умолчанию `3000`)
-- `WORKER_BATCH_SIZE` — размер батча за цикл (по умолчанию `1`)
-
-Воркер берёт записи `archive_renders` со статусом `docx_status='pending'`,
-генерирует DOCX из `archives.data`, сохраняет файл в `DOCX_DIR` по ключу вида
-`YYYY/MM/DD/<archive_id>/v<version>.docx` и выставляет `ready/failed`.
+- Расширить бизнес-валидацию обязательных полей на backend.
+- Улучшить UX редактирования/загрузки архивных записей в форму.
+- Добавить более детальные операционные алерты/метрики для воркеров.
