@@ -21,7 +21,7 @@
 
             <div class="form-group">
                 <label class="form-label">Подстанция</label>
-                <input type="text" id="pstation" name="ps" class="input-field" placeholder="Введите название бригады">
+                <select id="pstation" name="ps" class="input-field"></select>
             </div>
 
             <div class="form-group">
@@ -35,7 +35,10 @@
 
             <div class="form-group">
                 <label class="form-label">№ КВ</label>
-                <input type="number" id="kvNumber" name="kv_num" class="input-field" placeholder="Введите номер КВ" min="0">
+                <div class="kv-fields">
+                    <select id="kvPrefix" class="input-field kv-prefix"></select>
+                    <input type="number" id="kvNumber" name="kv_num" class="input-field kv-tail" placeholder="111111" min="0">
+                </div>
             </div>
 
             <div class="form-group">

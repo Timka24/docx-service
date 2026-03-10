@@ -2,6 +2,7 @@ import { createChronoRow } from "./grid-chrono.js";
 import { createEnergyRow } from "./grid-energy.js";
 import { createNumericRow } from "./grid-numeric.js";
 import { buildPayload } from "./form-payload.js";
+import { KV_PREFIX_BASE_CODES, PSTATION_OPTIONS } from "./form-config.js";
 
 const VD_DEV_OPTIONS = [
   "ларингеальная трубка",
@@ -61,6 +62,57 @@ function initSelectOptionsGrouped(selectId, groups) {
     });
     select.append(optgroup);
   });
+}
+
+function getCallYearFromDateInput() {
+  const iso = document.getElementById("nowDate")?.value || "";
+  const year = Number(String(iso).slice(0, 4));
+  return Number.isInteger(year) && year >= 1900 ? year : new Date().getFullYear();
+}
+
+function formatKvPrefix(code, year) {
+  return `${code}-${String(year).slice(-2)}`;
+}
+
+function buildKvPrefixOptions(year) {
+  return KV_PREFIX_BASE_CODES.map((code) => formatKvPrefix(code, year));
+}
+
+function syncKvPrefixOptions(preferredPrefix = "") {
+  const select = document.getElementById("kvPrefix");
+  if (!select) return;
+  const year = getCallYearFromDateInput();
+  const options = buildKvPrefixOptions(year);
+  const fallback = options[0] || "";
+  const nextValue = options.includes(preferredPrefix) ? preferredPrefix : fallback;
+  select.innerHTML = "";
+  options.forEach((value) => {
+    select.append(new Option(value, value));
+  });
+  select.value = nextValue;
+}
+
+function initPstationSelectOptions() {
+  initSelectOptions("pstation", PSTATION_OPTIONS);
+}
+
+function ensureSelectOption(selectId, value) {
+  const select = document.getElementById(selectId);
+  const nextValue = String(value || "").trim();
+  if (!select || !nextValue) return;
+  const exists = Array.from(select.options).some((opt) => opt.value === nextValue);
+  if (!exists) {
+    select.append(new Option(nextValue, nextValue));
+  }
+  select.value = nextValue;
+}
+
+function parseKvNum(kvNum) {
+  const rawKv = String(kvNum || "").trim();
+  if (!rawKv) return { prefix: "", tail: "" };
+  const match = rawKv.match(/^(\d+-\d{2})-(.+)$/);
+  if (!match) return { prefix: "", tail: rawKv };
+  return { prefix: match[1], tail: match[2] };
 }
 
 function setDisplay(id, isVisible) {
@@ -546,8 +598,11 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const dd = String(now.getDate()).padStart(2, "0");
   input.value = `${yyyy}-${mm}-${dd}`;
-  input2.value = `${yyyy}-${mm}-${dd}`;
+  if (input2) input2.value = `${yyyy}-${mm}-${dd}`;
+  syncKvPrefixOptions();
 })();
+
+initPstationSelectOptions();
 
 function clearForm()  {
   initSelectOptions("vd_dev", VD_DEV_OPTIONS);
@@ -555,10 +610,12 @@ function clearForm()  {
   initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
 
   document.getElementById("brigade") && (document.getElementById("brigade").value = "");
+  initPstationSelectOptions();
   document.getElementById("pstation") && (document.getElementById("pstation").value = "");
   document.getElementById("lastName") && (document.getElementById("lastName").value = "");
   document.getElementById("firstName") && (document.getElementById("firstName").value = "");
   document.getElementById("middleName") && (document.getElementById("middleName").value = "");
+  syncKvPrefixOptions();
   document.getElementById("kvNumber") && (document.getElementById("kvNumber").value = "");
   document.getElementById("arrivalHours") && (document.getElementById("arrivalHours").value = "");
   document.getElementById("arrivalMinutes") && (document.getElementById("arrivalMinutes").value = "");
@@ -813,12 +870,7 @@ function applyResultPair(name, successMark, failMark) {
 }
 
 function applyTailFromKv(kvNum) {
-  const kvTail = String(kvNum || "").trim();
-  if (!kvTail) return "";
-  if (kvTail.startsWith("100-26-")) {
-    return kvTail.slice("100-26-".length);
-  }
-  return kvTail;
+  return parseKvNum(kvNum).tail;
 }
 
 function loadArchiveToForm(archive) {
@@ -826,16 +878,18 @@ function loadArchiveToForm(archive) {
   clearForm();
 
   setInputValue("brigade", raw.brig);
-  setInputValue("pstation", raw.ps);
+  ensureSelectOption("pstation", raw.ps);
 
   const fio = splitFio(raw.fio_pac);
   setInputValue("lastName", raw.last_name_raw || fio.last);
   setInputValue("firstName", raw.first_name_raw || fio.first);
   setInputValue("middleName", raw.middle_name_raw || fio.middle);
 
-  setInputValue("kvNumber", raw.kv_num_tail_raw || applyTailFromKv(raw.kv_num));
-
-  setInputValue("nowDate", raw.pr_date_iso_raw || parseIsoDate(raw.pr_date));
+  const prDateIso = raw.pr_date_iso_raw || parseIsoDate(raw.pr_date);
+  const kvSource = raw.kv_num || archive?.kv_num || "";
+  setInputValue("nowDate", prDateIso);
+  syncKvPrefixOptions(raw.kv_prefix_raw || parseKvNum(kvSource).prefix);
+  setInputValue("kvNumber", raw.kv_num_tail_raw || applyTailFromKv(kvSource));
   setInputValue("end_date", raw.end_date_iso_raw || parseIsoDate(raw.end_date));
 
   setInputValue("arrivalHours", raw.pr_h);
@@ -952,7 +1006,9 @@ async function trySuggestLoadByKv() {
   const tail = typeof kvInput?.value === "string" ? kvInput.value.trim() : "";
   if (!tail) return;
 
-  const fullKvNum = `100-26-${tail}`;
+  const prefix = document.getElementById("kvPrefix")?.value || "";
+  if (!prefix) return;
+  const fullKvNum = `${prefix}-${tail}`;
 
   try {
     const resp = await fetch(`/api/archive/by-kv?kv_num=${encodeURIComponent(fullKvNum)}`);
@@ -1175,3 +1231,12 @@ document.getElementById("refreshStatusBtn")?.addEventListener("click", async () 
 
 getKvField()?.addEventListener("input", clearKvError);
 document.getElementById("kvNumber")?.addEventListener("blur", trySuggestLoadByKv);
+document.getElementById("kvPrefix")?.addEventListener("blur", trySuggestLoadByKv);
+document.getElementById("nowDate")?.addEventListener("change", () => {
+  const previousPrefix = document.getElementById("kvPrefix")?.value || "";
+  const previousCode = previousPrefix.split("-")[0] || "";
+  const year = getCallYearFromDateInput();
+  const preferredPrefix = previousCode ? formatKvPrefix(previousCode, year) : "";
+  syncKvPrefixOptions(preferredPrefix);
+});
+

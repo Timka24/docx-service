@@ -39,6 +39,7 @@ export function buildPayload(grids) {
   const firstName = document.getElementById("firstName")?.value || "";
   const middleName = document.getElementById("middleName")?.value || "";
   const kvNumber = document.getElementById("kvNumber")?.value || "";
+  const kvPrefixSelectValue = document.getElementById("kvPrefix")?.value || "";
 
   const fio_pac = [lastName, firstName, middleName].map((s) => s.trim()).filter(Boolean).join(" ");
 
@@ -182,6 +183,13 @@ export function buildPayload(grids) {
   const first_name_raw = firstName;
   const middle_name_raw = middleName;
   const kv_num_tail_raw = kvNumber;
+  const kv_prefix_raw = kvPrefixSelectValue;
+  const fallbackYearSuffix = /^\d{4}-\d{2}-\d{2}$/.test(pr_date_iso)
+    ? pr_date_iso.slice(2, 4)
+    : String(new Date().getFullYear()).slice(-2);
+  const kvPrefix = kvPrefixSelectValue || `100-${fallbackYearSuffix}`;
+  const kvTail = String(kvNumber || "").trim();
+  const kv_num = kvTail && kvPrefix ? `${kvPrefix}-${kvTail}` : "";
   const pr_date_iso_raw = pr_date_iso;
   const end_date_iso_raw = end_date_iso;
   const br_ruk_last_raw = br_ruk_last;
@@ -199,7 +207,8 @@ export function buildPayload(grids) {
     first_name_raw,
     middle_name_raw,
     kv_num_tail_raw,
-    kv_num: kvNumber ? `100-26-${kvNumber}` : "",
+    kv_prefix_raw,
+    kv_num,
     pr_date,
     pr_date_iso_raw,
     pr_time_h,
