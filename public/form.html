@@ -98,6 +98,21 @@
                 </div>
             </div>
 
+             <div class="form-group">
+                <label class="form-label">Место наступления клинической смерти:</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="death_place" class="radio-input" value="location">
+                        На месте вызова
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="death_place" class="radio-input" value="evac">
+                        При мед. эвакуации
+                    </label>
+                    <button type="button" class="clear-radio-btn" id="clearDeathPlaceBtn">Очистить</button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Проведение СЛР свидетелями</label>
                 <div class="radio-group">
@@ -1029,9 +1044,9 @@
                 <div class="form-group">
                     <label class="form-label">Время окончания</label>
                     <div class="flex-gap-8-center-wrap">
-                        <input type="text" id="end_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
+                        <input type="text" id="end_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ"  min="0" max="23"/>
                         <span>:</span>
-                        <input type="text" id="end_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                        <input type="text" id="end_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ"  min="0" max="59"/>
                     </div>
                 </div>
 

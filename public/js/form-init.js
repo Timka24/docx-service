@@ -443,6 +443,9 @@ document.getElementById("clearSlrBtn")?.addEventListener("click", () => {
 document.getElementById("clearWitnessBtn")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="witness"]').forEach((r) => (r.checked = false));
 });
+document.getElementById("clearDeathPlaceBtn")?.addEventListener("click", () => {
+  document.querySelectorAll('input[name="death_place"]').forEach((r) => (r.checked = false));
+});
 document.getElementById("clearVascularPhaseBtn")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="vascular_phase"]').forEach((r) => (r.checked = false));
 });
@@ -838,6 +841,7 @@ function loadArchiveToForm(archive) {
   setInputValue("bio_d_m", raw.bio_d_m);
 
   setRadioByName("witness", raw.witness || "");
+   setRadioByName("death_place", raw.death_place || "");
   setRadioByName("slr", raw.slr || "");
   setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
   setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));

@@ -72,6 +72,11 @@ export function buildPayload(grids) {
   const selectedWitness = document.querySelector('input[name="witness"]:checked');
   if (selectedWitness) witnessValue = selectedWitness.value;
 
+  let deathPlaceValue = "";
+  const selectedDeathPlace = document.querySelector('input[name="death_place"]:checked');
+  if (selectedDeathPlace) deathPlaceValue = selectedDeathPlace.value;
+
+
   let slr_value = "";
   const selectedCpr = document.querySelector('input[name="slr"]:checked');
   if (selectedCpr) slr_value = selectedCpr.value;
@@ -204,6 +209,7 @@ export function buildPayload(grids) {
     d_h,
     d_m,
     witness: witnessValue,
+    death_place: deathPlaceValue,
     slr: slr_value,
     r_start_nms,
     r_start_vent,
