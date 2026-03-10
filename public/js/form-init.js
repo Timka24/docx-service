@@ -524,6 +524,13 @@ normalizeTimeInput(document.getElementById("slr_h"), 23);
 normalizeTimeInput(document.getElementById("slr_m"), 59);
 normalizeTimeInput(document.getElementById("bio_d_h"), 23);
 normalizeTimeInput(document.getElementById("bio_d_m"), 59);
+normalizeTimeInput(document.getElementById("end_h"), 23);
+normalizeTimeInput(document.getElementById("end_m"), 59);
+normalizeTimeInput(document.getElementById("end_transfer_doc_h"), 23);
+normalizeTimeInput(document.getElementById("end_transfer_doc_m"), 59);
+normalizeTimeInput(document.getElementById("end_transfer_team_h"), 23);
+normalizeTimeInput(document.getElementById("end_transfer_team_m"), 59);
+
 
 document.getElementById("kvNumber")?.addEventListener("input", function () {
   this.value = this.value.replace(/[^0-9]/g, "");
@@ -841,7 +848,7 @@ function loadArchiveToForm(archive) {
   setInputValue("bio_d_m", raw.bio_d_m);
 
   setRadioByName("witness", raw.witness || "");
-   setRadioByName("death_place", raw.death_place || "");
+  setRadioByName("death_place", raw.death_place || "");
   setRadioByName("slr", raw.slr || "");
   setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
   setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));

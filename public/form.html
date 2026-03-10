@@ -16,7 +16,7 @@
             <form id="docxForm">
             <div class="form-group">
                 <label class="form-label">Бригада</label>
-                <input type="text" id="brigade" name="brig" class="input-field" placeholder="Введите название бригады">
+                <input type="text" id="brigade" name="brig" class="input-field" placeholder="Введите название бригады" maxlength="13">
             </div>
 
             <div class="form-group">
@@ -395,7 +395,7 @@
                             <input type="number" id="i_fr" class="input-field input-field--sm" inputmode="numeric" step="1" min="0" placeholder="">
                         </td>
                         <td class="cell-center">
-                            <input type="text" id="i_t" class="input-field input-field--sm" placeholder="">
+                            <input type="number" id="i_t" class="input-field input-field--sm" placeholder="">
                         </td>
                         </tr>
                     </tbody>
@@ -410,15 +410,15 @@
 
                 <label class="form-label">Время начала СЛР</label>
                 <div class="flex-gap-10-center-wrap">
-                    <input type="text" id="slr_h" class="input-field w-90" maxlength="2"
+                    <input type="number" id="slr_h" class="input-field w-90" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
-                        placeholder="чч" class="input-field input-field-xs" min="0" step="1"/>
+                        placeholder="чч" class="input-field input-field-xs" min="0" step="1" max="23"/>
 
                     <span>час</span>
 
-                    <input type="text" id="slr_m" class="input-field w-90" maxlength="2"
+                    <input type="number" id="slr_m" class="input-field w-90" maxlength="2"
                         inputmode="numeric" pattern="[0-9]*"
-                        placeholder="мм" class="input-field input-field-xs" min="0" step="1"/>
+                        placeholder="мм" class="input-field input-field-xs" min="0" step="1" max="59"/>
 
                     <span>мин</span>
                 </div>
@@ -515,6 +515,9 @@
             </div>
 
             <div class="checkbox-grid" id="ventAdvancedGrid"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Электрокардиомониторинг</label>
             </div>
             <!--Асистолия-->
             <div class="form-group">
@@ -1044,9 +1047,9 @@
                 <div class="form-group">
                     <label class="form-label">Время окончания</label>
                     <div class="flex-gap-8-center-wrap">
-                        <input type="text" id="end_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ"  min="0" max="23"/>
+                        <input type="number" id="end_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ"  min="0" max="23"/>
                         <span>:</span>
-                        <input type="text" id="end_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ"  min="0" max="59"/>
+                        <input type="number" id="end_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ"  min="0" max="59"/>
                     </div>
                 </div>
 
@@ -1070,7 +1073,7 @@
 
                 <div class="form-group end-success-field">
                     <label class="form-label">Сознание (ШКГ)</label>
-                    <input type="number" id="end_gcs" class="input-field" />
+                    <input type="number" id="end_gcs" class="input-field" min="0" max="13"/>
                 </div>
 
                 <div class="form-group end-success-field">
@@ -1105,9 +1108,9 @@
                         <label class="form-label">ФИО</label>
                         <input type="text" id="end_transfer_doc_fio" class="input-field" />
                         <div class="flex-gap-8-center-wrap mt-8">
-                            <input type="text" id="end_transfer_doc_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
+                            <input type="number" id="end_transfer_doc_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" min="0" max="23"/>
                             <span>:</span>
-                            <input type="text" id="end_transfer_doc_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                            <input type="number" id="end_transfer_doc_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" min="0" max="59"/>
                         </div>
                     </div>
                 </div>
@@ -1118,9 +1121,9 @@
                         <label class="form-label">№ бригады</label>
                         <input type="text" id="end_transfer_team_num" class="input-field" />
                         <div class="flex-gap-8-center-wrap mt-8">
-                            <input type="text" id="end_transfer_team_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" />
+                            <input type="number" id="end_transfer_team_h" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ЧЧ" min="0" max="23"/>
                             <span>:</span>
-                            <input type="text" id="end_transfer_team_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" />
+                            <input type="number" id="end_transfer_team_m" class="input-field w-90" maxlength="2" inputmode="numeric" placeholder="ММ" min="0" max="59"/>
                         </div>
                     </div>
                 </div>
