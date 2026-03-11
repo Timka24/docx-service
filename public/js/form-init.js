@@ -15,7 +15,7 @@ const IVL_DEVICE_OPTIONS = [
   '3/30А -"Медпром"',
   '"РИТМ" 100 "ТМТ"',
   'WEINMANN MEDUMAT',
-  'Care Fusion Pulmonetic LTV-1200',
+  'CareFusion LTV-1200',
 ];
 
 const DEFIB_MODEL_OPTIONS = [
