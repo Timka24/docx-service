@@ -159,7 +159,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="airwaySection">
                 <label class="form-label">Обеспечение проходимости ВДП</label>
 
                 <div class="radio-group">
@@ -173,7 +173,8 @@
                     До СЛР
                     </label>
 
-                    <button type="button" class="clear-radio-btn" id="clearAWhenBtn">Очистить</button>
+                    
+                    <button type="button" class="clear-radio-btn js-clear-section-btn" data-section-id="airwaySection">Очистить раздел</button>
                 </div>
 
                 <div class="airway-table-wrap">
@@ -238,7 +239,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="vascularSection">
                 <label class="form-label">Сосудистый доступ</label>
 
                 <div class="radio-group">
@@ -250,7 +251,8 @@
                     <input type="radio" name="vascular_phase" class="radio-input" value="before">
                     До СЛР
                     </label>
-                    <button type="button" class="clear-radio-btn" id="clearVascularPhaseBtn">Очистить</button>
+                    
+                    <button type="button" class="clear-radio-btn js-clear-section-btn" data-section-id="vascularSection">Очистить раздел</button>
                 </div>
 
                 <div class="airway-table-wrap">
@@ -372,7 +374,7 @@
                 </div>
             </div>
             <!--Форма аппаратной ИВЛ-->
-            <div class="form-group">
+            <div class="form-group" id="apparatusIvlSection">
                 <label class="form-label">Аппаратная ИВЛ</label>
 
                 <div class="airway-table-wrap">
@@ -404,12 +406,26 @@
                     </tbody>
                     </table>
                 </div>
+                <button type="button" class="clear-radio-btn js-clear-section-btn" data-section-id="apparatusIvlSection">Очистить раздел</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Показать хронометраж мероприятий</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="show_chrono" class="radio-input" value="yes">
+                        Да
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="show_chrono" class="radio-input" value="no">
+                        Нет
+                    </label>
+                </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Особенности</label>
                 <textarea id="vd_note" class="input-field textarea-field" rows="3" placeholder=""></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="chronoStartCprSection" data-chrono-section>
 
                 <label class="form-label">Время начала СЛР</label>
                 <div class="flex-gap-10-center-wrap">
@@ -427,14 +443,14 @@
                 </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" id="chronoCompressionRateSection" data-chrono-section>
                 <label class="form-label">Частота компрессий (в мин)</label>
                 <input type="number" id="fr_gr" class="input-field"
                         min="0" step="1" placeholder="частота компрессий" />
             </div>
 
             <!--Компрессии грудной клетки ручные 70-->
-            <div class="form-group">
+            <div class="form-group" id="chronoCprManualSection" data-chrono-section>
                 <label class="form-label">Компрессии гр. клетки ручные (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
@@ -454,7 +470,7 @@
             </div>
 
             <!--Компрессии грудной клетки автоматические 70-->
-            <div class="form-group">
+            <div class="form-group" id="chronoCprAutoSection" data-chrono-section>
                 <label class="form-label">Компрессии гр. клетки автоматические (1–70 мин)</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
@@ -475,7 +491,7 @@
                 <div class="checkbox-grid" id="cprAutoGrid"></div>
             </div>
             <!-- ИВЛ масочная (1–70 мин) -->
-            <div class="form-group">
+            <div class="form-group" id="chronoVentMaskSection" data-chrono-section>
             <label class="form-label">ИВЛ масочная (1–70 мин)</label>
 
             <div class="form-group">
@@ -498,7 +514,7 @@
             </div>
 
             <!-- ИВЛ после интубации / герметизирующего устройства (1–70 мин) -->
-            <div class="form-group">
+            <div class="form-group" id="chronoVentAdvancedSection" data-chrono-section>
             <label class="form-label">ИВЛ после интубации или применен. герметиз. уст-ва (1–70 мин)</label>
 
             <div class="form-group">
@@ -519,11 +535,11 @@
 
             <div class="checkbox-grid" id="ventAdvancedGrid"></div>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="chronoMonitoringSection" data-chrono-section>
                 <label class="form-label">Электрокардиомониторинг</label>
             </div>
             <!--Асистолия-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmAsSection" data-chrono-section>
             <label class="form-label">Асистолия (1–70 мин)</label>
 
             <div class="form-group">
@@ -545,7 +561,7 @@
             <div class="checkbox-grid" id="rhythmAsGrid"></div>
             </div>
             <!--Фибрилляция желудочков-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmVfSection" data-chrono-section>
                 <label class="form-label">Фибрилляция желудочков</label>
 
                 <div class="form-group">
@@ -567,7 +583,7 @@
                 <div class="checkbox-grid" id="rhythmVfGrid"></div>
             </div>
             <!--Желудочковая тахикардия без пульса-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmVtSection" data-chrono-section>
                 <label class="form-label">Желудочковая тахикардия без пульса</label>
 
                 <div class="form-group">
@@ -589,7 +605,7 @@
                 <div class="checkbox-grid" id="rhythmVtGrid"></div>
             </div>
             <!--Беспульсовая электрическая активность (ЭМД)-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmPeaSection" data-chrono-section>
                 <label class="form-label">Беспульсовая электрическая активность (ЭМД)</label>
 
                 <div class="form-group">
@@ -611,7 +627,7 @@
                 <div class="checkbox-grid" id="rhythmPeaGrid"></div>
             </div>
             <!--Навязанный ритм ЭКС (при использ. ЭКС бригадой)-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmPacedSection" data-chrono-section>
                 <label class="form-label">Навязанный ритм ЭКС <i>(при использ. ЭКС бригадой)</i></label>
 
                 <div class="form-group">
@@ -633,7 +649,7 @@
                 <div class="checkbox-grid" id="rhythmPacedGrid"></div>
             </div>
             <!--Организованный сердечный ритм с пульсом-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmOrgSection" data-chrono-section>
                 <label class="form-label">Организованный сердечный ритм с пульсом</label>
 
                 <div class="form-group">
@@ -655,7 +671,7 @@
                 <div class="checkbox-grid" id="rhythmOrgGrid"></div>
             </div>
             <!--Для детей брадиакардия менее 60 в мин-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmBradyPedSection" data-chrono-section>
                 <label class="form-label"><b><i>Для детей</i></b> брадиакардия менее 60 в мин</label>
 
                 <div class="form-group">
@@ -677,7 +693,7 @@
                 <div class="checkbox-grid" id="rhythmBradyPedGrid"></div>
             </div>
             <!--Для детей сердечный ритм с пульсом более 60 в мин-->
-            <div class="form-group">
+            <div class="form-group" id="chronoRhythmChildLt60Section" data-chrono-section>
                 <label class="form-label"><b><i>Для детей</i></b> сердечный ритм с пульсом более 60 в мин</label>
 
                 <div class="form-group">
@@ -700,7 +716,7 @@
             </div>
 
             <!-- Дефибрилляции (энергия в Дж по минутам 1–70) -->
-            <div class="form-group">
+            <div class="form-group" id="chronoDefibSection" data-chrono-section>
             <label class="form-label">Дефибрилляции — энергия (Дж) (1–70 мин)</label>
 
             <div class="form-group">
@@ -738,7 +754,7 @@
             <div class="checkbox-grid" id="defibGrid"></div>
             </div>
             <!--Медикаментозная терапия-->
-            <div class="form-group">
+            <div class="form-group" id="chronoMedicationSection" data-chrono-section>
                 <label class="form-label">
                     Медикаментозная терапия
                 </label>
@@ -924,11 +940,11 @@
             </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="chronoManipulationsTitleSection" data-chrono-section>
                 <label class="form-label">Дополнительные манипуляция и действия</label>
             </div>
             <!--Доп манипуляции 1-->
-            <div class="form-group">
+            <div class="form-group" id="chronoManipulation1Section" data-chrono-section>
                 <label class="form-label">Доп. манипуляция 1</label>
                 <div class="form-group">
                     <label class="form-label">Наименование манипуляции</label>
@@ -953,7 +969,7 @@
                 <div class="checkbox-grid" id="ch_manipulation1_grid"></div>
             </div>
             <!--Доп манипуляции 2-->
-            <div class="form-group">
+            <div class="form-group" id="chronoManipulation2Section" data-chrono-section>
                 <label class="form-label">Доп. манипуляция 2</label>
                 <div class="form-group">
                     <label class="form-label">Наименование манипуляции</label>
@@ -978,11 +994,11 @@
                 <div class="checkbox-grid" id="ch_manipulation2_grid"></div>
             </div>
             <!--Оценка состояния-->
-            <div class="form-group">
+            <div class="form-group" id="chronoAssessmentTitleSection" data-chrono-section>
                 <label class="form-label">Оценка состояния</label>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="chronoPulseCarotidSection" data-chrono-section>
                 <label class="form-label">Пульс на сонной артерии (плечевой для детей до года)</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>
@@ -1003,7 +1019,7 @@
                 <div class="checkbox-grid" id="ch_pulse_carotid_grid"></div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="chronoPupilReactionSection" data-chrono-section>
                 <label class="form-label">Фотореакция зрачков</label>
                 <div class="form-group">
                     <label class="form-label">Режим заполнения</label>

@@ -121,6 +121,72 @@ function setDisplay(id, isVisible) {
   el.style.display = isVisible ? "" : "none";
 }
 
+const CHRONO_SECTION_SELECTOR = "[data-chrono-section]";
+const CHRONO_VALUE_INPUT_IDS = [
+  "slr_h",
+  "slr_m",
+  "fr_gr",
+  "defib_model",
+  "ch_adr_nacl_sum",
+  "ch_amio_glu_sum",
+  "ch_nacl",
+  "ch_drugs1",
+  "ch_drugs2",
+  "ch_manipulation1",
+  "ch_manipulation2",
+];
+
+function dispatchFieldEvents(el) {
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function clearSection(sectionElement) {
+  if (!sectionElement) return;
+  const fields = sectionElement.querySelectorAll("input, textarea, select");
+  fields.forEach((field) => {
+    if (field.closest(".checkbox-grid")) return;
+
+    if (field.type === "checkbox" || field.type === "radio") {
+      if (!field.checked) return;
+      field.checked = false;
+      dispatchFieldEvents(field);
+      return;
+    }
+
+    if (field.value === "") return;
+    field.value = "";
+    dispatchFieldEvents(field);
+  });
+}
+
+function setChronoVisibility(show) {
+  document.querySelectorAll(CHRONO_SECTION_SELECTOR).forEach((section) => {
+    section.style.display = show ? "" : "none";
+  });
+}
+
+function hasAnyChronoData() {
+  const hasInputData = CHRONO_VALUE_INPUT_IDS.some((id) => {
+    const el = document.getElementById(id);
+    return el && String(el.value || "").trim() !== "";
+  });
+  if (hasInputData) return true;
+
+  return Object.values(grids).some((grid) => {
+    const data = grid?.getData?.();
+    return Array.isArray(data) && data.some((item) => String(item || "").trim() !== "");
+  });
+}
+
+function applyChronoVisibilityState(preferredValue = "") {
+  const forcedShow = hasAnyChronoData();
+  const show = forcedShow || preferredValue === "yes";
+  setRadioByName("show_chrono", show ? "yes" : "no");
+  setChronoVisibility(show);
+}
+
+
 function selectedRadioValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
 }
@@ -509,6 +575,16 @@ document.getElementById("clearIvlBtn")?.addEventListener("click", () => {
   const fr = document.getElementById("fr_m");
   if (fr) fr.value = "";
 });
+
+document.querySelectorAll(".js-clear-section-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const sectionId = btn.dataset.sectionId;
+    clearSection(document.getElementById(sectionId));
+    toggleSlrStopOtherText();
+    updateMedicationVisibility();
+    updateEndSectionVisibility();
+  });
+});
 document.getElementById("clearRstartBtn")?.addEventListener("click", () => {
   const rn = document.getElementById("r_start_nms");
   const rv = document.getElementById("r_start_vent");
@@ -546,9 +622,17 @@ document.querySelectorAll('input[name="other_drugs"]').forEach((el) => {
 document.getElementById("end_success")?.addEventListener("change", updateEndSectionVisibility);
 document.getElementById("end_transfer_doc")?.addEventListener("change", updateEndSectionVisibility);
 document.getElementById("end_transfer_team")?.addEventListener("change", updateEndSectionVisibility);
+
+document.querySelectorAll('input[name="show_chrono"]').forEach((el) => {
+  el.addEventListener("change", () => {
+    setChronoVisibility(selectedRadioValue("show_chrono") === "yes");
+  });
+});
+
 toggleSlrStopOtherText();
 updateMedicationVisibility();
 updateEndSectionVisibility();
+applyChronoVisibilityState("no");
 
 function normalizeTimeInput(input, max) {
   if (!input) return;
@@ -795,6 +879,7 @@ function clearForm()  {
   toggleSlrStopOtherText();
   updateMedicationVisibility();
   updateEndSectionVisibility();
+  applyChronoVisibilityState("no");
   window.lastArchiveId = null;
   setGenerateStatus({ status: "Форма очищена.", archiveId: null, version: null, renderStatus: "—" });
 }
@@ -990,6 +1075,8 @@ function loadArchiveToForm(archive) {
   grids.manipulation2.setData(arrayOrEmpty(raw.ch_manipulation2_marks));
   grids.chPulseCart.setData(arrayOrEmpty(raw.ch_pulse_carotid_marks));
   grids.chPupReact.setData(arrayOrEmpty(raw.ch_pupil_reaction_marks));
+
+  applyChronoVisibilityState(raw.show_chrono || "");
 
   window.lastArchiveId = archive.id;
   clearKvError();

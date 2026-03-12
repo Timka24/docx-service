@@ -179,6 +179,8 @@ export function buildPayload(grids) {
   const end_date_iso = document.getElementById("end_date")?.value || "";
   const end_date = formatDateForDocx(end_date_iso);
 
+  const show_chrono = document.querySelector('input[name="show_chrono"]:checked')?.value || "no";
+
   const last_name_raw = lastName;
   const first_name_raw = firstName;
   const middle_name_raw = middleName;
@@ -315,6 +317,7 @@ export function buildPayload(grids) {
     comments,
     end_date,
     end_date_iso_raw,
+    show_chrono,
     end_h,
     end_m,
     end_success_mark: document.getElementById("end_success")?.checked ? CHECKED : UNCHECKED,
