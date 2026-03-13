@@ -14,6 +14,15 @@
         </div>
         <div class="form-body">
             <form id="docxForm">
+            <div class="form-ux-toolbar" data-form-section="ui_service">
+                <div id="formModeToggle" class="form-mode-toggle">
+                    <span class="form-label">Режим формы</span>
+                    <label class="radio-option"><input type="radio" name="form_mode" class="radio-input" value="basic" checked> Базовый режим</label>
+                    <label class="radio-option"><input type="radio" name="form_mode" class="radio-input" value="full"> Полный режим</label>
+                </div>
+                <div id="formProgress" class="form-progress" aria-live="polite"></div>
+                <nav id="formNavigator" class="form-navigator" aria-label="Навигация по форме"></nav>
+            </div>
             <div class="form-group">
                 <label class="form-label">Бригада</label>
                 <input type="text" id="brigade" name="brig" class="input-field" placeholder="Введите название бригады" maxlength="13">
@@ -409,6 +418,10 @@
                 <button type="button" class="clear-radio-btn js-clear-section-btn" data-section-id="apparatusIvlSection">Очистить раздел</button>
             </div>
             <div class="form-group">
+                <label class="form-label">Особенности</label>
+                <textarea id="vd_note" class="input-field textarea-field" rows="3" placeholder=""></textarea>
+            </div>
+            <div class="form-group" id="chronoToggleGroup">
                 <label class="form-label">Показать хронометраж мероприятий</label>
                 <div class="radio-group">
                     <label class="radio-option">
@@ -420,10 +433,6 @@
                         Нет
                     </label>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Особенности</label>
-                <textarea id="vd_note" class="input-field textarea-field" rows="3" placeholder=""></textarea>
             </div>
             <div class="form-group" id="chronoStartCprSection" data-chrono-section>
 
@@ -1254,12 +1263,14 @@
                 <button type="button" class="btn btn-apply" id="applyBtn">Применить</button>
             </div>
             </form> -->
-             <div class="button-group">
+            <div class="form-group" id="preSubmitReview" data-form-section="ui_service"></div>
+
+             <div class="button-group" data-form-section="ui_service">
                 <button type="button" class="btn btn-clear" id="clearBtn">Очистить все</button>
                 <button type="button" class="btn btn-apply" id="applyBtn">Сформировать</button>
             </div>
 
-            <div class="generate-status" id="generateStatusBlock">
+            <div class="generate-status" id="generateStatusBlock" data-form-section="ui_service">
                 <div id="genStatus">Статус: ожидание формирования.</div>
                 <div class="generate-status-row" id="genArchiveId">Архив: —</div>
                 <div class="generate-status-row" id="genVersion">Версия: —</div>

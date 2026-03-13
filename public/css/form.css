@@ -384,3 +384,75 @@
 .radio-option-center { justify-content:center; }
 .input-field-sm { max-width:220px; }
 .input-field-xs { width:60px; }
+
+.form-ux-toolbar {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.form-mode-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.form-progress {
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(25,118,210,0.08);
+    font-size: 14px;
+}
+
+.form-navigator {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.navigator-btn {
+    border: 1px solid rgba(25,118,210,0.45);
+    color: #1565c0;
+    background: #fff;
+    border-radius: 16px;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.navigator-btn.active {
+    background: #1976d2;
+    color: #fff;
+}
+
+.section-wrapper {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    background: #fff;
+}
+
+.section-header-btn {
+    width: 100%;
+    text-align: left;
+    background: #f7f9fc;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.section-wrapper.is-collapsed .form-section-content {
+    display: none;
+}
+
+.mode-full-only[hidden] {
+    display: none !important;
+}

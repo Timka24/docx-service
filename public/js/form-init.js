@@ -186,6 +186,274 @@ function applyChronoVisibilityState(preferredValue = "") {
   setChronoVisibility(show);
 }
 
+const UX_STORAGE_KEY = "slr_form_draft_v1";
+const DEFAULT_FORM_MODE = "basic";
+const NAVIGATOR_SECTIONS = [
+  ["main", "Основные данные"],
+  ["circumstances", "Время"],
+  ["resuscitation_start", "Начало реанимации"],
+  ["notes", "Особенности"],
+  ["chrono", "Хронометраж"],
+  ["outcome", "Исход"],
+  ["signatures", "Подписи"],
+];
+
+function setFormMode(mode = DEFAULT_FORM_MODE) {
+  const target = mode === "full" ? "full" : DEFAULT_FORM_MODE;
+  document.querySelectorAll('input[name="form_mode"]').forEach((input) => {
+    input.checked = input.value === target;
+  });
+}
+
+function findFormGroupByFieldId(fieldId) {
+  const node = document.getElementById(fieldId);
+  if (!node) return null;
+  if (node.classList?.contains("form-group")) return node;
+  return node.closest(".form-group") || null;
+}
+
+function createSectionWrapper({ key, title, startFieldId, endFieldId }) {
+  const form = document.getElementById("docxForm");
+  const start = findFormGroupByFieldId(startFieldId);
+  const end = findFormGroupByFieldId(endFieldId);
+  if (!form || !start || !end) return null;
+
+  const existing = form.querySelector(`.section-wrapper[data-form-section="${key}"]`);
+  if (existing) return existing;
+
+  const wrapper = document.createElement("section");
+  wrapper.className = "section-wrapper";
+  wrapper.dataset.formSection = key;
+
+  const headerBtn = document.createElement("button");
+  headerBtn.type = "button";
+  headerBtn.className = "section-header-btn";
+  headerBtn.textContent = title;
+  wrapper.append(headerBtn);
+
+  const content = document.createElement("div");
+  content.className = "form-section-content";
+  wrapper.append(content);
+
+  const nodes = [];
+  let current = start;
+  while (current) {
+    nodes.push(current);
+    if (current === end) break;
+    current = current.nextElementSibling;
+  }
+  if (nodes.length === 0 || nodes[nodes.length - 1] !== end) return null;
+
+  form.insertBefore(wrapper, start);
+  nodes.forEach((node) => content.append(node));
+  return wrapper;
+}
+
+function initUxSections() {
+  const sections = [
+    { key: "main", title: "1. Основные данные", startFieldId: "brigade", endFieldId: "nowDate" },
+    { key: "circumstances", title: "2. Время и обстоятельства", startFieldId: "arrivalHours", endFieldId: "clearSlrBtn" },
+    { key: "resuscitation_start", title: "3. Начало реанимационных мероприятий", startFieldId: "clearRstartBtn", endFieldId: "apparatusIvlSection" },
+    { key: "notes", title: "4. Особенности", startFieldId: "vd_note", endFieldId: "vd_note" },
+    { key: "chrono", title: "5. Хронометраж мероприятий", startFieldId: "chronoToggleGroup", endFieldId: "chronoPupilReactionSection" },
+    { key: "outcome", title: "6. Завершение реанимации", startFieldId: "reverseCauses", endFieldId: "bio_d_h" },
+    { key: "signatures", title: "7. Подписи", startFieldId: "br_ruk_last", endFieldId: "ver_ruk_last" },
+  ];
+
+  sections.forEach((section) => createSectionWrapper(section));
+
+  const chrono = document.querySelector('.section-wrapper[data-form-section="chrono"] .form-section-content');
+  if (chrono) {
+    [
+      "chronoStartCprSection",
+      "chronoCompressionRateSection",
+      "chronoMonitoringSection",
+      "chronoMedicationSection",
+      "chronoManipulation1Section",
+      "chronoManipulation2Section",
+      "chronoPulseCarotidSection",
+      "chronoPupilReactionSection",
+    ].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && !chrono.contains(el)) {
+        console.error(`${id} outside chrono section`);
+      }
+    });
+  }
+}
+
+function getVisibleSectionWrappers() {
+  return Array.from(document.querySelectorAll(".section-wrapper")).filter((wrapper) => !wrapper.hidden);
+}
+
+function syncSectionVisibility() {
+  const wrappers = Array.from(document.querySelectorAll(".section-wrapper"));
+  wrappers.forEach((wrapper) => {
+    const visibleGroups = Array.from(wrapper.querySelectorAll(":scope > .form-section-content > .form-group"))
+      .filter((group) => !group.hidden);
+    wrapper.hidden = visibleGroups.length === 0;
+  });
+
+  const visibleWrappers = getVisibleSectionWrappers();
+  const openedVisible = visibleWrappers.filter((wrapper) => !wrapper.classList.contains("is-collapsed"));
+  if (openedVisible.length === 0 && visibleWrappers[0]) {
+    visibleWrappers[0].classList.remove("is-collapsed");
+  }
+  visibleWrappers
+    .filter((wrapper) => !wrapper.classList.contains("is-collapsed"))
+    .slice(2)
+    .forEach((wrapper) => wrapper.classList.add("is-collapsed"));
+}
+
+function syncNavigatorVisibility() {
+  document.querySelectorAll(".navigator-btn").forEach((btn) => {
+    const target = document.querySelector(`.section-wrapper[data-form-section="${btn.dataset.targetSection}"]`);
+    const hidden = !target || target.hidden;
+    btn.hidden = hidden;
+    if (hidden) btn.classList.remove("active");
+  });
+}
+
+function initAccordionBehavior() {
+  const wrappers = Array.from(document.querySelectorAll(".section-wrapper"));
+  wrappers.forEach((wrapper, idx) => {
+    if (idx > 1) wrapper.classList.add("is-collapsed");
+    wrapper.querySelector(".section-header-btn")?.addEventListener("click", () => {
+      const collapsed = wrapper.classList.toggle("is-collapsed");
+      if (!collapsed) {
+        const opened = wrappers.filter((item) => !item.hidden && !item.classList.contains("is-collapsed"));
+        if (opened.length > 2) {
+          opened[0].classList.add("is-collapsed");
+        }
+      }
+      updateNavigatorState();
+    });
+  });
+}
+
+function currentMode() {
+  return selectedRadioValue("form_mode") || "basic";
+}
+
+function getRequiredFieldsMissingCount() {
+  const requiredIds = ["brigade", "pstation", "lastName", "firstName", "nowDate", "callAcceptHours", "callAcceptMinutes"];
+  return requiredIds.reduce((acc, id) => {
+    const val = String(document.getElementById(id)?.value || "").trim();
+    return acc + (val ? 0 : 1);
+  }, 0);
+}
+
+function computeProgressPercent() {
+  const fields = Array.from(document.querySelectorAll("#docxForm input, #docxForm select, #docxForm textarea"))
+    .filter((el) => {
+      if (el.type === "button" || el.id === "" || el.name === "form_mode") return false;
+      if (el.closest('[data-form-section="ui_service"]')) return false;
+      const group = el.closest(".form-group");
+      return !(group && group.hidden);
+    });
+  if (fields.length === 0) return 0;
+  const filled = fields.filter((el) => {
+    if (el.type === "checkbox" || el.type === "radio") return el.checked;
+    return String(el.value || "").trim() !== "";
+  }).length;
+  return Math.round((filled / fields.length) * 100);
+}
+
+function renderPreSubmitReview() {
+  const box = document.getElementById("preSubmitReview");
+  if (!box) return;
+  const missing = getRequiredFieldsMissingCount();
+  const fullName = ["lastName", "firstName", "middleName"].map((id) => document.getElementById(id)?.value || "").join(" ").trim();
+  box.innerHTML = `
+    <label class="form-label">Проверка перед формированием</label>
+    <div>Пациент: ${fullName || "не заполнен"}</div>
+    <div>Прогресс: ${computeProgressPercent()}%</div>
+    <div>Пропущено ключевых полей: ${missing}</div>
+    <div>${missing > 0 ? "⚠️ Проверьте обязательные блоки" : "✅ Основные блоки заполнены"}</div>
+  `;
+}
+
+function updateProgressUi() {
+  const progress = document.getElementById("formProgress");
+  if (progress) {
+    progress.textContent = `Заполнение формы: ${computeProgressPercent()}%. Незаполненных ключевых блоков: ${getRequiredFieldsMissingCount()}.`;
+  }
+  renderPreSubmitReview();
+}
+
+function updateNavigatorState() {
+  const active = NAVIGATOR_SECTIONS.map(([key]) => key).find((key) => {
+    const wrapper = document.querySelector(`.section-wrapper[data-form-section="${key}"]`);
+    return wrapper && !wrapper.hidden && !wrapper.classList.contains("is-collapsed");
+  });
+  document.querySelectorAll(".navigator-btn").forEach((btn) => {
+    btn.classList.toggle("active", !btn.hidden && btn.dataset.targetSection === active);
+  });
+}
+
+function initNavigator() {
+  const nav = document.getElementById("formNavigator");
+  if (!nav) return;
+  nav.innerHTML = "";
+  NAVIGATOR_SECTIONS.forEach(([key, label]) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "navigator-btn";
+    btn.textContent = label;
+    btn.dataset.targetSection = key;
+    btn.addEventListener("click", () => {
+      const target = document.querySelector(`.section-wrapper[data-form-section="${key}"]`);
+      if (!target || target.hidden) return;
+      target.classList.remove("is-collapsed");
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      updateNavigatorState();
+    });
+    nav.append(btn);
+  });
+  syncNavigatorVisibility();
+  updateNavigatorState();
+}
+
+function applyFormMode() {
+  const basicKeep = new Set([
+    "brigade", "pstation", "lastName", "firstName", "middleName", "kvPrefix", "kvNumber",
+    "nowDate", "callAcceptHours", "callAcceptMinutes", "arrivalHours", "arrivalMinutes",
+    "deathHours", "deathMinutes", "reverseCauses", "comments", "end_date", "end_h", "end_m"
+  ]);
+  const basic = currentMode() === "basic";
+  document.querySelectorAll("#docxForm .form-group").forEach((group) => {
+    if (group.closest('[data-form-section="ui_service"]')) return;
+    const hasKeyField = Array.from(group.querySelectorAll("input[id], select[id], textarea[id]")).some((el) => basicKeep.has(el.id));
+    group.classList.toggle("mode-full-only", !hasKeyField);
+    group.hidden = basic ? !hasKeyField : false;
+  });
+  syncSectionVisibility();
+  syncNavigatorVisibility();
+  updateNavigatorState();
+}
+
+function saveDraft() {
+  const payload = buildPayload(grids);
+  payload.archive_id = window.lastArchiveId || null;
+  payload.ui_form_mode = currentMode();
+  localStorage.setItem(UX_STORAGE_KEY, JSON.stringify(payload));
+}
+
+function restoreDraft() {
+  const raw = localStorage.getItem(UX_STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw);
+    loadRawToForm(parsed);
+  } catch {
+    // ignore broken draft
+  }
+}
+
+function loadRawToForm(raw) {
+  loadArchiveToForm({ id: null, kv_num: raw?.kv_num || "", raw_data: raw || {} });
+}
+
 
 function selectedRadioValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
@@ -688,7 +956,39 @@ document.getElementById("kvNumber")?.addEventListener("input", function () {
 
 initPstationSelectOptions();
 
-function clearForm()  {
+initUxSections();
+initAccordionBehavior();
+initNavigator();
+setFormMode(DEFAULT_FORM_MODE);
+applyFormMode();
+restoreDraft();
+updateProgressUi();
+
+document.querySelectorAll('input[name="form_mode"]').forEach((el) => {
+  el.addEventListener("change", () => {
+    applyFormMode();
+    updateProgressUi();
+  });
+});
+
+document.getElementById("docxForm")?.addEventListener("input", () => {
+  saveDraft();
+  updateProgressUi();
+});
+
+document.getElementById("docxForm")?.addEventListener("change", () => {
+  saveDraft();
+  updateProgressUi();
+  updateNavigatorState();
+});
+
+window.addEventListener("beforeunload", () => {
+  saveDraft();
+});
+
+function clearForm(options = {})  {
+  const preserveDraft = options.preserveDraft === true;
+  const preserveMode = options.preserveMode === true;
   initSelectOptions("vd_dev", VD_DEV_OPTIONS);
   initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
   initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
@@ -721,7 +1021,7 @@ function clearForm()  {
     if (el) el.value = "";
   });
 
-  document.querySelectorAll('input[type="radio"]').forEach((r) => (r.checked = false));
+  document.querySelectorAll('#docxForm input[type="radio"]').forEach((r) => (r.checked = false));
   document.querySelectorAll('input[type="checkbox"]').forEach((c) => (c.checked = false));
   document.querySelectorAll('input[name="airway_phase"]').forEach((r) => (r.checked = false));
 
@@ -881,9 +1181,26 @@ function clearForm()  {
   updateEndSectionVisibility();
   applyChronoVisibilityState("no");
   window.lastArchiveId = null;
+  (function resetDefaultDates() {
+    const input = document.getElementById("nowDate");
+    const input2 = document.getElementById("end_date");
+    if (!input) return;
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    input.value = `${yyyy}-${mm}-${dd}`;
+    if (input2) input2.value = `${yyyy}-${mm}-${dd}`;
+    syncKvPrefixOptions();
+  })();
+  if (!preserveMode) setFormMode(DEFAULT_FORM_MODE);
+  applyFormMode();
+  updateNavigatorState();
+  updateProgressUi();
+  if (!preserveDraft) localStorage.removeItem(UX_STORAGE_KEY);
   setGenerateStatus({ status: "Форма очищена.", archiveId: null, version: null, renderStatus: "—" });
 }
-
 document.getElementById("clearBtn")?.addEventListener("click", clearForm);
 
 // 
@@ -960,7 +1277,8 @@ function applyTailFromKv(kvNum) {
 
 function loadArchiveToForm(archive) {
   const raw = archive?.raw_data && typeof archive.raw_data === "object" ? archive.raw_data : {};
-  clearForm();
+  clearForm({ preserveDraft: true, preserveMode: true });
+  setFormMode(raw.ui_form_mode || DEFAULT_FORM_MODE);
 
   setInputValue("brigade", raw.brig);
   ensureSelectOption("pstation", raw.ps);
@@ -1077,14 +1395,20 @@ function loadArchiveToForm(archive) {
   grids.chPupReact.setData(arrayOrEmpty(raw.ch_pupil_reaction_marks));
 
   applyChronoVisibilityState(raw.show_chrono || "");
+  applyFormMode();
+  updateProgressUi();
+  updateNavigatorState();
 
   window.lastArchiveId = archive.id;
   clearKvError();
+  const restoredFromDraft = archive.id == null;
   setGenerateStatus({
-    status: `Загружена карта #${archive.id} по kv_num ${archive.kv_num}.`,
+    status: restoredFromDraft
+      ? "Черновик формы восстановлен."
+      : `Загружена карта #${archive.id} по kv_num ${archive.kv_num}.`,
     archiveId: archive.id,
     version: null,
-    renderStatus: "загружено из архива"
+    renderStatus: restoredFromDraft ? "восстановлено из черновика" : "загружено из архива"
   });
 }
 
