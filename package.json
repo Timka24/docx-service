@@ -10,9 +10,16 @@
     "pizzip": "^3.1.7"
   },
   "scripts": {
+    "build:js-legacy": "babel public/js --out-dir public/js-legacy --extensions .js --source-maps",
+    "build": "npm run build:js-legacy",
     "start": "node index.js",
     "worker:docx": "node worker/docx-worker.js",
     "worker:pdf": "node worker/pdf-worker.js",
     "test": "node --test"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3"
   }
 }
