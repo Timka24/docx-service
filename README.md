@@ -29,6 +29,7 @@
   - автосохранение черновика в `localStorage` с восстановлением данных и выбранного режима после перезагрузки;
   - индикатор прогресса заполнения и блок проверки ключевых полей перед формированием;
   - сборка payload клиентскими модулями в `public/js`.
+  - legacy-совместимая сборка фронтенда через Babel в `public/js-legacy` для старых версий Google Chrome, включая Chrome 64/75.
 
 - **Сохранение и архив**
   - сохранение сырого payload и нормализованных данных в PostgreSQL;
@@ -80,6 +81,15 @@ docx-service/
 │   └── js/
 │       ├── form-init.js
 │       ├── form-payload.js
+│       ├── archive-list.js
+│       ├── archive-card.js
+│       ├── grid-chrono.js
+│       ├── grid-energy.js
+│       └── grid-numeric.js
+│   └── js-legacy/
+│       ├── form-init.js
+│       ├── form-payload.js
+│       ├── form-config.js
 │       ├── archive-list.js
 │       ├── archive-card.js
 │       ├── grid-chrono.js
@@ -186,18 +196,43 @@ migrations/003_add_pdf_retry_fields.sql
 migrations/004_kv_num_unique.sql
 ```
 
-3) Запустите API:
+3) Соберите legacy-версии фронтенд-скриптов:
+
+```bash
+npm run build:js-legacy
+```
+
+4) Запустите API:
 
 ```bash
 DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm start
 ```
 
-4) (Опционально) Запустите воркеры отдельными процессами:
+5) (Опционально) Запустите воркеры отдельными процессами:
 
 ```bash
 DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm run worker:docx
 DATABASE_URL=postgresql://user:pass@localhost:5432/docxdb npm run worker:pdf
 ```
+
+## Сборка legacy frontend
+
+- Исходники фронтенда: `public/js`
+- Совместимые с Chrome 64+ файлы: `public/js-legacy`
+- Babel-конфиг: `babel.config.json`
+- HTML формы подключает именно собранные legacy-модули
+
+```bash
+npm run build:js-legacy
+```
+
+Короткий алиас:
+
+```bash
+npm run build
+```
+
+После изменения файлов в `public/js` сборку `public/js-legacy` нужно обновлять повторным запуском команды.
 
 ## Тесты
 
@@ -297,7 +332,7 @@ docker compose down -v
 
 - **Backend:** Node.js, Express, pg
 - **Генерация документов:** docxtemplater, pizzip, Gotenberg
-- **Frontend:** vanilla JS (ES modules), HTML/CSS без сборки
+- **Frontend:** vanilla JS (ES modules), HTML/CSS, Babel-сборка legacy-модулей для Chrome 64+
 - **База данных:** PostgreSQL
 
 ## Дорожная карта (кратко)
