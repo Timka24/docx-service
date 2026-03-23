@@ -13,6 +13,15 @@ export function createChronoRow(cfg) {
   const elGrid = () => document.getElementById(cfg.gridId);
   const elHint = () => document.getElementById(cfg.hintId);
 
+  function notifyDataChange() {
+    document.dispatchEvent(new CustomEvent("chrono-grid-datachange", {
+      detail: {
+        gridId: cfg.gridId,
+        data: data.slice(),
+      },
+    }));
+  }
+
   function setHint(text) {
     const el = elHint();
     if (el) el.textContent = text || "";
@@ -230,6 +239,16 @@ export function createChronoRow(cfg) {
       btn.className = "btn cpr-cell";
       btn.dataset.minute = String(i);
       btn.textContent = data[i - 1] || " ";
+      btn.classList.toggle("is-filled", String(data[i - 1] || "").trim() !== "");
+
+      const minuteGroupIndex = Math.floor((i - 1) / 10);
+      wrap.classList.add(minuteGroupIndex % 2 === 0 ? "minute-group-odd" : "minute-group-even");
+      if ((i - 1) % 10 === 0) {
+        wrap.classList.add("minute-group-start");
+      }
+      if (i % 10 === 0 || i === minutes) {
+        wrap.classList.add("minute-group-end");
+      }
 
       if (mode === "range" && rangeStart === i) btn.classList.add("is-start");
 
@@ -256,6 +275,8 @@ export function createChronoRow(cfg) {
       wrap.appendChild(btn);
       container.appendChild(wrap);
     }
+
+    notifyDataChange();
   }
 
   function init() {

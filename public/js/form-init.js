@@ -136,6 +136,62 @@ const CHRONO_VALUE_INPUT_IDS = [
   "ch_manipulation2",
 ];
 
+const CHRONO_GRID_ACCORDIONS = [
+  { sectionId: "chronoCprManualSection", gridId: "cprManualGrid" },
+  { sectionId: "chronoCprAutoSection", gridId: "cprAutoGrid" },
+  { sectionId: "chronoVentMaskSection", gridId: "ventMaskGrid" },
+  { sectionId: "chronoVentAdvancedSection", gridId: "ventAdvancedGrid" },
+  { sectionId: "chronoRhythmAsSection", gridId: "rhythmAsGrid" },
+  { sectionId: "chronoRhythmVfSection", gridId: "rhythmVfGrid" },
+  { sectionId: "chronoRhythmVtSection", gridId: "rhythmVtGrid" },
+  { sectionId: "chronoRhythmPeaSection", gridId: "rhythmPeaGrid" },
+  { sectionId: "chronoRhythmPacedSection", gridId: "rhythmPacedGrid" },
+  { sectionId: "chronoRhythmOrgSection", gridId: "rhythmOrgGrid" },
+  { sectionId: "chronoRhythmBradyPedSection", gridId: "rhythmBradyPedGrid" },
+  { sectionId: "chronoRhythmChildLt60Section", gridId: "rhythmChildLt60Grid" },
+  { sectionId: "chronoDefibSection", gridId: "defibGrid" },
+  { sectionId: "medTherapyFieldsBlock", gridId: "adrNaclGrid" },
+  { sectionId: "medTherapyFieldsBlock", gridId: "amioGluGrid" },
+  { sectionId: "medNaclBlock", gridId: "naclGrid" },
+  { sectionId: "medDrugs1Block", gridId: "ch_drugs1_grid" },
+  { sectionId: "medDrugs2Block", gridId: "ch_drugs2_grid" },
+  { sectionId: "chronoManipulation1Section", gridId: "ch_manipulation1_grid" },
+  { sectionId: "chronoManipulation2Section", gridId: "ch_manipulation2_grid" },
+  { sectionId: "chronoPulseCarotidSection", gridId: "ch_pulse_carotid_grid" },
+  { sectionId: "chronoPupilReactionSection", gridId: "ch_pupil_reaction_grid" },
+];
+
+const EMPTY_STATUS_HTML = "&#1053;&#1077;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;";
+const FILLED_STATUS_PREFIX_HTML = "&#1047;&#1072;&#1087;&#1086;&#1083;&#1085;&#1077;&#1085;&#1086; &#1084;&#1080;&#1085;&#1091;&#1090;: ";
+
+function countFilledChronoMinutes(data) {
+  return Array.isArray(data)
+    ? data.reduce((count, value) => count + (String(value || "").trim() !== "" ? 1 : 0), 0)
+    : 0;
+}
+
+function getChronoAccordionTitle(host) {
+  const sourceLabel = Array.from(host.children).find((child) => child.classList?.contains("form-label"));
+  return sourceLabel?.innerHTML?.trim() || "";
+}
+
+function setChronoAccordionExpanded(wrapper, expanded) {
+  if (!wrapper) return;
+  wrapper.classList.toggle("is-collapsed", !expanded);
+  wrapper.querySelector(".chrono-grid-header")?.setAttribute("aria-expanded", expanded ? "true" : "false");
+}
+
+function updateChronoAccordionStatus(gridId, data) {
+  const status = document.querySelector(`[data-chrono-grid-status="${gridId}"]`);
+  if (!status) return;
+
+  const filledMinutes = countFilledChronoMinutes(data);
+  const hasData = filledMinutes > 0;
+  status.innerHTML = hasData ? FILLED_STATUS_PREFIX_HTML + filledMinutes : EMPTY_STATUS_HTML;
+  status.classList.toggle("is-empty", !hasData);
+  status.classList.toggle("is-filled", hasData);
+}
+
 function dispatchFieldEvents(el) {
   el.dispatchEvent(new Event("input", { bubbles: true }));
   el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -789,6 +845,102 @@ const grids = {
   chPupReact,
 };
 
+const GRID_INSTANCE_BY_ID = {
+  cprManualGrid: cprManual,
+  cprAutoGrid: cprAuto,
+  ventMaskGrid: ventMask,
+  ventAdvancedGrid: ventAdvanced,
+  rhythmAsGrid: rhythmAs,
+  rhythmVfGrid: rhythmVf,
+  rhythmVtGrid: rhythmVt,
+  rhythmPeaGrid: rhythmPea,
+  rhythmPacedGrid: rhythmPaced,
+  rhythmOrgGrid: rhythmOrg,
+  rhythmBradyPedGrid: rhythmBradyPed,
+  rhythmChildLt60Grid: rhythmChildLt60,
+  defibGrid: defibEnergy,
+  adrNaclGrid: adrNaclMl,
+  amioGluGrid: amioGluMl,
+  naclGrid: nacl,
+  ch_drugs1_grid: drugs1,
+  ch_drugs2_grid: drugs2,
+  ch_manipulation1_grid: manipulation1,
+  ch_manipulation2_grid: manipulation2,
+  ch_pulse_carotid_grid: chPulseCart,
+  ch_pupil_reaction_grid: chPupReact,
+};
+
+function updateAllChronoAccordionStatuses() {
+  CHRONO_GRID_ACCORDIONS.forEach(({ gridId }) => {
+    const grid = GRID_INSTANCE_BY_ID[gridId];
+    if (!grid) return;
+    updateChronoAccordionStatus(gridId, grid.getData());
+  });
+}
+
+function createChronoGridAccordion(item) {
+  const section = document.getElementById(item.sectionId);
+  const grid = document.getElementById(item.gridId);
+  if (!section || !grid || grid.closest(".chrono-grid-accordion")) return null;
+
+  const host = grid.closest(".form-group") || section;
+  if (!host || host.closest(".chrono-grid-accordion")) return null;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "chrono-grid-accordion section-wrapper is-collapsed";
+  wrapper.dataset.chronoGridId = item.gridId;
+
+  const headerBtn = document.createElement("button");
+  headerBtn.type = "button";
+  headerBtn.className = "section-header-btn chrono-grid-header";
+  headerBtn.setAttribute("aria-expanded", "false");
+
+  const titleEl = document.createElement("span");
+  titleEl.className = "chrono-grid-title";
+  titleEl.innerHTML = getChronoAccordionTitle(host);
+
+  const statusEl = document.createElement("span");
+  statusEl.className = "chrono-grid-status is-empty";
+  statusEl.dataset.chronoGridStatus = item.gridId;
+  statusEl.innerHTML = EMPTY_STATUS_HTML;
+
+  headerBtn.append(titleEl, statusEl);
+
+  const content = document.createElement("div");
+  content.className = "form-section-content chrono-grid-content";
+
+  const firstLabel = Array.from(host.children).find((child) => child.classList?.contains("form-label"));
+  firstLabel?.classList.add("chrono-grid-inner-label");
+  host.classList.add("chrono-grid-body");
+
+  host.parentElement.insertBefore(wrapper, host);
+  content.append(host);
+  wrapper.append(headerBtn, content);
+  return wrapper;
+}
+
+function initChronoGridAccordions() {
+  const wrappers = CHRONO_GRID_ACCORDIONS
+    .map((item) => createChronoGridAccordion(item))
+    .filter(Boolean);
+
+  wrappers.forEach((wrapper) => {
+    wrapper.querySelector(".chrono-grid-header")?.addEventListener("click", () => {
+      const shouldExpand = wrapper.classList.contains("is-collapsed");
+      wrappers.forEach((item) => setChronoAccordionExpanded(item, false));
+      if (shouldExpand) setChronoAccordionExpanded(wrapper, true);
+    });
+  });
+
+  document.addEventListener("chrono-grid-datachange", (event) => {
+    const gridId = event.detail?.gridId;
+    if (!gridId) return;
+    updateChronoAccordionStatus(gridId, event.detail?.data);
+  });
+
+  updateAllChronoAccordionStatuses();
+}
+
 adrNaclMl.init();
 amioGluMl.init();
 defibEnergy.init();
@@ -958,6 +1110,7 @@ initPstationSelectOptions();
 
 initUxSections();
 initAccordionBehavior();
+initChronoGridAccordions();
 initNavigator();
 setFormMode(DEFAULT_FORM_MODE);
 applyFormMode();
