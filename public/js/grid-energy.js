@@ -10,7 +10,6 @@ export function createEnergyRow(cfg) {
   const elGrid = () => document.getElementById(cfg.gridId);
   const elHint = () => document.getElementById(cfg.hintId);
   const elInput = () => document.getElementById(cfg.inputId);
-  const elSetBtn = () => document.getElementById(cfg.setBtnId);
   const elClearBtn = () => document.getElementById(cfg.clearBtnId);
 
   function notifyDataChange() {
@@ -35,7 +34,7 @@ export function createEnergyRow(cfg) {
   }
 
   function setActiveAux(btnId) {
-    [cfg.setBtnId, cfg.clearBtnId].forEach((id) => {
+    [cfg.setBtnId, cfg.clearBtnId].filter(Boolean).forEach((id) => {
       const b = document.getElementById(id);
       if (!b) return;
       b.classList.toggle("active", id === btnId);
@@ -287,17 +286,19 @@ export function createEnergyRow(cfg) {
 
   function init() {
     const input = elInput();
-    const setBtn = elSetBtn();
     const clearBtn = elClearBtn();
 
     function useInputValue() {
       const v = normalizeEnergy(input?.value || "");
       if (input) input.value = v;
       activeValue = v;
-      setActiveAux(v === "" ? cfg.clearBtnId : cfg.setBtnId);
-      setHint("Выбрано: " + (activeValue || "Пусто") + " (теперь можно рисовать)");
+      setActiveAux(v === "" ? cfg.clearBtnId : (cfg.setBtnId || null));
+      setHint("Значение: " + (activeValue || "Пусто"));
     }
 
+    input?.addEventListener("input", useInputValue);
+    input?.addEventListener("change", useInputValue);
+    input?.addEventListener("blur", useInputValue);
     input?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -305,7 +306,9 @@ export function createEnergyRow(cfg) {
       }
     });
 
-    setBtn?.addEventListener("click", () => useInputValue());
+    if (cfg.setBtnId) {
+      document.getElementById(cfg.setBtnId)?.addEventListener("click", () => useInputValue());
+    }
 
     clearBtn?.addEventListener("click", () => {
       if (input) input.value = "";

@@ -16,27 +16,22 @@ const IVL_DEVICE_OPTIONS = [
   '"РИТМ" 100 "ТМТ"',
   'WEINMANN MEDUMAT',
   'CareFusion LTV-1200',
+  "4/40А (Медпром)",
+  "Drager Oxylog 1000",
+  "Drager Oxylog 3000",
+  "Drager Oxylog 3000+",
+  "Drager Carina",
 ];
 
 const DEFIB_MODEL_OPTIONS = [
-  {
-    label: "Ручные",
-    values: [
-      "AXION ДКИ-Н-11",
-      "BeneHeart D3",
-    ],
-  },
-  {
-    label: "Автоматические",
-    values: [
-      "ZOL AED Plus",
-      "LifePak",
-      "Comen",
-      "Corpuls3",
-      "Mindray BeneHeart",
-      'ДКИ-Н-11 "Аксион"',
-    ],
-  },
+  "AXION ДКИ-Н-11",
+  "BeneHeart D3",
+  "ZOL AED Plus",
+  "LifePak",
+  "Comen",
+  "Corpuls3",
+  "Mindray BeneHeart",
+  'ДКИ-Н-11 "Аксион"',
 ];
 
 function initSelectOptions(selectId, options) {
@@ -236,10 +231,7 @@ function hasAnyChronoData() {
 }
 
 function applyChronoVisibilityState(preferredValue = "") {
-  const forcedShow = hasAnyChronoData();
-  const show = forcedShow || preferredValue === "yes";
-  setRadioByName("show_chrono", show ? "yes" : "no");
-  setChronoVisibility(show);
+  setChronoVisibility(true);
 }
 
 const UX_STORAGE_KEY = "slr_form_draft_v1";
@@ -258,6 +250,14 @@ function setFormMode(mode = DEFAULT_FORM_MODE) {
   const target = mode === "full" ? "full" : DEFAULT_FORM_MODE;
   document.querySelectorAll('input[name="form_mode"]').forEach((input) => {
     input.checked = input.value === target;
+  });
+  syncFormModeToggleState();
+}
+
+function syncFormModeToggleState() {
+  document.querySelectorAll("#formModeToggle .radio-option").forEach((option) => {
+    const modeInput = option.querySelector('input[name="form_mode"]');
+    option.classList.toggle("is-active", Boolean(modeInput?.checked));
   });
 }
 
@@ -311,7 +311,7 @@ function initUxSections() {
     { key: "circumstances", title: "2. Время и обстоятельства", startFieldId: "arrivalHours", endFieldId: "clearSlrBtn" },
     { key: "resuscitation_start", title: "3. Начало реанимационных мероприятий", startFieldId: "clearRstartBtn", endFieldId: "apparatusIvlSection" },
     { key: "notes", title: "4. Особенности", startFieldId: "vd_note", endFieldId: "vd_note" },
-    { key: "chrono", title: "5. Хронометраж мероприятий", startFieldId: "chronoToggleGroup", endFieldId: "chronoPupilReactionSection" },
+    { key: "chrono", title: "5. Хронометраж мероприятий", startFieldId: "chronoStartCprSection", endFieldId: "chronoPupilReactionSection" },
     { key: "outcome", title: "6. Завершение реанимации", startFieldId: "reverseCauses", endFieldId: "bio_d_h" },
     { key: "signatures", title: "7. Подписи", startFieldId: "br_ruk_last", endFieldId: "ver_ruk_last" },
   ];
@@ -355,10 +355,6 @@ function syncSectionVisibility() {
   if (openedVisible.length === 0 && visibleWrappers[0]) {
     visibleWrappers[0].classList.remove("is-collapsed");
   }
-  visibleWrappers
-    .filter((wrapper) => !wrapper.classList.contains("is-collapsed"))
-    .slice(2)
-    .forEach((wrapper) => wrapper.classList.add("is-collapsed"));
 }
 
 function syncNavigatorVisibility() {
@@ -375,13 +371,7 @@ function initAccordionBehavior() {
   wrappers.forEach((wrapper, idx) => {
     if (idx > 1) wrapper.classList.add("is-collapsed");
     wrapper.querySelector(".section-header-btn")?.addEventListener("click", () => {
-      const collapsed = wrapper.classList.toggle("is-collapsed");
-      if (!collapsed) {
-        const opened = wrappers.filter((item) => !item.hidden && !item.classList.contains("is-collapsed"));
-        if (opened.length > 2) {
-          opened[0].classList.add("is-collapsed");
-        }
-      }
+      wrapper.classList.toggle("is-collapsed");
       updateNavigatorState();
     });
   });
@@ -438,12 +428,14 @@ function updateProgressUi() {
 }
 
 function updateNavigatorState() {
-  const active = NAVIGATOR_SECTIONS.map(([key]) => key).find((key) => {
-    const wrapper = document.querySelector(`.section-wrapper[data-form-section="${key}"]`);
-    return wrapper && !wrapper.hidden && !wrapper.classList.contains("is-collapsed");
-  });
+  const activeSections = new Set(
+    getVisibleSectionWrappers()
+      .filter((wrapper) => !wrapper.classList.contains("is-collapsed"))
+      .map((wrapper) => wrapper.dataset.formSection)
+      .filter(Boolean)
+  );
   document.querySelectorAll(".navigator-btn").forEach((btn) => {
-    btn.classList.toggle("active", !btn.hidden && btn.dataset.targetSection === active);
+    btn.classList.toggle("active", !btn.hidden && activeSections.has(btn.dataset.targetSection));
   });
 }
 
@@ -566,7 +558,6 @@ const defibEnergy = createEnergyRow({
   gridId: "defibGrid",
   hintId: "defibHint",
   inputId: "defibEnergyInput",
-  setBtnId: "defibEnergySet",
   clearBtnId: "defibEClear",
   modePaintBtnId: "defibModePaint",
   modeRangeBtnId: "defibModeRange",
@@ -965,7 +956,7 @@ chPulseCart.init();
 chPupReact.init();
 initSelectOptions("vd_dev", VD_DEV_OPTIONS);
 initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
-initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
+initSelectOptions("defib_model", DEFIB_MODEL_OPTIONS);
 
 document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   document.querySelectorAll('input[name="med_therapy"]').forEach((r) => (r.checked = false));
@@ -1043,12 +1034,6 @@ document.getElementById("end_success")?.addEventListener("change", updateEndSect
 document.getElementById("end_transfer_doc")?.addEventListener("change", updateEndSectionVisibility);
 document.getElementById("end_transfer_team")?.addEventListener("change", updateEndSectionVisibility);
 
-document.querySelectorAll('input[name="show_chrono"]').forEach((el) => {
-  el.addEventListener("change", () => {
-    setChronoVisibility(selectedRadioValue("show_chrono") === "yes");
-  });
-});
-
 toggleSlrStopOtherText();
 updateMedicationVisibility();
 updateEndSectionVisibility();
@@ -1119,6 +1104,7 @@ updateProgressUi();
 
 document.querySelectorAll('input[name="form_mode"]').forEach((el) => {
   el.addEventListener("change", () => {
+    syncFormModeToggleState();
     applyFormMode();
     updateProgressUi();
   });
@@ -1144,7 +1130,7 @@ function clearForm(options = {})  {
   const preserveMode = options.preserveMode === true;
   initSelectOptions("vd_dev", VD_DEV_OPTIONS);
   initSelectOptions("i_d", IVL_DEVICE_OPTIONS);
-  initSelectOptionsGrouped("defib_model", DEFIB_MODEL_OPTIONS);
+  initSelectOptions("defib_model", DEFIB_MODEL_OPTIONS);
 
   document.getElementById("brigade") && (document.getElementById("brigade").value = "");
   initPstationSelectOptions();

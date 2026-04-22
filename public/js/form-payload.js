@@ -9,6 +9,18 @@ function normalizeTimePart(value, max) {
   return String(num).padStart(2, "0");
 }
 
+function normalizeClockTime(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const match = text.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (!match) return "";
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return "";
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return "";
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 function normalizeMlInput(value) {
   const text = String(value || "").trim();
   if (!text) return "";
@@ -137,7 +149,7 @@ export function buildPayload(grids) {
   const i_d = document.getElementById("i_d")?.value || "";
   const i_m = document.getElementById("i_m")?.value || "";
   const i_fr = document.getElementById("i_fr")?.value || "";
-  const i_t = document.getElementById("i_t")?.value || "";
+  const i_t = normalizeClockTime(document.getElementById("i_t")?.value);
   const vd_dev = document.getElementById("vd_dev")?.value || "";
   const vd_note = document.getElementById("vd_note")?.value || "";
 
@@ -179,7 +191,7 @@ export function buildPayload(grids) {
   const end_date_iso = document.getElementById("end_date")?.value || "";
   const end_date = formatDateForDocx(end_date_iso);
 
-  const show_chrono = document.querySelector('input[name="show_chrono"]:checked')?.value || "no";
+  const show_chrono = "yes";
 
   const last_name_raw = lastName;
   const first_name_raw = firstName;

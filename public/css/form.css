@@ -7,8 +7,8 @@
   --border: #d7dee8;
   --border-strong: #c0cada;
   --text: #1e2937;
-  --text-soft: #536273;
-  --text-muted: #7a8797;
+  --text-soft: #3f4f63;
+  --text-muted: #667689;
   --primary: #2563eb;
   --primary-strong: #1d4ed8;
   --primary-soft: rgba(37, 99, 235, 0.12);
@@ -21,6 +21,7 @@
   --radius-lg: 18px;
   --radius-md: 14px;
   --radius-sm: 10px;
+  --control-gap: 10px;
 }
 
 * {
@@ -243,8 +244,36 @@ body * {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px 18px;
+  gap: var(--control-gap);
   padding: 16px 18px;
+}
+
+.form-mode-toggle .radio-option {
+  align-items: center;
+  min-height: 38px;
+  margin: 0;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--primary-strong);
+  font-weight: 600;
+}
+
+.form-mode-toggle .radio-option .radio-input {
+  margin-top: 0;
+}
+
+.form-mode-toggle .radio-option.is-active {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.12);
+}
+
+.form-mode-toggle .radio-option:has(> .radio-input:checked) {
+  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.1);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.12);
 }
 
 .form-progress,
@@ -267,7 +296,7 @@ body * {
 .form-navigator {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--control-gap);
 }
 
 .navigator-btn,
@@ -383,7 +412,7 @@ textarea.input-field:focus,
 
 .radio-group {
   display: grid;
-  gap: 12px;
+  gap: var(--control-gap);
   margin-top: 12px;
 }
 
@@ -391,7 +420,8 @@ textarea.input-field:focus,
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  color: var(--text-soft);
+  color: #304055;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -399,11 +429,12 @@ textarea.input-field:focus,
 .checkbox-input,
 input[type="radio"],
 input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   margin-top: 2px;
-  flex: 0 0 18px;
-  accent-color: var(--primary);
+  flex: 0 0 20px;
+  accent-color: var(--primary-strong);
+  filter: contrast(1.15);
 }
 
 .radio-option-center {
@@ -412,7 +443,7 @@ input[type="checkbox"] {
 
 .button-group {
   display: flex;
-  gap: 14px;
+  gap: var(--control-gap);
   margin-top: 4px;
 }
 
@@ -478,6 +509,17 @@ button:disabled {
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+
+.btn[id$="SymPlus"],
+.btn[id$="SymMinus"] {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.btn[id$="SymFill"] {
+  display: none !important;
 }
 
 .generate-status {
@@ -565,7 +607,8 @@ button:disabled {
   min-height: 34px;
   padding: 0;
   line-height: 34px;
-  font-size: 15px;
+  font-size: 17px;
+  font-weight: 800;
   color: var(--text);
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   border-color: rgba(192, 202, 218, 0.95);
@@ -583,7 +626,7 @@ button:disabled {
 }
 
 .cpr-cell.is-filled {
-  color: #1f5133;
+  color: #14532d;
   background: linear-gradient(180deg, rgba(220, 252, 231, 0.98) 0%, rgba(209, 250, 229, 0.9) 100%);
   border-color: rgba(22, 163, 74, 0.42);
   box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.12);
@@ -610,8 +653,34 @@ button:disabled {
 .flex-gap-10-center-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--control-gap);
   flex-wrap: wrap;
+}
+
+.group-heading {
+  margin-top: 10px;
+  border-color: rgba(148, 163, 184, 0.45);
+  background: linear-gradient(180deg, rgba(226, 235, 247, 0.65) 0%, rgba(241, 246, 252, 0.95) 100%);
+}
+
+.group-heading .form-label {
+  margin-bottom: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1d2f45;
+  letter-spacing: -0.01em;
+}
+
+.checkbox-inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+  color: var(--text);
+}
+
+.checkbox-inline-label .checkbox-input {
+  margin-top: 0;
 }
 
 .flex-gap-8-wrap-center-mt12 {
@@ -627,7 +696,7 @@ button:disabled {
 .mt-12 { margin-top: 12px; }
 .hidden-mt-8 { display: none; margin-top: 8px; }
 .op-70-ml-8 { opacity: 0.7; margin-left: 8px; }
-.icon-emoji { font-size: 18px; }
+.icon-emoji { font-size: 20px; }
 .hint-inline { display: inline-block; min-width: 220px; min-height: 30px; opacity: 0.75; color: var(--text-muted); }
 .input-field-sm { max-width: 220px; }
 .input-field-xs { width: 60px; }

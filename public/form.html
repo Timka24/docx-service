@@ -126,22 +126,25 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Проведение СЛР свидетелями</label>
+                <label class="form-label">Проведение СЛР свидетелями до приезда бригады СМП</label>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="slr" class="radio-input" value="none">
-                        Не проводили СЛР
+                        Не проводили
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="slr" class="radio-input" value="compress">
-                        В присутствии бригады СМП
+                        Только компрессии грудной клетки
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="slr" class="radio-input" value="comp_ivl">
                         Компрессии + ИВЛ
                     </label>
+                    <label class="radio-option">
+                        <input type="radio" name="slr" class="radio-input" value="and">
+                        АНД
+                    </label>
                     <button type="button" class="clear-radio-btn" id="clearSlrBtn">Очистить</button>
-                    <!-- <button class="clear-radio-btn" id="clearRadioBtn">Очистить</button> -->
                 </div>
             </div>
 
@@ -409,7 +412,7 @@
                             <input type="number" id="i_fr" class="input-field input-field--sm" inputmode="numeric" step="1" min="0" placeholder="">
                         </td>
                         <td class="cell-center">
-                            <input type="number" id="i_t" class="input-field input-field--sm" placeholder="">
+                            <input type="time" id="i_t" class="input-field input-field--sm" step="60">
                         </td>
                         </tr>
                     </tbody>
@@ -420,19 +423,6 @@
             <div class="form-group">
                 <label class="form-label">Особенности</label>
                 <textarea id="vd_note" class="input-field textarea-field" rows="3" placeholder=""></textarea>
-            </div>
-            <div class="form-group" id="chronoToggleGroup">
-                <label class="form-label">Показать хронометраж мероприятий</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="show_chrono" class="radio-input" value="yes">
-                        Да
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="show_chrono" class="radio-input" value="no">
-                        Нет
-                    </label>
-                </div>
             </div>
             <div class="form-group" id="chronoStartCprSection" data-chrono-section>
 
@@ -544,7 +534,7 @@
 
             <div class="checkbox-grid" id="ventAdvancedGrid"></div>
             </div>
-            <div class="form-group" id="chronoMonitoringSection" data-chrono-section>
+            <div class="form-group group-heading" id="chronoMonitoringSection" data-chrono-section>
                 <label class="form-label">Электрокардиомониторинг</label>
             </div>
             <!--Асистолия-->
@@ -745,7 +735,6 @@
                 class="max-w-140"
             />
 
-            <button type="button" class="btn" id="defibEnergySet">Выбрать</button>
             <button type="button" class="btn" id="defibEClear">Пусто</button>
 
             <span class="op-70-ml-8">Диапазон:</span>
@@ -763,7 +752,7 @@
             <div class="checkbox-grid" id="defibGrid"></div>
             </div>
             <!--Медикаментозная терапия-->
-            <div class="form-group" id="chronoMedicationSection" data-chrono-section>
+            <div class="form-group group-heading" id="chronoMedicationSection" data-chrono-section>
                 <label class="form-label">
                     Медикаментозная терапия
                 </label>
@@ -949,7 +938,7 @@
             </div>
             </div>
 
-            <div class="form-group" id="chronoManipulationsTitleSection" data-chrono-section>
+            <div class="form-group group-heading" id="chronoManipulationsTitleSection" data-chrono-section>
                 <label class="form-label">Дополнительные манипуляция и действия</label>
             </div>
             <!--Доп манипуляции 1-->
@@ -1003,7 +992,7 @@
                 <div class="checkbox-grid" id="ch_manipulation2_grid"></div>
             </div>
             <!--Оценка состояния-->
-            <div class="form-group" id="chronoAssessmentTitleSection" data-chrono-section>
+            <div class="form-group group-heading" id="chronoAssessmentTitleSection" data-chrono-section>
                 <label class="form-label">Оценка состояния</label>
             </div>
 
@@ -1082,7 +1071,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label"><input type="checkbox" id="end_success" calss="checkbox-input"/> Успешная СЛР</label>
+                    <label class="form-label checkbox-inline-label"><input type="checkbox" id="end_success" class="checkbox-input"/> Успешная СЛР</label>
                 </div>
 
                 <div class="form-group" id="endSuccessFieldsBlock">
