@@ -97,6 +97,101 @@ function setDisplay(id, isVisible) {
 }
 const CHRONO_SECTION_SELECTOR = "[data-chrono-section]";
 const CHRONO_VALUE_INPUT_IDS = ["slr_h", "slr_m", "fr_gr", "defib_model", "ch_adr_nacl_sum", "ch_amio_glu_sum", "ch_nacl", "ch_drugs1", "ch_drugs2", "ch_manipulation1", "ch_manipulation2"];
+const CHRONO_GRID_ACCORDIONS = [{
+  sectionId: "chronoCprManualSection",
+  gridId: "cprManualGrid"
+}, {
+  sectionId: "chronoCprAutoSection",
+  gridId: "cprAutoGrid"
+}, {
+  sectionId: "chronoVentMaskSection",
+  gridId: "ventMaskGrid"
+}, {
+  sectionId: "chronoVentAdvancedSection",
+  gridId: "ventAdvancedGrid"
+}, {
+  sectionId: "chronoRhythmAsSection",
+  gridId: "rhythmAsGrid"
+}, {
+  sectionId: "chronoRhythmVfSection",
+  gridId: "rhythmVfGrid"
+}, {
+  sectionId: "chronoRhythmVtSection",
+  gridId: "rhythmVtGrid"
+}, {
+  sectionId: "chronoRhythmPeaSection",
+  gridId: "rhythmPeaGrid"
+}, {
+  sectionId: "chronoRhythmPacedSection",
+  gridId: "rhythmPacedGrid"
+}, {
+  sectionId: "chronoRhythmOrgSection",
+  gridId: "rhythmOrgGrid"
+}, {
+  sectionId: "chronoRhythmBradyPedSection",
+  gridId: "rhythmBradyPedGrid"
+}, {
+  sectionId: "chronoRhythmChildLt60Section",
+  gridId: "rhythmChildLt60Grid"
+}, {
+  sectionId: "chronoDefibSection",
+  gridId: "defibGrid"
+}, {
+  sectionId: "medTherapyFieldsBlock",
+  gridId: "adrNaclGrid"
+}, {
+  sectionId: "medTherapyFieldsBlock",
+  gridId: "amioGluGrid"
+}, {
+  sectionId: "medNaclBlock",
+  gridId: "naclGrid"
+}, {
+  sectionId: "medDrugs1Block",
+  gridId: "ch_drugs1_grid"
+}, {
+  sectionId: "medDrugs2Block",
+  gridId: "ch_drugs2_grid"
+}, {
+  sectionId: "chronoManipulation1Section",
+  gridId: "ch_manipulation1_grid"
+}, {
+  sectionId: "chronoManipulation2Section",
+  gridId: "ch_manipulation2_grid"
+}, {
+  sectionId: "chronoPulseCarotidSection",
+  gridId: "ch_pulse_carotid_grid"
+}, {
+  sectionId: "chronoPupilReactionSection",
+  gridId: "ch_pupil_reaction_grid"
+}];
+const EMPTY_STATUS_HTML = "&#1053;&#1077;&#1090; &#1076;&#1072;&#1085;&#1085;&#1099;&#1093;";
+const FILLED_STATUS_PREFIX_HTML = "&#1047;&#1072;&#1087;&#1086;&#1083;&#1085;&#1077;&#1085;&#1086; &#1084;&#1080;&#1085;&#1091;&#1090;: ";
+function countFilledChronoMinutes(data) {
+  return Array.isArray(data) ? data.reduce((count, value) => count + (String(value || "").trim() !== "" ? 1 : 0), 0) : 0;
+}
+function getChronoAccordionTitle(host) {
+  var _sourceLabel$innerHTM;
+  const sourceLabel = Array.from(host.children).find(child => {
+    var _child$classList;
+    return (_child$classList = child.classList) === null || _child$classList === void 0 ? void 0 : _child$classList.contains("form-label");
+  });
+  return (sourceLabel === null || sourceLabel === void 0 || (_sourceLabel$innerHTM = sourceLabel.innerHTML) === null || _sourceLabel$innerHTM === void 0 ? void 0 : _sourceLabel$innerHTM.trim()) || "";
+}
+function setChronoAccordionExpanded(wrapper, expanded) {
+  var _wrapper$querySelecto;
+  if (!wrapper) return;
+  wrapper.classList.toggle("is-collapsed", !expanded);
+  (_wrapper$querySelecto = wrapper.querySelector(".chrono-grid-header")) === null || _wrapper$querySelecto === void 0 || _wrapper$querySelecto.setAttribute("aria-expanded", expanded ? "true" : "false");
+}
+function updateChronoAccordionStatus(gridId, data) {
+  const status = document.querySelector(`[data-chrono-grid-status="${gridId}"]`);
+  if (!status) return;
+  const filledMinutes = countFilledChronoMinutes(data);
+  const hasData = filledMinutes > 0;
+  status.innerHTML = hasData ? FILLED_STATUS_PREFIX_HTML + filledMinutes : EMPTY_STATUS_HTML;
+  status.classList.toggle("is-empty", !hasData);
+  status.classList.toggle("is-filled", hasData);
+}
 function dispatchFieldEvents(el) {
   el.dispatchEvent(new Event("input", {
     bubbles: true
@@ -270,9 +365,9 @@ function syncNavigatorVisibility() {
 function initAccordionBehavior() {
   const wrappers = Array.from(document.querySelectorAll(".section-wrapper"));
   wrappers.forEach((wrapper, idx) => {
-    var _wrapper$querySelecto;
+    var _wrapper$querySelecto2;
     if (idx > 1) wrapper.classList.add("is-collapsed");
-    (_wrapper$querySelecto = wrapper.querySelector(".section-header-btn")) === null || _wrapper$querySelecto === void 0 || _wrapper$querySelecto.addEventListener("click", () => {
+    (_wrapper$querySelecto2 = wrapper.querySelector(".section-header-btn")) === null || _wrapper$querySelecto2 === void 0 || _wrapper$querySelecto2.addEventListener("click", () => {
       const collapsed = wrapper.classList.toggle("is-collapsed");
       if (!collapsed) {
         const opened = wrappers.filter(item => !item.hidden && !item.classList.contains("is-collapsed"));
@@ -709,6 +804,91 @@ const grids = {
   chPulseCart,
   chPupReact
 };
+const GRID_INSTANCE_BY_ID = {
+  cprManualGrid: cprManual,
+  cprAutoGrid: cprAuto,
+  ventMaskGrid: ventMask,
+  ventAdvancedGrid: ventAdvanced,
+  rhythmAsGrid: rhythmAs,
+  rhythmVfGrid: rhythmVf,
+  rhythmVtGrid: rhythmVt,
+  rhythmPeaGrid: rhythmPea,
+  rhythmPacedGrid: rhythmPaced,
+  rhythmOrgGrid: rhythmOrg,
+  rhythmBradyPedGrid: rhythmBradyPed,
+  rhythmChildLt60Grid: rhythmChildLt60,
+  defibGrid: defibEnergy,
+  adrNaclGrid: adrNaclMl,
+  amioGluGrid: amioGluMl,
+  naclGrid: nacl,
+  ch_drugs1_grid: drugs1,
+  ch_drugs2_grid: drugs2,
+  ch_manipulation1_grid: manipulation1,
+  ch_manipulation2_grid: manipulation2,
+  ch_pulse_carotid_grid: chPulseCart,
+  ch_pupil_reaction_grid: chPupReact
+};
+function updateAllChronoAccordionStatuses() {
+  CHRONO_GRID_ACCORDIONS.forEach(({
+    gridId
+  }) => {
+    const grid = GRID_INSTANCE_BY_ID[gridId];
+    if (!grid) return;
+    updateChronoAccordionStatus(gridId, grid.getData());
+  });
+}
+function createChronoGridAccordion(item) {
+  const section = document.getElementById(item.sectionId);
+  const grid = document.getElementById(item.gridId);
+  if (!section || !grid || grid.closest(".chrono-grid-accordion")) return null;
+  const host = grid.closest(".form-group") || section;
+  if (!host || host.closest(".chrono-grid-accordion")) return null;
+  const wrapper = document.createElement("div");
+  wrapper.className = "chrono-grid-accordion section-wrapper is-collapsed";
+  wrapper.dataset.chronoGridId = item.gridId;
+  const headerBtn = document.createElement("button");
+  headerBtn.type = "button";
+  headerBtn.className = "section-header-btn chrono-grid-header";
+  headerBtn.setAttribute("aria-expanded", "false");
+  const titleEl = document.createElement("span");
+  titleEl.className = "chrono-grid-title";
+  titleEl.innerHTML = getChronoAccordionTitle(host);
+  const statusEl = document.createElement("span");
+  statusEl.className = "chrono-grid-status is-empty";
+  statusEl.dataset.chronoGridStatus = item.gridId;
+  statusEl.innerHTML = EMPTY_STATUS_HTML;
+  headerBtn.append(titleEl, statusEl);
+  const content = document.createElement("div");
+  content.className = "form-section-content chrono-grid-content";
+  const firstLabel = Array.from(host.children).find(child => {
+    var _child$classList2;
+    return (_child$classList2 = child.classList) === null || _child$classList2 === void 0 ? void 0 : _child$classList2.contains("form-label");
+  });
+  firstLabel === null || firstLabel === void 0 || firstLabel.classList.add("chrono-grid-inner-label");
+  host.classList.add("chrono-grid-body");
+  host.parentElement.insertBefore(wrapper, host);
+  content.append(host);
+  wrapper.append(headerBtn, content);
+  return wrapper;
+}
+function initChronoGridAccordions() {
+  const wrappers = CHRONO_GRID_ACCORDIONS.map(item => createChronoGridAccordion(item)).filter(Boolean);
+  wrappers.forEach(wrapper => {
+    var _wrapper$querySelecto3;
+    (_wrapper$querySelecto3 = wrapper.querySelector(".chrono-grid-header")) === null || _wrapper$querySelecto3 === void 0 || _wrapper$querySelecto3.addEventListener("click", () => {
+      const shouldExpand = wrapper.classList.contains("is-collapsed");
+      wrappers.forEach(item => setChronoAccordionExpanded(item, false));
+      if (shouldExpand) setChronoAccordionExpanded(wrapper, true);
+    });
+  });
+  document.addEventListener("chrono-grid-datachange", event => {
+    var _event$detail, _event$detail2;
+    const gridId = (_event$detail = event.detail) === null || _event$detail === void 0 ? void 0 : _event$detail.gridId;
+    if (!gridId) return;
+    updateChronoAccordionStatus(gridId, (_event$detail2 = event.detail) === null || _event$detail2 === void 0 ? void 0 : _event$detail2.data);
+  });
+  updateAllChronoAccordionStatuses();
+}
 adrNaclMl.init();
 amioGluMl.init();
 defibEnergy.init();
@@ -860,6 +1040,7 @@ normalizeTimeInput(document.getElementById("end_transfer_team_m"), 59);
 initPstationSelectOptions();
 initUxSections();
 initAccordionBehavior();
+initChronoGridAccordions();
 initNavigator();
 setFormMode(DEFAULT_FORM_MODE);
 applyFormMode();
@@ -1380,12 +1561,17 @@ async function refreshArchiveStatus(archiveId) {
     });
   }
 }
+let isGenerateInFlight = false;
 (_document$getElementB24 = document.getElementById("applyBtn")) === null || _document$getElementB24 === void 0 || _document$getElementB24.addEventListener("click", async () => {
+  if (isGenerateInFlight) return;
+  const applyBtn = document.getElementById("applyBtn");
+  isGenerateInFlight = true;
+  if (applyBtn) applyBtn.disabled = true;
   clearKvError();
   const payload = buildPayload(grids);
   payload.archive_id = window.lastArchiveId || null;
   try {
-    var _data$archive_id, _data3, _data4, _data5, _data6, _data$version2, _data7;
+    var _data$archive_id, _data4, _data5, _data6, _data7, _data$version2, _data8;
     const resp = await fetch("/generate", {
       method: "POST",
       headers: {
@@ -1400,6 +1586,8 @@ async function refreshArchiveStatus(archiveId) {
       data = null;
     }
     if (!resp.ok) {
+      var _data3;
+      const errText = ((_data3 = data) === null || _data3 === void 0 ? void 0 : _data3.error) || `HTTP ${resp.status}`;
       if (resp.status === 409 && errText === "kv_num_exists") {
         highlightKvError();
         setGenerateStatus({
@@ -1419,9 +1607,9 @@ async function refreshArchiveStatus(archiveId) {
       });
       return;
     }
-    const archiveId = (_data$archive_id = (_data3 = data) === null || _data3 === void 0 ? void 0 : _data3.archive_id) !== null && _data$archive_id !== void 0 ? _data$archive_id : null;
+    const archiveId = (_data$archive_id = (_data4 = data) === null || _data4 === void 0 ? void 0 : _data4.archive_id) !== null && _data$archive_id !== void 0 ? _data$archive_id : null;
     window.lastArchiveId = archiveId;
-    if (((_data4 = data) === null || _data4 === void 0 ? void 0 : _data4.message) === "queued") {
+    if (((_data5 = data) === null || _data5 === void 0 ? void 0 : _data5.message) === "queued") {
       var _data$version;
       setGenerateStatus({
         status: `Сохранено. Поставлено в очередь на формирование. Архив #${archiveId}, версия ${data.version}. Статус: pending.`,
@@ -1432,7 +1620,7 @@ async function refreshArchiveStatus(archiveId) {
       await refreshArchiveStatus(archiveId);
       return;
     }
-    if (((_data5 = data) === null || _data5 === void 0 ? void 0 : _data5.message) === "saved_no_kv_num") {
+    if (((_data6 = data) === null || _data6 === void 0 ? void 0 : _data6.message) === "saved_no_kv_num") {
       setGenerateStatus({
         status: `Сохранено как черновик (архив #${archiveId}). Заполните номер квитанции (kv_num), затем снова нажмите «Сформировать».`,
         archiveId,
@@ -1442,7 +1630,7 @@ async function refreshArchiveStatus(archiveId) {
       highlightKvError();
       return;
     }
-    if ((_data6 = data) !== null && _data6 !== void 0 && _data6.error) {
+    if ((_data7 = data) !== null && _data7 !== void 0 && _data7.error) {
       setGenerateStatus({
         status: `Ошибка: ${data.error}`,
         archiveId,
@@ -1454,7 +1642,7 @@ async function refreshArchiveStatus(archiveId) {
     setGenerateStatus({
       status: "Получен неожиданный ответ сервера.",
       archiveId,
-      version: (_data$version2 = (_data7 = data) === null || _data7 === void 0 ? void 0 : _data7.version) !== null && _data$version2 !== void 0 ? _data$version2 : null,
+      version: (_data$version2 = (_data8 = data) === null || _data8 === void 0 ? void 0 : _data8.version) !== null && _data$version2 !== void 0 ? _data$version2 : null,
       renderStatus: "—"
     });
   } catch (_unused7) {
@@ -1464,6 +1652,9 @@ async function refreshArchiveStatus(archiveId) {
       version: null,
       renderStatus: "—"
     });
+  } finally {
+    isGenerateInFlight = false;
+    if (applyBtn) applyBtn.disabled = false;
   }
 });
 (_document$getElementB25 = document.getElementById("refreshStatusBtn")) === null || _document$getElementB25 === void 0 || _document$getElementB25.addEventListener("click", async () => {

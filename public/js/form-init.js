@@ -1698,7 +1698,15 @@ async function refreshArchiveStatus(archiveId) {
   }
 }
 
+let isGenerateInFlight = false;
+
 document.getElementById("applyBtn")?.addEventListener("click", async () => {
+  if (isGenerateInFlight) return;
+
+  const applyBtn = document.getElementById("applyBtn");
+  isGenerateInFlight = true;
+  if (applyBtn) applyBtn.disabled = true;
+
   clearKvError();
   const payload = buildPayload(grids);
   payload.archive_id = window.lastArchiveId || null;
@@ -1718,6 +1726,7 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
     }
 
     if (!resp.ok) {
+      const errText = data?.error || `HTTP ${resp.status}`;
       if (resp.status === 409 && errText === "kv_num_exists") {
         highlightKvError();
         setGenerateStatus({
@@ -1786,6 +1795,9 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
       version: null,
       renderStatus: "—"
     });
+  } finally {
+    isGenerateInFlight = false;
+    if (applyBtn) applyBtn.disabled = false;
   }
 });
 
@@ -1803,4 +1815,3 @@ document.getElementById("nowDate")?.addEventListener("change", () => {
   const preferredPrefix = previousCode ? formatKvPrefix(previousCode, year) : "";
   syncKvPrefixOptions(preferredPrefix);
 });
-
