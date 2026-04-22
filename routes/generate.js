@@ -8,7 +8,7 @@ const ERROR_MESSAGES = {
   internal_error: "Не удалось сохранить форму из-за внутренней ошибки сервера. Попробуйте еще раз позже.",
   archive_not_found: "Архивная запись не найдена.",
   invalid_archive_id: "Некорректный идентификатор архивной записи.",
-  kv_num_required_for_render: "Для формирования документа нужно заполнить номер квитанции (kv_num).",
+  kv_num_required_for_render: "Для формирования документа нужно заполнить номер карты вызова (kv_num).",
 };
 
 function errorResponse(error, details) {
