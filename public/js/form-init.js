@@ -1618,10 +1618,57 @@ const genVersionEl = document.getElementById("genVersion");
 const genRenderStatusEl = document.getElementById("genRenderStatus");
 
 function setGenerateStatus({ status, archiveId, version, renderStatus }) {
-  if (genStatusEl && typeof status === "string") genStatusEl.textContent = status;
+  if (genStatusEl && typeof status === "string") {
+    genStatusEl.style.whiteSpace = "pre-line";
+    genStatusEl.textContent = status;
+  }
   if (genArchiveIdEl) genArchiveIdEl.textContent = `Архив: ${archiveId ?? "—"}`;
   if (genVersionEl) genVersionEl.textContent = `Версия: ${version ?? "—"}`;
   if (genRenderStatusEl) genRenderStatusEl.textContent = `DOCX/PDF: ${renderStatus || "—"}`;
+}
+
+function formatErrorDetails(details) {
+  if (!Array.isArray(details) || details.length === 0) return "";
+
+  const lines = details.map((item) => {
+    if (item && typeof item === "object") {
+      const path = item.path || item.field || "поле";
+      const message = item.message || item.error || "некорректное значение";
+      return `- ${path}: ${message}`;
+    }
+    return `- ${String(item)}`;
+  });
+
+  return lines.join("\n");
+}
+
+function getFriendlyGenerateErrorMessage(errorCode, httpStatus) {
+  if (errorCode === "validation_error") {
+    return "Проверьте заполнение формы. Некоторые поля содержат некорректные значения.";
+  }
+  if (errorCode === "kv_num_exists") {
+    return "Карта с таким kv_num уже существует. Загрузите существующую карту или измените номер.";
+  }
+  if (errorCode === "internal_error") {
+    return "Не удалось сохранить форму из-за внутренней ошибки сервера. Попробуйте еще раз позже.";
+  }
+  if (errorCode === "archive_not_found") {
+    return "Архивная запись не найдена. Обновите страницу и попробуйте снова.";
+  }
+  if (errorCode === "invalid_archive_id") {
+    return "Некорректный идентификатор архивной записи. Обновите страницу и попробуйте снова.";
+  }
+  if (errorCode === "kv_num_required_for_render") {
+    return "Для формирования документа нужно заполнить номер карты вызова (kv_num).";
+  }
+  return `Ошибка сервера: HTTP ${httpStatus}`;
+}
+
+function formatGenerateError(resp, data) {
+  const errorCode = data?.error;
+  const message = data?.message || getFriendlyGenerateErrorMessage(errorCode, resp.status);
+  const detailsText = formatErrorDetails(data?.details);
+  return detailsText ? `${message}\nДетали:\n${detailsText}` : message;
 }
 
 function getKvField() {
@@ -1661,7 +1708,7 @@ async function refreshArchiveStatus(archiveId) {
     }
 
     if (!resp.ok) {
-      const errText = data?.error || `HTTP ${resp.status}`;
+      const errText = formatGenerateError(resp, data);
       setGenerateStatus({
         status: `Ошибка: ${errText}`,
         archiveId,
@@ -1726,11 +1773,11 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
     }
 
     if (!resp.ok) {
-      const errText = data?.error || `HTTP ${resp.status}`;
-      if (resp.status === 409 && errText === "kv_num_exists") {
+      const errText = formatGenerateError(resp, data);
+      if (resp.status === 409 && data?.error === "kv_num_exists") {
         highlightKvError();
         setGenerateStatus({
-          status: "kv_num уже существует, загрузите карту",
+          status: errText,
           archiveId: window.lastArchiveId || null,
           version: null,
           renderStatus: "—"
@@ -1763,7 +1810,7 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
 
     if (data?.message === "saved_no_kv_num") {
       setGenerateStatus({
-        status: `Сохранено как черновик (архив #${archiveId}). Заполните номер квитанции (kv_num), затем снова нажмите «Сформировать».`,
+        status: `Сохранено как черновик (архив #${archiveId}). Заполните номер карты вызова (kv_num), затем снова нажмите «Сформировать».`,
         archiveId,
         version: null,
         renderStatus: "версия не создана"
@@ -1774,7 +1821,7 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
 
     if (data?.error) {
       setGenerateStatus({
-        status: `Ошибка: ${data.error}`,
+        status: formatGenerateError({ status: 200 }, data),
         archiveId,
         version: null,
         renderStatus: "—"
