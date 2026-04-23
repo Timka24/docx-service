@@ -113,7 +113,9 @@ function parseKvNum(kvNum) {
 function setDisplay(id, isVisible) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.style.display = isVisible ? "" : "none";
+  const target = el.closest(".chrono-grid-accordion") || el;
+  if (target !== el) el.style.display = "";
+  target.style.display = isVisible ? "" : "none";
 }
 
 const CHRONO_SECTION_SELECTOR = "[data-chrono-section]";
@@ -963,7 +965,7 @@ document.getElementById("clearMedTherapy")?.addEventListener("click", () => {
   updateMedicationVisibility();
 });
 document.getElementById("clearOtherDrugsBtn")?.addEventListener("click", () => {
-  document.querySelectorAll('input[name="other_drugs"]').forEach((r) => (r.checked = false));
+  setRadioByName("other_drugs", "no");
   updateMedicationVisibility();
 });
 document.getElementById("clearSlrBtn")?.addEventListener("click", () => {
@@ -1096,6 +1098,7 @@ initPstationSelectOptions();
 initUxSections();
 initAccordionBehavior();
 initChronoGridAccordions();
+updateMedicationVisibility();
 initNavigator();
 setFormMode(DEFAULT_FORM_MODE);
 applyFormMode();
@@ -1314,7 +1317,7 @@ function clearForm(options = {})  {
   if (slrStop5) slrStop5.checked = false;
   const slrStop6 = document.getElementById("slr_stop_6");
   if (slrStop6) slrStop6.checked = false;
-  document.querySelectorAll('input[name="other_drugs"]').forEach((r) => (r.checked = false));
+  setRadioByName("other_drugs", "no");
   toggleSlrStopOtherText();
   updateMedicationVisibility();
   updateEndSectionVisibility();
@@ -1449,12 +1452,12 @@ function loadArchiveToForm(archive) {
   setRadioByName("airway_phase", raw.a_v === "☑" ? "during" : (raw.a_d === "☑" ? "before" : ""));
   setRadioByName("vascular_phase", raw.v_v === "☑" ? "during" : (raw.v_d === "☑" ? "before" : ""));
   setRadioByName("ivl_alt", raw.t_3 === "☑" ? "3" : (raw.t_15 === "☑" ? "15" : (raw.t_30 === "☑" ? "30" : "")));
-  setRadioByName("med_therapy", raw.med_t_y === "☑" ? "yes" : (raw.med_t_n === "☑" ? "no" : ""));
   const hasOtherDrugData =
     String(raw.ch_drugs1 || "").trim() !== "" ||
     String(raw.ch_drugs2 || "").trim() !== "" ||
     arrayOrEmpty(raw.ch_drugs1_marks).some((v) => String(v || "").trim() !== "") ||
     arrayOrEmpty(raw.ch_drugs2_marks).some((v) => String(v || "").trim() !== "");
+  setRadioByName("med_therapy", raw.med_t_y === "☑" ? "yes" : (raw.med_t_n === "☑" ? "no" : (hasOtherDrugData ? "yes" : "")));
   setRadioByName("other_drugs", raw.other_drugs || (hasOtherDrugData ? "yes" : "no"));
   setRadioByName("end_resp", raw.end_resp || (raw.end_resp_spont === "☑" ? "spont" : (raw.end_resp_ivl === "☑" ? "ivl" : "")));
 

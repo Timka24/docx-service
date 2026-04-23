@@ -5,12 +5,12 @@ const { buildTemplateData } = require("../lib/template-data");
 
 test("buildTemplateData sets slr_and when AND is selected", () => {
   const data = buildTemplateData({ slr: "and" });
-  assert.equal(data.slr_and, "+");
+  assert.equal(data.slr_and, "☑");
 });
 
 test("buildTemplateData keeps slr_and empty for other options", () => {
   const data = buildTemplateData({ slr: "comp_ivl" });
-  assert.equal(data.slr_and, "");
+  assert.equal(data.slr_and, "☐");
 });
 
 test("buildTemplateData normalizes i_t to HH:MM", () => {
