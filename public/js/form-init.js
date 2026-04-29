@@ -24,14 +24,12 @@ const IVL_DEVICE_OPTIONS = [
 ];
 
 const DEFIB_MODEL_OPTIONS = [
-  "AXION ДКИ-Н-11",
-  "BeneHeart D3",
-  "ZOL AED Plus",
-  "LifePak",
+  "Mindray BeneHeart D3",
+  "ДКИ-Н-11 (ЭКГ) Аксион",
+  "LifePak 1000",
+  "Zoll AED Plus",
   "Comen",
-  "Corpuls3",
-  "Mindray BeneHeart",
-  'ДКИ-Н-11 "Аксион"',
+  "CORPULS3",
 ];
 
 function initSelectOptions(selectId, options) {
