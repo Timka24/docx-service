@@ -100,12 +100,14 @@ Responsibilities:
 - manage chronometry grids and accordion state
 - assemble payload
 - send data to backend
+- display backend validation_error details near mapped fields and in the generate status panel
 - restore draft from localStorage
 - keep UI state compatible with saved archive data
 
 Rules:
 - do not change payload structure without updating the relevant backend mapping/validation modules (primarily lib/template-data.js, lib/validation.js) and related tests
 - kv_num format must remain compatible with backend validation and archive lookup
+- validation_error field mapping currently lives in public/js/form-init.js; keep mappings for kv_num, pr_date/pr_date_iso_raw, and end_date/end_date_iso_raw synchronized with real form ids/names
 - if a UI field controls visibility, ensure behavior works on first load, manual change, clear/reset, and archive/draft restore
 - keep source and loaded browser bundles synchronized for the affected page
 
@@ -168,6 +170,11 @@ Responsibilities:
 - trigger document rendering
 - return archive data
 
+Rules:
+- POST /generate must validate payload and require a renderable call date before saveArchive/createRenderVersion/queue creation
+- valid renderable call date means pr_date_iso_raw or pr_date passes the strict date helper
+- POST /api/archive/save may remain draft-friendly and should not require the call date unless product behavior changes
+
 
 VALIDATION_AGENT
 --------------------------------------------------
@@ -175,14 +182,23 @@ Responsibility:
 Validate incoming CPR form data.
 
 Files:
+lib/date-utils.js
 lib/validation.js
 test/*.test.js
 
 Responsibilities:
 - enforce required fields
 - validate kv_num
-- validate timestamps
+- validate timestamps and strict calendar dates
 - reject malformed requests
+
+Rules:
+- strict date parsing supports DD.MM.YYYY and YYYY-MM-DD through lib/date-utils.js
+- impossible dates such as 31.02.2024, 2024-02-31, and 29.02.2023 must be rejected; 29.02.2024 must be accepted
+- validated date fields include pr_date, pr_date_iso_raw, end_date, and end_date_iso_raw
+- empty date strings are allowed by validatePayload for draft compatibility; POST /generate adds its own required call-date check
+- unknown fields are allowed only when they are strings within the default text limit; object, array, number, boolean, and null values must be rejected with path information
+- regular grid values are limited to 8 characters per element; numeric grid values are limited to 10 characters per element and still use the numeric regex for non-empty values
 
 
 NORMALIZATION_AGENT
@@ -206,12 +222,14 @@ Build the data object consumed by the DOCX template.
 
 Files:
 lib/template-data.js
+lib/date-utils.js
 test/template-data.test.js
 
 Responsibilities:
 - map normalized archive data to template variables
 - keep checkbox marks and template placeholders consistent
 - preserve backwards compatibility with existing archive raw_data
+- normalize valid dates for template output without turning impossible dates into ISO strings
 
 Rules:
 - template variables must match template.docx placeholders
@@ -285,6 +303,7 @@ Generate PDF documents.
 
 Files:
 worker/pdf-worker.js
+lib/date-utils.js
 
 Responsibilities:
 - detect ready DOCX
@@ -292,6 +311,11 @@ Responsibilities:
 - receive PDF
 - store PDF
 - update render status
+
+Rules:
+- PDF path date parsing must use the strict date helper and must not fall back to today's date
+- resolvePrDateParts date precedence is data.pr_date_iso -> data.pr_date -> raw_data.pr_date_iso_raw -> raw_data.nowDate -> raw_data.pr_date
+- pdf-worker.js should not start its worker loop when required from tests; normal CLI startup must still run the worker
 
 External dependency:
 Gotenberg
@@ -356,6 +380,9 @@ FORM SUBMIT
      |
      v
 API VALIDATION
+     |
+     v
+POST /generate REQUIRED CALL DATE CHECK
      |
      v
 NORMALIZATION

@@ -1,6 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 const { Pool } = require("pg");
+const { parseStrictDate } = require("../lib/date-utils");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -49,31 +50,9 @@ function safeErrorText(error) {
 }
 
 function parseDateForPdfPath(value) {
-  if (typeof value !== "string") return null;
-  const raw = value.trim();
-  if (!raw) return null;
-
-  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (iso) {
-    const [, yyyy, mm, dd] = iso;
-    const month = Number(mm);
-    const day = Number(dd);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return { yyyy, mm, dd };
-    }
-  }
-
-  const ru = raw.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  if (ru) {
-    const [, dd, mm, yyyy] = ru;
-    const month = Number(mm);
-    const day = Number(dd);
-    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      return { yyyy, mm, dd };
-    }
-  }
-
-  return null;
+  const parts = parseStrictDate(value);
+  if (!parts) return null;
+  return { yyyy: parts.yyyy, mm: parts.mm, dd: parts.dd };
 }
 
 function buildPdfKey(parts, kvNum) {
@@ -193,6 +172,7 @@ function resolvePrDateParts(archive) {
   return (
     parseDateForPdfPath(archive?.data?.pr_date_iso)
     || parseDateForPdfPath(archive?.data?.pr_date)
+    || parseDateForPdfPath(archive?.raw_data?.pr_date_iso_raw)
     || parseDateForPdfPath(archive?.raw_data?.nowDate)
     || parseDateForPdfPath(archive?.raw_data?.pr_date)
   );
@@ -354,23 +334,31 @@ async function runWorker() {
   console.log("PDF worker stopped");
 }
 
-process.on("SIGTERM", () => {
-  stopRequested = true;
-});
+if (require.main === module) {
+  process.on("SIGTERM", () => {
+    stopRequested = true;
+  });
 
-process.on("SIGINT", () => {
-  stopRequested = true;
-});
+  process.on("SIGINT", () => {
+    stopRequested = true;
+  });
 
-process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled rejection in PDF worker:", reason);
-});
+  process.on("unhandledRejection", (reason) => {
+    console.error("Unhandled rejection in PDF worker:", reason);
+  });
 
-process.on("uncaughtException", (error) => {
-  console.error("Uncaught exception in PDF worker:", error);
-});
+  process.on("uncaughtException", (error) => {
+    console.error("Uncaught exception in PDF worker:", error);
+  });
 
-runWorker().catch((error) => {
-  console.error("PDF worker fatal startup error:", error);
-  process.exit(1);
-});
+  runWorker().catch((error) => {
+    console.error("PDF worker fatal startup error:", error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  buildPdfKey,
+  parseDateForPdfPath,
+  resolvePrDateParts,
+};

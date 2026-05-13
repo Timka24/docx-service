@@ -1,6 +1,7 @@
 const express = require("express");
 const { HttpError, saveArchive, createRenderVersion } = require("../lib/archive-service");
 const { ValidationError, validatePayload } = require("../lib/validation");
+const { parseStrictDate } = require("../lib/date-utils");
 
 const ERROR_MESSAGES = {
   validation_error: "Проверьте заполнение формы. Некоторые поля содержат некорректные значения.",
@@ -21,12 +22,27 @@ function errorResponse(error, details) {
   return body;
 }
 
+function requireRenderablePrDate(payload) {
+  if (
+    parseStrictDate(payload?.pr_date_iso_raw)
+    || parseStrictDate(payload?.pr_date)
+  ) {
+    return;
+  }
+
+  throw new ValidationError([{
+    path: "pr_date",
+    message: "Дата приёма вызова обязательна для формирования PDF",
+  }]);
+}
+
 function createGenerateRouter(pool) {
   const router = express.Router();
 
   router.post("/generate", async (req, res) => {
     try {
       validatePayload(req.body);
+      requireRenderablePrDate(req.body);
       const saved = await saveArchive(pool, req.body);
 
       try {
@@ -63,5 +79,7 @@ function createGenerateRouter(pool) {
 
   return router;
 }
+
+createGenerateRouter.requireRenderablePrDate = requireRenderablePrDate;
 
 module.exports = createGenerateRouter;

@@ -2,3 +2,7 @@ node_modules/
 test.tar
 backups/
 .continue/
+.Trash-1000/
+.codex
+..gitignore.swp
+.agents/

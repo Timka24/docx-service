@@ -1605,15 +1605,45 @@ const genStatusEl = document.getElementById("genStatus");
 const genArchiveIdEl = document.getElementById("genArchiveId");
 const genVersionEl = document.getElementById("genVersion");
 const genRenderStatusEl = document.getElementById("genRenderStatus");
+const generateStatusBlockEl = document.getElementById("generateStatusBlock");
 
-function setGenerateStatus({ status, archiveId, version, renderStatus }) {
+function setGenerateStatus({ status, archiveId, version, renderStatus, state = "neutral", details = [] }) {
+  if (generateStatusBlockEl) {
+    generateStatusBlockEl.classList.remove("status-error", "status-pending", "status-success", "status-neutral");
+    generateStatusBlockEl.classList.add(`status-${state}`);
+  }
   if (genStatusEl && typeof status === "string") {
     genStatusEl.style.whiteSpace = "pre-line";
-    genStatusEl.textContent = status;
+    genStatusEl.innerHTML = "";
+    const title = document.createElement("strong");
+    title.className = "generate-status-title";
+    title.textContent = state === "error" ? "Ошибка" : state === "success" ? "Готово" : state === "pending" ? "Формирование выполняется" : "Статус";
+    const body = document.createElement("div");
+    body.textContent = status;
+    genStatusEl.append(title, body);
+    if (state === "error" && Array.isArray(details) && details.length > 0) {
+      const list = document.createElement("ul");
+      list.className = "generate-status-details";
+      details.forEach(item => {
+        const li = document.createElement("li");
+        const path = item?.path || item?.field || "поле";
+        const message = item?.message || item?.error || "некорректное значение";
+        li.textContent = `${path}: ${message}`;
+        list.appendChild(li);
+      });
+      genStatusEl.appendChild(list);
+    }
   }
-  if (genArchiveIdEl) genArchiveIdEl.textContent = `Архив: ${archiveId ?? "—"}`;
-  if (genVersionEl) genVersionEl.textContent = `Версия: ${version ?? "—"}`;
-  if (genRenderStatusEl) genRenderStatusEl.textContent = `DOCX/PDF: ${renderStatus || "—"}`;
+  const hasRenderMeta = renderStatus && renderStatus !== "—";
+  const showMeta = state !== "error" || archiveId != null || version != null || hasRenderMeta;
+  [genArchiveIdEl, genVersionEl, genRenderStatusEl].forEach(el => {
+    if (el) el.hidden = !showMeta;
+  });
+  if (showMeta) {
+    if (genArchiveIdEl) genArchiveIdEl.textContent = `Архив: ${archiveId ?? "—"}`;
+    if (genVersionEl) genVersionEl.textContent = `Версия: ${version ?? "—"}`;
+    if (genRenderStatusEl) genRenderStatusEl.textContent = `DOCX/PDF: ${renderStatus || "—"}`;
+  }
 }
 
 function formatErrorDetails(details) {
@@ -1664,9 +1694,64 @@ function getKvField() {
   return document.getElementById("kvNumber") || document.querySelector('input[name="kv_num"]');
 }
 
+const VALIDATION_FIELD_MAP = {
+  kv_num: "kvNumber",
+  pr_date: "nowDate",
+  pr_date_iso_raw: "nowDate",
+  end_date: "end_date",
+  end_date_iso_raw: "end_date"
+};
+
+function resolveFieldForValidationPath(path) {
+  const key = String(path || "").replace(/\[.*$/, "");
+  const mapped = VALIDATION_FIELD_MAP[key] || key;
+  return document.getElementById(mapped) || document.querySelector(`[name="${mapped}"]`);
+}
+
+function clearFieldValidationError(field) {
+  if (!field) return;
+  field.classList.remove("field-invalid");
+  field.classList.remove("error");
+  field.removeAttribute("aria-invalid");
+  const group = field.closest(".form-group") || field.parentElement;
+  const message = group?.querySelector(`.field-error-message[data-error-for="${field.id || field.name}"]`);
+  message?.remove();
+}
+
+function clearValidationErrors() {
+  document.querySelectorAll(".field-invalid, .input-field.error").forEach(field => {
+    clearFieldValidationError(field);
+  });
+  document.querySelectorAll(".field-error-message").forEach(message => message.remove());
+}
+
+function showValidationErrors(details) {
+  if (!Array.isArray(details) || details.length === 0) return;
+  let firstField = null;
+  details.forEach(item => {
+    const field = resolveFieldForValidationPath(item?.path || item?.field);
+    if (!field) return;
+    if (!firstField) firstField = field;
+    clearFieldValidationError(field);
+    field.classList.add("field-invalid");
+    field.classList.add("error");
+    field.setAttribute("aria-invalid", "true");
+    const group = field.closest(".form-group") || field.parentElement;
+    const message = document.createElement("div");
+    message.className = "field-error-message";
+    message.dataset.errorFor = field.id || field.name || "";
+    message.textContent = item?.message || item?.error || "Некорректное значение";
+    group?.appendChild(message);
+  });
+  if (firstField) {
+    firstField.scrollIntoView({ behavior: "smooth", block: "center" });
+    firstField.focus({ preventScroll: true });
+  }
+}
+
 function clearKvError() {
   const kvField = getKvField();
-  if (kvField) kvField.classList.remove("error");
+  if (kvField) clearFieldValidationError(kvField);
 }
 
 function highlightKvError() {
@@ -1722,7 +1807,8 @@ async function refreshArchiveStatus(archiveId) {
       status: `Архив #${archiveId}: статус версии обновлён.`,
       archiveId,
       version: latestRender.version,
-      renderStatus: `${latestRender.docx_status}/${latestRender.pdf_status}`
+      renderStatus: `${latestRender.docx_status}/${latestRender.pdf_status}`,
+      state: latestRender.docx_status === "ready" && latestRender.pdf_status === "ready" ? "success" : "pending"
     });
   } catch {
     setGenerateStatus({
@@ -1743,6 +1829,7 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
   isGenerateInFlight = true;
   if (applyBtn) applyBtn.disabled = true;
 
+  clearValidationErrors();
   clearKvError();
   const payload = buildPayload(grids);
   payload.archive_id = window.lastArchiveId || null;
@@ -1769,16 +1856,22 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
           status: errText,
           archiveId: window.lastArchiveId || null,
           version: null,
-          renderStatus: "—"
+          renderStatus: "—",
+          state: "error"
         });
         await trySuggestLoadByKv();
         return;
       }
+      if (data?.error === "validation_error") {
+        showValidationErrors(data?.details);
+      }
       setGenerateStatus({
-        status: `Ошибка: ${errText}`,
+        status: data?.error === "validation_error" ? data?.message || getFriendlyGenerateErrorMessage(data?.error, resp.status) : `Ошибка: ${errText}`,
         archiveId: window.lastArchiveId || null,
         version: null,
-        renderStatus: "—"
+        renderStatus: "—",
+        state: "error",
+        details: data?.details
       });
       return;
     }
@@ -1791,7 +1884,8 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
         status: `Сохранено. Поставлено в очередь на формирование. Архив #${archiveId}, версия ${data.version}. Статус: pending.`,
         archiveId,
         version: data.version ?? null,
-        renderStatus: "pending/pending"
+        renderStatus: "pending/pending",
+        state: "pending"
       });
       await refreshArchiveStatus(archiveId);
       return;
@@ -1802,7 +1896,8 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
         status: `Сохранено как черновик (архив #${archiveId}). Заполните номер карты вызова (kv_num), затем снова нажмите «Сформировать».`,
         archiveId,
         version: null,
-        renderStatus: "версия не создана"
+        renderStatus: "версия не создана",
+        state: "error"
       });
       highlightKvError();
       return;
@@ -1813,7 +1908,8 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
         status: formatGenerateError({ status: 200 }, data),
         archiveId,
         version: null,
-        renderStatus: "—"
+        renderStatus: "—",
+        state: "error"
       });
       return;
     }
@@ -1822,14 +1918,16 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
       status: "Получен неожиданный ответ сервера.",
       archiveId,
       version: data?.version ?? null,
-      renderStatus: "—"
+      renderStatus: "—",
+      state: "error"
     });
   } catch {
     setGenerateStatus({
       status: "Ошибка сети/сервер недоступен",
       archiveId: null,
       version: null,
-      renderStatus: "—"
+      renderStatus: "—",
+      state: "error"
     });
   } finally {
     isGenerateInFlight = false;
@@ -1841,6 +1939,10 @@ document.getElementById("refreshStatusBtn")?.addEventListener("click", async () 
   await refreshArchiveStatus(window.lastArchiveId);
 });
 
+document.querySelectorAll("input, select, textarea").forEach(field => {
+  field.addEventListener("input", () => clearFieldValidationError(field));
+  field.addEventListener("change", () => clearFieldValidationError(field));
+});
 getKvField()?.addEventListener("input", clearKvError);
 document.getElementById("kvNumber")?.addEventListener("blur", trySuggestLoadByKv);
 document.getElementById("kvPrefix")?.addEventListener("blur", trySuggestLoadByKv);
