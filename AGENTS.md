@@ -18,27 +18,51 @@ The system consists of the following major components:
 10) DOCUMENT TEMPLATE SYSTEM
 11) FRONTEND BUILD PIPELINE (Babel)
 12) TEST SUITE (node --test)
+13) NGINX REVERSE PROXY
 
 
 MAIN DATA FLOW
 --------------------------------------------------
 
-User -> Form UI -> API -> Database
-                         |
-                         v
-                    Render Queue
-                         |
-                         v
-                  DOCX Worker
-                         |
-                         v
-                   PDF Worker
-                         |
-                         v
-                    File Storage
-                         |
-                         v
-                      Archive UI
+User -> Nginx -> Form UI -> API -> Database
+                                  |
+                                  v
+                             Render Queue
+                                  |
+                                  v
+                           DOCX Worker
+                                  |
+                                  v
+                            PDF Worker
+                                  |
+                                  v
+                             File Storage
+                                  |
+                                  v
+                               Archive UI
+
+
+DOCKER / NGINX EDGE
+==================================================
+
+Current docker-compose behavior:
+- app exposes port 3000 only inside the Docker network.
+- nginx publishes host ports 80 and 443.
+- nginx proxies HTTPS traffic to http://app:3000.
+- nginx redirects HTTP port 80 to HTTPS.
+- nginx configuration lives in nginx/default.conf.
+- TLS certificate files are mounted from nginx/certs/ into /etc/nginx/certs/.
+
+Files:
+docker-compose.yaml
+nginx/default.conf
+.gitignore
+
+Rules:
+- do not publish app port 3000 with ports in docker-compose unless intentionally bypassing nginx.
+- keep nginx/default.conf upstream aligned with the compose service name and port, currently app:3000.
+- keep nginx/certs/ ignored; do not commit local certificates or private keys.
+- if server_name, certificate filenames, or exposed ports change, update README.md and this section.
 
 
 FRONTEND BUILD PIPELINE

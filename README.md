@@ -17,6 +17,7 @@
   - версионирование рендеров (`archive_renders`);
   - асинхронная генерация DOCX отдельным воркером;
   - асинхронная генерация PDF отдельным воркером через Gotenberg с retry/backoff.
+  - Docker Compose-стек с nginx reverse proxy для HTTP/HTTPS.
   - UX-слой формы: режимы `basic/full`, секционная навигация, прогресс заполнения, восстановление черновика и подсветка серверных ошибок валидации.
 - **В развитии:** расширение бизнес-валидации обязательных полей и UX сценариев повторной загрузки данных.
 
@@ -71,6 +72,8 @@ docx-service/
 ├── worker/
 │   ├── docx-worker.js        # Обработка docx_status=pending
 │   └── pdf-worker.js         # Обработка pdf_status=pending + retry/backoff
+├── nginx/
+│   └── default.conf          # Reverse proxy: HTTP redirect + HTTPS proxy to app:3000
 ├── migrations/
 │   ├── 001_init.sql
 │   ├── 002_archive_versions.sql
@@ -120,6 +123,8 @@ docx-service/
 5. `worker/docx-worker.js` забирает pending-задачу, генерирует DOCX, сохраняет файл и отмечает `docx_status = ready`.
 6. `worker/pdf-worker.js` обрабатывает задачи с готовым DOCX, выбирает дату для PDF path в порядке `data.pr_date_iso → data.pr_date → raw_data.pr_date_iso_raw → raw_data.nowDate → raw_data.pr_date`, конвертирует через Gotenberg и отмечает `pdf_status = ready`.
 7. UI архива позволяет отслеживать статусы и скачивать итоговые файлы.
+
+В Docker Compose входящий HTTP/HTTPS-трафик принимает nginx и проксирует запросы к Express-приложению внутри сети Docker на `app:3000`.
 
 ## API и маршруты
 
@@ -303,13 +308,14 @@ docker run --rm -p 3000:3000 \
   docx-service
 ```
 
-## Docker Compose (app + docx-worker + pdf-worker + gotenberg + postgres)
+## Docker Compose (nginx + app + docx-worker + pdf-worker + gotenberg + postgres)
 
 ### Что поднимается
 
 `docker-compose.yaml` поднимает:
 - `db` — PostgreSQL 16 + volume `db_data`;
-- `app` — Express API на `3000:3000`;
+- `app` — Express API на внутреннем порту `3000`, доступном сервисам в сети Docker;
+- `nginx` — reverse proxy на внешних портах `80` и `443`, проксирует HTTPS-запросы на `app:3000`;
 - `worker` — DOCX-воркер из того же образа;
 - `pdf-worker` — PDF-воркер из того же образа;
 - `gotenberg` — конвертация DOCX → PDF.
@@ -317,9 +323,18 @@ docker run --rm -p 3000:3000 \
 ### Подготовка директорий на хосте
 
 ```bash
-sudo mkdir -p /srv/slr-docx /srv/slr-pdf
-sudo chown -R "$USER":"$USER" /srv/slr-docx /srv/slr-pdf
+sudo mkdir -p /srv/slr-docx /srv/slr-pdf nginx/certs
+sudo chown -R "$USER":"$USER" /srv/slr-docx /srv/slr-pdf nginx/certs
 ```
+
+Для HTTPS nginx ожидает сертификат и ключ:
+
+```text
+nginx/certs/slr.local.crt
+nginx/certs/slr.local.key
+```
+
+Папка `nginx/certs/` добавлена в `.gitignore`, чтобы локальные сертификаты и приватные ключи не попадали в репозиторий.
 
 ### Перечень команд Docker Compose
 
@@ -335,6 +350,7 @@ docker compose up -d --build worker
 docker compose up -d --build pdf-worker
 docker compose up -d --build gotenberg
 docker compose up -d --build db
+docker compose up -d --build nginx
 ```
 
 #### Статус и диагностика
@@ -352,6 +368,7 @@ docker compose logs -f worker
 docker compose logs -f pdf-worker
 docker compose logs -f db
 docker compose logs -f gotenberg
+docker compose logs -f nginx
 ```
 
 #### Выполнение команд внутри контейнеров

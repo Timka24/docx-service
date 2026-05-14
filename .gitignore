@@ -6,3 +6,4 @@ backups/
 .codex
 ..gitignore.swp
 .agents/
+nginx/certs/
