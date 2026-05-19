@@ -1794,6 +1794,8 @@ async function refreshArchiveStatus(archiveId) {
 
     const latestRender = Array.isArray(data.renders) ? data.renders[0] : null;
     if (!latestRender) {
+      isRenderPending = false;
+      setApplyButtonDisabled(isGenerateInFlight);
       setGenerateStatus({
         status: "Сохранено. Версия ещё не создана.",
         archiveId,
@@ -1803,12 +1805,15 @@ async function refreshArchiveStatus(archiveId) {
       return;
     }
 
+    isRenderPending = isRenderStillPending(latestRender);
+    setApplyButtonDisabled(isGenerateInFlight || isRenderPending);
+    const renderFailed = latestRender.docx_status === "failed" || latestRender.pdf_status === "failed";
     setGenerateStatus({
       status: `Архив #${archiveId}: статус версии обновлён.`,
       archiveId,
       version: latestRender.version,
       renderStatus: `${latestRender.docx_status}/${latestRender.pdf_status}`,
-      state: latestRender.docx_status === "ready" && latestRender.pdf_status === "ready" ? "success" : "pending"
+      state: latestRender.docx_status === "ready" && latestRender.pdf_status === "ready" ? "success" : (renderFailed ? "error" : "pending")
     });
   } catch {
     setGenerateStatus({
@@ -1821,13 +1826,35 @@ async function refreshArchiveStatus(archiveId) {
 }
 
 let isGenerateInFlight = false;
+let isRenderPending = false;
 
-document.getElementById("applyBtn")?.addEventListener("click", async () => {
+function setApplyButtonDisabled(disabled) {
+  const applyBtn = document.getElementById("applyBtn");
+  if (applyBtn) applyBtn.disabled = disabled;
+}
+
+function isRenderStillPending(render) {
+  return render?.docx_status === "pending" || render?.pdf_status === "pending";
+}
+
+function unlockGenerateAfterFormChange() {
+  if (!isRenderPending || isGenerateInFlight) return;
+  isRenderPending = false;
+  setApplyButtonDisabled(false);
+  setGenerateStatus({
+    status: "Данные изменены. Для формирования новой версии нажмите «Сформировать».",
+    archiveId: window.lastArchiveId || null,
+    version: null,
+    renderStatus: "—",
+    state: "neutral"
+  });
+}
+
+async function runGenerate() {
   if (isGenerateInFlight) return;
 
-  const applyBtn = document.getElementById("applyBtn");
   isGenerateInFlight = true;
-  if (applyBtn) applyBtn.disabled = true;
+  setApplyButtonDisabled(true);
 
   clearValidationErrors();
   clearKvError();
@@ -1879,7 +1906,21 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
     const archiveId = data?.archive_id ?? null;
     window.lastArchiveId = archiveId;
 
+    if (data?.already_pending) {
+      isRenderPending = true;
+      setGenerateStatus({
+        status: "Формирование уже выполняется. Дождитесь завершения текущей версии.",
+        archiveId,
+        version: data.version ?? null,
+        renderStatus: "pending",
+        state: "pending"
+      });
+      await refreshArchiveStatus(archiveId);
+      return;
+    }
+
     if (data?.message === "queued") {
+      isRenderPending = true;
       setGenerateStatus({
         status: `Сохранено. Поставлено в очередь на формирование. Архив #${archiveId}, версия ${data.version}. Статус: pending.`,
         archiveId,
@@ -1931,8 +1972,15 @@ document.getElementById("applyBtn")?.addEventListener("click", async () => {
     });
   } finally {
     isGenerateInFlight = false;
-    if (applyBtn) applyBtn.disabled = false;
+    setApplyButtonDisabled(isRenderPending);
   }
+}
+
+document.getElementById("applyBtn")?.addEventListener("click", runGenerate);
+
+document.getElementById("docxForm")?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  runGenerate();
 });
 
 document.getElementById("refreshStatusBtn")?.addEventListener("click", async () => {
@@ -1940,8 +1988,14 @@ document.getElementById("refreshStatusBtn")?.addEventListener("click", async () 
 });
 
 document.querySelectorAll("input, select, textarea").forEach((field) => {
-  field.addEventListener("input", () => clearFieldValidationError(field));
-  field.addEventListener("change", () => clearFieldValidationError(field));
+  field.addEventListener("input", () => {
+    clearFieldValidationError(field);
+    unlockGenerateAfterFormChange();
+  });
+  field.addEventListener("change", () => {
+    clearFieldValidationError(field);
+    unlockGenerateAfterFormChange();
+  });
 });
 getKvField()?.addEventListener("input", clearKvError);
 document.getElementById("kvNumber")?.addEventListener("blur", trySuggestLoadByKv);

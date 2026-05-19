@@ -397,9 +397,12 @@ function createArchiveRouter(pool) {
     try {
       const render = await createRenderVersion(pool, id);
       return res.json({
+        ok: true,
         archive_id: id,
         render_id: render.renderId,
         version: render.version,
+        already_pending: Boolean(render.alreadyPending),
+        message: render.alreadyPending ? "Формирование уже выполняется" : "queued",
       });
     } catch (e) {
       if (e instanceof ValidationError) {

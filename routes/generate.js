@@ -48,10 +48,12 @@ function createGenerateRouter(pool) {
       try {
         const render = await createRenderVersion(pool, saved.archiveId);
         return res.json({
+          ok: true,
           archive_id: saved.archiveId,
           render_id: render.renderId,
           version: render.version,
-          message: "queued",
+          already_pending: Boolean(render.alreadyPending),
+          message: render.alreadyPending ? "Формирование уже выполняется" : "queued",
         });
       } catch (e) {
         if (e instanceof HttpError && e.status === 400 && e.message === "kv_num_required_for_render") {
