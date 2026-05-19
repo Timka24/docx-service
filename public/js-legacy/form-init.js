@@ -1049,7 +1049,9 @@ document.querySelectorAll('input[name="form_mode"]').forEach(el => {
 });
 window.addEventListener("beforeunload", () => {
   saveDraft();
+  stopRenderPolling();
 });
+window.addEventListener("pagehide", stopRenderPolling);
 function clearForm(options = {}) {
   const preserveDraft = options.preserveDraft === true;
   const preserveMode = options.preserveMode === true;
@@ -1476,7 +1478,8 @@ function setGenerateStatus({
   version,
   renderStatus,
   state = "neutral",
-  details = []
+  details = [],
+  links = []
 }) {
   if (generateStatusBlockEl) {
     generateStatusBlockEl.classList.remove("status-error", "status-pending", "status-success", "status-neutral");
@@ -1502,6 +1505,21 @@ function setGenerateStatus({
         list.appendChild(li);
       });
       genStatusEl.appendChild(list);
+    }
+    if (Array.isArray(links) && links.length > 0) {
+      const actions = document.createElement("div");
+      actions.className = "generate-status-actions";
+      links.forEach(item => {
+        if (!(item !== null && item !== void 0 && item.href) || !(item !== null && item !== void 0 && item.label)) return;
+        const link = document.createElement("a");
+        link.className = "generate-status-link";
+        link.href = item.href;
+        link.textContent = item.label;
+        actions.appendChild(link);
+      });
+      if (actions.children.length > 0) {
+        genStatusEl.appendChild(actions);
+      }
     }
   }
   const hasRenderMeta = renderStatus && renderStatus !== "—";
@@ -1622,7 +1640,96 @@ function highlightKvError() {
   kvField.classList.add("error");
   kvField.focus();
 }
-async function refreshArchiveStatus(archiveId) {
+const RENDER_POLL_INTERVAL_MS = 3000;
+const RENDER_POLL_TIMEOUT_MS = 5 * 60 * 1000;
+const RENDER_POLL_MAX_ERRORS = 5;
+let currentRenderPollTimer = null;
+let currentRenderPollToken = null;
+let currentRenderStartedAt = null;
+let currentRenderErrorCount = 0;
+let currentRenderId = null;
+let currentRenderVersion = null;
+function normalizeRenderId(value) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+function findRender(renders, {
+  renderId,
+  version
+} = {}) {
+  if (!Array.isArray(renders) || renders.length === 0) return null;
+  const normalizedRenderId = normalizeRenderId(renderId);
+  if (normalizedRenderId) {
+    const byId = renders.find(render => Number(render.id) === normalizedRenderId);
+    if (byId) return byId;
+  }
+  const normalizedVersion = Number(version);
+  if (Number.isInteger(normalizedVersion) && normalizedVersion > 0) {
+    const byVersion = renders.find(render => Number(render.version) === normalizedVersion);
+    if (byVersion) return byVersion;
+  }
+  return renders[0];
+}
+function buildRenderLinks(archiveId, render) {
+  const links = [];
+  if ((render === null || render === void 0 ? void 0 : render.docx_status) === "ready" && render !== null && render !== void 0 && render.docx_key) {
+    links.push({
+      label: "DOCX",
+      href: `/api/archive/${archiveId}/download/docx?version=${encodeURIComponent(render.version)}`
+    });
+  }
+  if ((render === null || render === void 0 ? void 0 : render.pdf_status) === "ready" && render !== null && render !== void 0 && render.pdf_key) {
+    links.push({
+      label: "PDF",
+      href: `/api/archive/${archiveId}/download/pdf`
+    });
+  }
+  return links;
+}
+function getRenderStatusMessage(render) {
+  if ((render === null || render === void 0 ? void 0 : render.docx_status) === "failed" || (render === null || render === void 0 ? void 0 : render.pdf_status) === "failed") {
+    return render.pdf_error || render.docx_error || "Ошибка формирования";
+  }
+  if ((render === null || render === void 0 ? void 0 : render.docx_status) === "ready" && (render === null || render === void 0 ? void 0 : render.pdf_status) === "pending") {
+    return "DOCX готов, формируется PDF";
+  }
+  if ((render === null || render === void 0 ? void 0 : render.docx_status) === "ready" && (render === null || render === void 0 ? void 0 : render.pdf_status) === "ready") {
+    return "DOCX/PDF готовы";
+  }
+  return "Формирование выполняется";
+}
+function renderGenerateStatusFromRender(archiveId, render) {
+  var _render$version;
+  const renderFailed = (render === null || render === void 0 ? void 0 : render.docx_status) === "failed" || (render === null || render === void 0 ? void 0 : render.pdf_status) === "failed";
+  const renderReady = (render === null || render === void 0 ? void 0 : render.docx_status) === "ready" && (render === null || render === void 0 ? void 0 : render.pdf_status) === "ready";
+  const state = renderReady ? "success" : renderFailed ? "error" : "pending";
+  setGenerateStatus({
+    status: getRenderStatusMessage(render),
+    archiveId,
+    version: (_render$version = render === null || render === void 0 ? void 0 : render.version) !== null && _render$version !== void 0 ? _render$version : null,
+    renderStatus: `${(render === null || render === void 0 ? void 0 : render.docx_status) || "—"}/${(render === null || render === void 0 ? void 0 : render.pdf_status) || "—"}`,
+    state,
+    links: buildRenderLinks(archiveId, render)
+  });
+}
+async function fetchArchiveDetails(archiveId) {
+  const resp = await fetch(`/api/archive/${archiveId}`);
+  let data = null;
+  try {
+    data = await resp.json();
+  } catch (_unused4) {
+    data = null;
+  }
+  if (!resp.ok) {
+    const errText = formatGenerateError(resp, data);
+    const error = new Error(errText);
+    error.status = resp.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+}
+async function refreshArchiveStatus(archiveId, options = {}) {
   if (!archiveId) {
     setGenerateStatus({
       status: "Нет archive_id для обновления статуса.",
@@ -1633,25 +1740,15 @@ async function refreshArchiveStatus(archiveId) {
     return;
   }
   try {
-    const resp = await fetch(`/api/archive/${archiveId}`);
-    let data = null;
-    try {
-      data = await resp.json();
-    } catch (_unused4) {
-      data = null;
-    }
-    if (!resp.ok) {
-      const errText = formatGenerateError(resp, data);
-      setGenerateStatus({
-        status: `Ошибка: ${errText}`,
-        archiveId,
-        version: null,
-        renderStatus: "—"
-      });
-      return;
-    }
-    const latestRender = Array.isArray(data.renders) ? data.renders[0] : null;
+    const data = await fetchArchiveDetails(archiveId);
+    const latestRender = findRender(data.renders, options);
     if (!latestRender) {
+      if (options.skipRender) {
+        return {
+          data,
+          render: null
+        };
+      }
       isRenderPending = false;
       setApplyButtonDisabled(isGenerateInFlight);
       setGenerateStatus({
@@ -1662,22 +1759,25 @@ async function refreshArchiveStatus(archiveId) {
       });
       return;
     }
-    isRenderPending = isRenderStillPending(latestRender);
-    setApplyButtonDisabled(isGenerateInFlight || isRenderPending);
-    const renderFailed = latestRender.docx_status === "failed" || latestRender.pdf_status === "failed";
+    if (!options.skipRender) {
+      isRenderPending = isRenderStillPending(latestRender);
+      setApplyButtonDisabled(isGenerateInFlight || isRenderPending);
+      renderGenerateStatusFromRender(archiveId, latestRender);
+    }
+    return {
+      data,
+      render: latestRender
+    };
+  } catch (error) {
+    if (options.suppressErrors) {
+      throw error;
+    }
     setGenerateStatus({
-      status: `Архив #${archiveId}: статус версии обновлён.`,
-      archiveId,
-      version: latestRender.version,
-      renderStatus: `${latestRender.docx_status}/${latestRender.pdf_status}`,
-      state: latestRender.docx_status === "ready" && latestRender.pdf_status === "ready" ? "success" : renderFailed ? "error" : "pending"
-    });
-  } catch (_unused5) {
-    setGenerateStatus({
-      status: "Ошибка сети/сервер недоступен",
+      status: error !== null && error !== void 0 && error.message ? `Ошибка: ${error.message}` : "Ошибка сети/сервер недоступен",
       archiveId,
       version: null,
-      renderStatus: "—"
+      renderStatus: "—",
+      state: "error"
     });
   }
 }
@@ -1689,6 +1789,99 @@ function setApplyButtonDisabled(disabled) {
 }
 function isRenderStillPending(render) {
   return (render === null || render === void 0 ? void 0 : render.docx_status) === "pending" || (render === null || render === void 0 ? void 0 : render.pdf_status) === "pending";
+}
+function isRenderReady(render) {
+  return (render === null || render === void 0 ? void 0 : render.docx_status) === "ready" && (render === null || render === void 0 ? void 0 : render.pdf_status) === "ready";
+}
+function isRenderFailed(render) {
+  return (render === null || render === void 0 ? void 0 : render.docx_status) === "failed" || (render === null || render === void 0 ? void 0 : render.pdf_status) === "failed";
+}
+function stopRenderPolling() {
+  if (currentRenderPollTimer) {
+    clearInterval(currentRenderPollTimer);
+  }
+  currentRenderPollTimer = null;
+  currentRenderPollToken = null;
+  currentRenderStartedAt = null;
+  currentRenderErrorCount = 0;
+  currentRenderId = null;
+  currentRenderVersion = null;
+}
+async function pollRenderStatus({
+  archiveId,
+  renderId,
+  version,
+  token
+}) {
+  if (!token || token !== currentRenderPollToken) return;
+  if (currentRenderStartedAt && Date.now() - currentRenderStartedAt > RENDER_POLL_TIMEOUT_MS) {
+    stopRenderPolling();
+    isRenderPending = false;
+    setApplyButtonDisabled(isGenerateInFlight);
+    setGenerateStatus({
+      status: "Время ожидания формирования истекло. Обновите статус вручную позже.",
+      archiveId,
+      version,
+      renderStatus: "timeout",
+      state: "error"
+    });
+    return;
+  }
+  try {
+    const result = await refreshArchiveStatus(archiveId, {
+      renderId,
+      version,
+      skipRender: true,
+      suppressErrors: true
+    });
+    if (token !== currentRenderPollToken) return;
+    currentRenderErrorCount = 0;
+    const render = result === null || result === void 0 ? void 0 : result.render;
+    isRenderPending = isRenderStillPending(render);
+    setApplyButtonDisabled(isGenerateInFlight || isRenderPending);
+    renderGenerateStatusFromRender(archiveId, render);
+    if (isRenderReady(render) || isRenderFailed(render)) {
+      stopRenderPolling();
+    }
+  } catch (_unused5) {
+    if (token !== currentRenderPollToken) return;
+    currentRenderErrorCount += 1;
+    if (currentRenderErrorCount >= RENDER_POLL_MAX_ERRORS) {
+      stopRenderPolling();
+      isRenderPending = false;
+      setApplyButtonDisabled(isGenerateInFlight);
+      setGenerateStatus({
+        status: "Не удалось обновить статус формирования",
+        archiveId,
+        version,
+        renderStatus: "—",
+        state: "error"
+      });
+    }
+  }
+}
+function startRenderPolling({
+  archiveId,
+  renderId,
+  version
+}) {
+  stopRenderPolling();
+  const token = `${Date.now()}:${Math.random()}`;
+  currentRenderPollToken = token;
+  currentRenderStartedAt = Date.now();
+  currentRenderErrorCount = 0;
+  currentRenderId = normalizeRenderId(renderId);
+  currentRenderVersion = Number.isInteger(Number(version)) ? Number(version) : null;
+  const pollArgs = {
+    archiveId,
+    renderId: currentRenderId,
+    version: currentRenderVersion,
+    token
+  };
+  pollRenderStatus(pollArgs);
+  currentRenderPollTimer = setInterval(() => {
+    pollRenderStatus(pollArgs);
+  }, RENDER_POLL_INTERVAL_MS);
 }
 function unlockGenerateAfterFormChange() {
   if (!isRenderPending || isGenerateInFlight) return;
@@ -1704,6 +1897,7 @@ function unlockGenerateAfterFormChange() {
 }
 async function runGenerate() {
   if (isGenerateInFlight) return;
+  stopRenderPolling();
   isGenerateInFlight = true;
   setApplyButtonDisabled(true);
   clearValidationErrors();
@@ -1711,7 +1905,7 @@ async function runGenerate() {
   const payload = buildPayload(grids);
   payload.archive_id = window.lastArchiveId || null;
   try {
-    var _data$archive_id, _data9, _data0, _data1, _data10, _data11, _data$version3, _data12;
+    var _data$archive_id, _data9, _data0, _data1, _data10, _data11, _data$version5, _data12;
     const resp = await fetch("/generate", {
       method: "POST",
       headers: {
@@ -1757,7 +1951,7 @@ async function runGenerate() {
     const archiveId = (_data$archive_id = (_data9 = data) === null || _data9 === void 0 ? void 0 : _data9.archive_id) !== null && _data$archive_id !== void 0 ? _data$archive_id : null;
     window.lastArchiveId = archiveId;
     if ((_data0 = data) !== null && _data0 !== void 0 && _data0.already_pending) {
-      var _data$version;
+      var _data$version, _data$render_id, _data$version2;
       isRenderPending = true;
       setGenerateStatus({
         status: "Формирование уже выполняется. Дождитесь завершения текущей версии.",
@@ -1766,20 +1960,28 @@ async function runGenerate() {
         renderStatus: "pending",
         state: "pending"
       });
-      await refreshArchiveStatus(archiveId);
+      startRenderPolling({
+        archiveId,
+        renderId: (_data$render_id = data.render_id) !== null && _data$render_id !== void 0 ? _data$render_id : null,
+        version: (_data$version2 = data.version) !== null && _data$version2 !== void 0 ? _data$version2 : null
+      });
       return;
     }
     if (((_data1 = data) === null || _data1 === void 0 ? void 0 : _data1.message) === "queued") {
-      var _data$version2;
+      var _data$version3, _data$render_id2, _data$version4;
       isRenderPending = true;
       setGenerateStatus({
         status: `Сохранено. Поставлено в очередь на формирование. Архив #${archiveId}, версия ${data.version}. Статус: pending.`,
         archiveId,
-        version: (_data$version2 = data.version) !== null && _data$version2 !== void 0 ? _data$version2 : null,
+        version: (_data$version3 = data.version) !== null && _data$version3 !== void 0 ? _data$version3 : null,
         renderStatus: "pending/pending",
         state: "pending"
       });
-      await refreshArchiveStatus(archiveId);
+      startRenderPolling({
+        archiveId,
+        renderId: (_data$render_id2 = data.render_id) !== null && _data$render_id2 !== void 0 ? _data$render_id2 : null,
+        version: (_data$version4 = data.version) !== null && _data$version4 !== void 0 ? _data$version4 : null
+      });
       return;
     }
     if (((_data10 = data) === null || _data10 === void 0 ? void 0 : _data10.message) === "saved_no_kv_num") {
@@ -1808,7 +2010,7 @@ async function runGenerate() {
     setGenerateStatus({
       status: "Получен неожиданный ответ сервера.",
       archiveId,
-      version: (_data$version3 = (_data12 = data) === null || _data12 === void 0 ? void 0 : _data12.version) !== null && _data$version3 !== void 0 ? _data$version3 : null,
+      version: (_data$version5 = (_data12 = data) === null || _data12 === void 0 ? void 0 : _data12.version) !== null && _data$version5 !== void 0 ? _data$version5 : null,
       renderStatus: "—",
       state: "error"
     });

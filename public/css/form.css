@@ -587,6 +587,35 @@ button:disabled {
   color: inherit;
 }
 
+.generate-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.generate-status-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid currentColor;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.generate-status-link:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.hidden-legacy-action {
+  display: none !important;
+}
+
 .generate-status-row {
   margin-top: 8px;
   font-size: 14px;
