@@ -396,6 +396,35 @@ docker compose down -v
 
 > Важно: SQL-скрипты из `./migrations`, проброшенные в `/docker-entrypoint-initdb.d`, выполняются только при первом старте нового volume `db_data`.
 
+## Разоврачивание
+1. Подготовка сервера
+```bash
+sudo apt update
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+#создать директории для документов
+sudo mkdir -p /srv/slr-docx
+sudo mkdir -p /srv/slr-pdf
+sudo chmod 775 /srv/slr-docx
+sudo chmod 775 /srv/slr-pdf
+```
+2. Клонирование репозитория
+```bash
+cd /opt
+sudo git clone (https://github.com/Timka24/docx-service.git) slr
+sudo chown -R $USER:$USER slr
+cd slr
+```
+3. Перенести сертификаты в директорию /slr/nginx/certs
+4. Сборка и запуск контейнеров
+В директории с docker-compose.yaml
+```bash
+docker compose pull
+docker compose build
+docker compose up -d
+```
+
+
 ## Технологии
 
 - **Backend:** Node.js, Express, pg
