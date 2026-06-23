@@ -415,7 +415,7 @@ sudo git clone (https://github.com/Timka24/docx-service.git) slr
 sudo chown -R $USER:$USER slr
 cd slr
 ```
-3. Перенести сертификаты в директорию /slr/nginx/certs
+3. Перенести сертификаты в директорию `/slr/nginx/certs`
 4. Сборка и запуск контейнеров
 В директории с docker-compose.yaml
 ```bash
