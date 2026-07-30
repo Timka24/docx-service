@@ -23,6 +23,10 @@ services:
   
   gotenberg:
     image: gotenberg/gotenberg:8
+    environment:
+      LIBREOFFICE_AUTO_START: "true"
+      LIBREOFFICE_START_TIMEOUT: "60s"
+      API_TIMEOUT: "120s"
     container_name: gotenberg
     command:
       - gotenberg
