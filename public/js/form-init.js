@@ -523,12 +523,9 @@ function updateMedicationVisibility() {
 function updateEndSectionVisibility() {
   const endSuccess = document.getElementById("end_success")?.checked === true;
   setDisplay("endSuccessFieldsBlock", endSuccess);
-  document.querySelectorAll(".end-success-field").forEach((el) => {
-    el.style.display = endSuccess ? "" : "none";
-  });
 
-  const showTransferDoc = endSuccess && (document.getElementById("end_transfer_doc")?.checked === true);
-  const showTransferTeam = endSuccess && (document.getElementById("end_transfer_team")?.checked === true);
+  const showTransferDoc = document.getElementById("end_transfer_doc")?.checked === true;
+  const showTransferTeam = document.getElementById("end_transfer_team")?.checked === true;
   setDisplay("endTransferDocDetails", showTransferDoc);
   setDisplay("endTransferTeamDetails", showTransferTeam);
 }

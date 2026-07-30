@@ -125,6 +125,7 @@ Responsibilities:
 - assemble payload
 - send data to backend
 - display backend validation_error details near mapped fields and in the generate status panel
+- auto-refresh DOCX/PDF render status in the generate status panel after POST /generate using GET /api/archive/:id polling
 - restore draft from localStorage
 - keep UI state compatible with saved archive data
 
@@ -133,6 +134,8 @@ Rules:
 - kv_num format must remain compatible with backend validation and archive lookup
 - validation_error field mapping currently lives in public/js/form-init.js; keep mappings for kv_num, pr_date/pr_date_iso_raw, and end_date/end_date_iso_raw synchronized with real form ids/names
 - if a UI field controls visibility, ensure behavior works on first load, manual change, clear/reset, and archive/draft restore
+- keep the legacy manual refresh button refreshStatusBtn in the DOM but hidden with hidden-legacy-action unless the manual refresh UI is intentionally restored
+- render status polling must not remove refreshArchiveStatus(); it is reused by the polling flow and the hidden legacy refresh handler
 - keep source and loaded browser bundles synchronized for the affected page
 
 

@@ -505,11 +505,8 @@ function updateEndSectionVisibility() {
   var _document$getElementB4, _document$getElementB5, _document$getElementB6;
   const endSuccess = ((_document$getElementB4 = document.getElementById("end_success")) === null || _document$getElementB4 === void 0 ? void 0 : _document$getElementB4.checked) === true;
   setDisplay("endSuccessFieldsBlock", endSuccess);
-  document.querySelectorAll(".end-success-field").forEach(el => {
-    el.style.display = endSuccess ? "" : "none";
-  });
-  const showTransferDoc = endSuccess && ((_document$getElementB5 = document.getElementById("end_transfer_doc")) === null || _document$getElementB5 === void 0 ? void 0 : _document$getElementB5.checked) === true;
-  const showTransferTeam = endSuccess && ((_document$getElementB6 = document.getElementById("end_transfer_team")) === null || _document$getElementB6 === void 0 ? void 0 : _document$getElementB6.checked) === true;
+  const showTransferDoc = ((_document$getElementB5 = document.getElementById("end_transfer_doc")) === null || _document$getElementB5 === void 0 ? void 0 : _document$getElementB5.checked) === true;
+  const showTransferTeam = ((_document$getElementB6 = document.getElementById("end_transfer_team")) === null || _document$getElementB6 === void 0 ? void 0 : _document$getElementB6.checked) === true;
   setDisplay("endTransferDocDetails", showTransferDoc);
   setDisplay("endTransferTeamDetails", showTransferTeam);
 }
